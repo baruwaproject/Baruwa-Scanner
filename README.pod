@@ -1,0 +1,23 @@
+=pod
+
+=encoding utf8
+
+=head1 Baruwa-Scanner
+
+Email Filtering Gateway.
+
+Baruwa-Scanner was forked from MailScanner in July 2016.
+
+=head2 Installation
+
+The package will be available for installation from CPAN
+
+=head2 Support and Documentation
+
+This is still a work in progress
+
+=head2 License
+
+Baruwa-Scanner is licensed under the GPLv3 license.
+
+=cut
