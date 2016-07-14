@@ -1,0 +1,15 @@
+This is a message from the %org-long-name% E-Mail Security Service
+----------------------------------------------------------------------
+The original e-mail attachment "$filename"
+is on the list of unacceptable attachments for this site and has been
+replaced by this warning message.
+
+
+The content filter report is below:
+$report
+Please logon to %web-site% to review the message with message id: $id.
+-- 
+Postmaster
+%org-long-name%
+%web-site%
+

@@ -1,0 +1,24 @@
+From: "$postmastername" <$localpostmaster>
+To: $from
+Subject: Warning: E-mail viruses detected
+X-%org-name%: generated
+
+Our virus detector has just been triggered by a message you sent:-
+  To: $to
+  Subject: $subject
+  Date: $date
+Any infected parts of the message ($filename)
+have not been delivered.
+
+This message is simply to warn you that your computer system may have a
+virus present and should be checked.
+
+The content filter report is as follows:
+Report: $report
+
+-- 
+%org-long-name%
+Email Security
+%org-long-name%
+%web-site%
+

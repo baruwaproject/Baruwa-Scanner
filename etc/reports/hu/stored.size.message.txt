@@ -1,0 +1,15 @@
+This is a message from the %org-long-name% E-Mail Security Service
+----------------------------------------------------------------------
+The original e-mail message, or an attachment it contained, was too large
+and has been removed.
+
+You should try compressing the attachments before sending them.
+
+The content filter report is below:
+$report
+Please logon to %web-site% to review the message with message id: $id.
+-- 
+Postmaster
+%org-long-name%
+%web-site%
+

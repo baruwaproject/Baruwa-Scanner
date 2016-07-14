@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+# Baruwa Enterprise Edition
+# Clean up stale messages from the exim queues
+#
+# PERIOD in seconds
+PERIOD=1209600
+exiqgrep -C /etc/exim/exim_out.conf -o $PERIOD -i|xargs exim -C /etc/exim/exim_out.conf -Mrm >/dev/null 2>&1
+exiqgrep -o $PERIOD -i|xargs exim -Mrm >/dev/null 2>&1

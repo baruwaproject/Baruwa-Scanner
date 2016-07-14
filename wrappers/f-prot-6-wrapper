@@ -1,0 +1,45 @@
+#!/bin/sh
+# -*- coding: utf-8 -*-
+# vim: ai ts=4 sts=4 et sw=4
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This file was forked from MailScanner in July 2016.
+# Original author, and relevant copyright and licensing information is below:
+# :author: Julian Field
+# :copyright: Copyright (C) 2002  Julian Field
+#
+# f-prot-6-wrapper --	invoke F-Prot version 6 AV for use with
+# 			mailscanner
+
+
+# You may want to check this script for bash-isms
+
+PackageDir=$1		# This may vary depending on your OS
+shift
+Scanner=fpscan
+
+if [ "x$PackageDir" = "x" ]; then
+  # No command-line arg, so set default at /opt/f-prot
+  PackageDir="/opt/f-prot"
+fi
+
+ScanOptions=""
+
+if [ "x$1" = "x-IsItInstalled" ]; then
+  [ -x ${PackageDir}/$Scanner ] && exit 0
+  exit 1
+fi
+
+exec ${PackageDir}/$Scanner $ScanOptions "$@"
+

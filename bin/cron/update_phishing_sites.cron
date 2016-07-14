@@ -1,0 +1,39 @@
+#!/bin/bash
+# -*- coding: utf-8 -*-
+# vim: ai ts=4 sts=4 et sw=4
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This file was forked from Baruwa in July 2016.
+# Original author, and relevant copyright and licensing information is below:
+# :author: Julian Field
+# :copyright: Copyright (C) 2002  Julian Field
+#
+# Insert a random delay up to this value, to spread virus updates round
+# the clock. 1800 seconds = 30 minutes.
+# Set this to 0 to disable it.
+UPDATEMAXDELAY=3600
+if [ -f /etc/sysconfig/Baruwa ] ; then
+        . /etc/sysconfig/Baruwa
+fi
+export UPDATEMAXDELAY
+
+[ -x /usr/sbin/update_phishing_sites ] || exit 0
+if [ "x$UPDATEMAXDELAY" = "x0" ]; then
+  :
+else
+  logger -p mail.info -t update.phishing.sites Delaying cron job up to $UPDATEMAXDELAY seconds
+  perl -e "sleep int(rand($UPDATEMAXDELAY));"
+fi
+exec /usr/sbin/update_phishing_sites > /dev/null 2>&1
+exit 0

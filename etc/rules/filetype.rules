@@ -1,0 +1,2 @@
+From:           127.0.0.1       /etc/mail/baruwa/filetype.rules.allowall.conf
+FromOrTo:       default         /etc/mail/baruwa/filetype.rules.conf

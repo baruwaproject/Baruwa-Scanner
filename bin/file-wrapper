@@ -1,0 +1,4 @@
+#!/bin/bash
+#
+# Wrap the file command
+/usr/bin/file -i "$1"

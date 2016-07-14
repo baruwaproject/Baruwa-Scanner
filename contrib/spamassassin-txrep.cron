@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# Baruwa Enterprise Edition
+# Clean up stale data from the user_awl_sql_table table
+#
+dbhost=/tmp
+dbport=5432
+dbuser=baruwa
+dbname=baruwa
+[ -f /etc/sysconfig/Baruwa ] && . /etc/sysconfig/Baruwa
+psql -h${dbhost} -U${dbuser} -p${dbport} ${dbname} -f /usr/share/Baruwa/contrib/spamassassin-txrep.sql >/dev/null
