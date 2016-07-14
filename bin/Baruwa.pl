@@ -134,8 +134,7 @@ if ($WantHelp) {
     print STDERR "            [ --id=<message-id> ] |\n";
     print STDERR "            [ --inqueuedir=<dir-name|glob> ] |\n";
     print STDERR "            [--value=<option-name> --from=<from-address>\n";
-    print STDERR
-      "             --to=<to-address>,    --to=<to-address-2>, ...]\n";
+    print STDERR "             --to=<to-address>,    --to=<to-address-2>, ...]\n";
     print STDERR "             --ip=<ip-address>,    --virus=<virus-name> ]\n";
     print STDERR "            <baruwa.conf-file-location>\n";
     exit 0;
@@ -1260,7 +1259,7 @@ sub WorkForHours {
         $0 = 'Baruwa: finishing batch';
         $batch->LastLookup();
 
-     #print STDERR "\n\n3 times are $StartTime " . time . " $RestartTime\n\n\n";
+        #print STDERR "\n\n3 times are $StartTime " . time . " $RestartTime\n\n\n";
 
         # Only do 1 batch if debugging
         last if $Debug;
@@ -1303,7 +1302,7 @@ sub ExitChild {
     unlink $Baruwa::Scanner::SA::BayesRebuildStartLock
       if $Baruwa::Scanner::SA::BayesRebuildStartLock;
 
-   # Kill off any commercial virus scanner process groups that are still running
+    # Kill off any commercial virus scanner process groups that are still running
     kill -15, $Baruwa::Scanner::SweepViruses::ScannerPID
       if $Baruwa::Scanner::SweepViruses::ScannerPID;
 
