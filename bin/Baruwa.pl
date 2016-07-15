@@ -282,7 +282,7 @@ my $dir = $0;
 
 # can't use s/// as it doesn't untaint $dir
 $dir =~ m#^(.*)/([^/]+)$#;
-$dir                                            = $1;
+$dir = $1;
 $Baruwa::Scanner::Config::BaruwaProcessCommand = "$1/$2";
 $Baruwa::Scanner::Config::BaruwaProcessName = "";
 $Baruwa::Scanner::Config::BaruwaProcessName = $2;
@@ -305,9 +305,7 @@ if ( $WantLintOnly || $WantLintLiteOnly ) {
 my $ConfFile = $ARGV[0];
 
 # Use the default if we couldn't find theirs. Will save a lot of grief.
-$ConfFile = '/etc/mail/baruwa/baruwa.conf'
-  if $ConfFile eq ""
-  || !( -f $ConfFile );
+$ConfFile = '/etc/mail/baruwa/baruwa.conf' if $ConfFile eq "" || !( -f $ConfFile );
 
 # Tell ConfigSQL where the configuration file is.
 $Baruwa::Scanner::ConfigSQL::ConfFile = $ConfFile;
