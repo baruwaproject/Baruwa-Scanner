@@ -77,12 +77,7 @@ checkmshmacskip			= CheckWatermarksToSkipSpamChecks
 checkppafilenames		= CheckFilenamesInPasswordProtectedArchives
 CheckSAIfOnSpamList		= checkspamassassinifonspamlist
 children			= maxchildren
-clamavmaxreclevel		= clamavmodulemaximumrecursionlevel
-clamavmaxfiles			= clamavmodulemaximumfiles
-clamavmaxfilesize		= clamavmodulemaximumfilesize
-clamavmaxratio			= clamavmodulemaximumcompressionratio
 clamavspam			= ClamAVFullMessageScan
-clamwatchfiles			= monitorsforclamavupdates
 cleanheader			= cleanheadervalue
 contentmodifysubject		= contentmodifysubject
 contentsubjecttext		= contentsubjecttext
@@ -310,10 +305,6 @@ VirusScannerDefinitions	/etc/mail/baruwa/virus.scanners.conf
 AntiwordTimeout			50
 BayesRebuild			0
 Children			5
-clamavmaxreclevel               8
-clamavmaxfiles                  1000
-clamavmaxfilesize               10000000
-clamavmaxratio                  250
 ClamdPort 3310
 CriticalQueueSize		800
 FileTimeout			20
@@ -350,7 +341,6 @@ qmailintdhashnumber		1
 # filename containing a list of directories.
 [Simple,Other]
 cachetiming		1800,300,10800,172800,600
-ClamWatchFiles		/var/lib/clamav/*.cvd
 CustomFunctionsDir	/usr/share/baruwa/CustomFunctions
 FileCommand		/usr/bin/file
 FirstCheck		mcp
