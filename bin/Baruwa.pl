@@ -1021,13 +1021,6 @@ sub WorkForHours {
             last;
         }
 
-        # Also bail out if the ClamAV database has been upgraded
-        if ( Baruwa::Scanner::SweepViruses::ClamUpgraded() ) {
-            Baruwa::Scanner::Log::InfoLog( "ClamAV virus database has been "
-                  . "updated, killing this child" );
-            last;
-        }
-
         # Also bail out if the LDAP configuration serial number has changed.
         if ( Baruwa::Scanner::Config::LDAPUpdated() ) {
             Baruwa::Scanner::Log::InfoLog(
