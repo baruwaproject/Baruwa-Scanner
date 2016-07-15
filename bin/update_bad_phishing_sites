@@ -25,6 +25,7 @@ use Net::DNS::Resolver;
 use LWP::UserAgent;
 use DirHandle;
 use Baruwa::Scanner::Config;
+use File::Copy qw(copy move);
 use Fcntl qw(:flock);
 
 # Ensure only one instance runs
@@ -283,8 +284,8 @@ if ($generate) {
         die "Unable to work out file!\n";
     }
 
-    system("mv -f $target $target.old");
-    system("cp $file $target");
+    move($target, "$target.old");
+    copy($file, $target);
 
     open( STATUS_FILE, ">$status" ) or die "Unable to open status file\n";
     print STATUS_FILE "$currentbase.$currentupdate\n";

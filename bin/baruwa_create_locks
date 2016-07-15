@@ -22,6 +22,7 @@
 
 use DirHandle;
 use FileHandle;
+use File::Path qw(remove_tree);
 use strict;
 no strict 'subs';
 
@@ -56,7 +57,7 @@ while ( defined( $updatename = $dh->read ) ) {
         # It's not a plain file!
         if ( -d _ ) {
             # It's a directory, so cannot just unlink it
-            system("rm -rf $lockname");
+            remove_tree($lockname);
         }
         else {
             # It's not a plain file nor a directory, so just remove it
@@ -79,7 +80,7 @@ foreach $lockfname ( 'Baruwa.bayes.rebuild.lock', 'Baruwa.bayes.starting.lock' )
         # It's not a plain file!
         if ( -d _ ) {
             # It's a directory, so cannot just unlink it
-            system("rm -rf $lockname");
+            remove_tree($lockname);
         }
         else {
             # It's not a plain file nor a directory, so just remove it

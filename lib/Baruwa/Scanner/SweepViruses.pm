@@ -1455,8 +1455,6 @@ sub ProcessSophosOutput {
     # viruses in zip files in attachments. Now pull out first 3 parts instead.
     ( $dot, $id, $part, @rest ) = split( /\//, $infected );
 
-    #system("echo $dot, $id, $part, @rest >> /tmp/jkf");
-    #system("echo $infections >> /tmp/jkf");
     my $notype = substr( $part, 1 );
     $logout =~ s/\Q$part\E/$notype/;
     $report =~ s/\Q$part\E/$notype/;
@@ -1691,10 +1689,6 @@ sub ProcessFSecureOutput {
     my ( $logout, $virus, $BeenSeen );
 
     chomp $line;
-
-    #print STDERR "$line\n";
-    #print STDERR "InHeader $fsecure_InHeader\n";
-    #system("echo -n '$line' | od -c");
 
     # Lose header
     if (   $fsecure_InHeader < 0

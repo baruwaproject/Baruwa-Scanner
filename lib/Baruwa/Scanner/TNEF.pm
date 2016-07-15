@@ -26,6 +26,7 @@ use strict 'refs';
 no strict 'subs';    # Allow bare words for parameter %'s
 
 use DirHandle;
+use File::Path qw(remove_tree);
 use File::Temp qw/ tempfile tempdir /;
 use POSIX qw(:signal_h setsid);    # For Solaris 9 SIG bug workaround
 
@@ -206,7 +207,7 @@ sub InternalDecoder {
         $message->{foundtnefattachments} = 1;
 
         #$message->{entity}->dump_skeleton();
-        system("rm -rf $tempdir");                            # /tmp/tnef.$$");
+        remove_tree($tempdir);
         Baruwa::Scanner::Log::InfoLog( "Message %s added TNEF contents %s",
             $message->{id}, join( ',', @replacements ) )
           if @replacements;
@@ -215,7 +216,7 @@ sub InternalDecoder {
     else {
         # It failed
         undef $tnef;
-        system("rm -rf $tempdir");
+        remove_tree($tempdir);
         return 1
           if Baruwa::Scanner::Config::Value( 'deliverunparsabletnef', $message );
         return 0;
