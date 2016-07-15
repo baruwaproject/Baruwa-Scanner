@@ -46,7 +46,6 @@ my ($LOCK_EX) = 2;
 my ($LOCK_NB) = 4;
 my ($LOCK_UN) = 8;
 
-my $SAversion;         # SpamAssassin version number
 my @SAsuccessqueue;    # queue of failure history
 my $SAsuccessqsum;     # current sum of history queue
 
@@ -94,40 +93,9 @@ sub initialise {
     if ($Baruwa::Scanner::SA::Debug) {
         my $result;
 
-        # Do a trial run of awk to see if it is going to work on this system.
-        eval {
-            $result = `echo 'Hello,World' | awk '{printf \"%s %s\\n\", strftime(\"%T\"), \$0}' 2>&1`;
-
-            #print "Result is \"$result\"\n";
-        };
-
-        #print "Eval result = \"$@\"\n";
-
-        # If the trial worked...
-        if ( $result =~ /\d+:\d.*Hello,World/ ) {
-
-         #print STDERR "It Succeeded!\n";
-         #select STDERR; $| = 1;
-         # Re-open STDERR with the current time stuck on the front of each line.
-         # It should work okay as we have just tried it out.
-            open STDERR, "| awk '{printf \"%s %s\\n\", strftime(\"%T\"), \$0}'";
-            select STDOUT;
-        }
-        else {
-            print STDERR "\n\n*****\n";
-            print STDERR
-              "If 'awk' (with support for the function strftime) was\n";
-            print STDERR
-              "available on your \$PATH then all the SpamAssassin debug\n";
-            print STDERR
-              "output would have the current time added to the start of\n";
-            print STDERR "every line, making debugging far easier.\n*****\n\n";
-        }
+        open STDERR, "| awk '{printf \"%s %s\\n\", strftime(\"%T\"), \$0}'";
+        select STDOUT;
     }
-
-    # Can't just do this when sendmail.pl loads, as we are still running as
-    # root then & spamassassin will get confused when we are later running
-    # as something else.
 
     # Only do this if we want to use SpamAssassin and therefore have it installed.
     # Justin Mason advises only creating 1 Mail::SpamAssassin object, so I do it
@@ -148,9 +116,9 @@ sub initialise {
             $settings{post_config_text} = Baruwa::Scanner::Config::SpamAssassinPostConfig();
         }
         $settings{dont_copy_prefs} = 1;    # Removes need for home directory
-          # This file is now read directly by SpamAssassin's normal startup code.
-          #$prefs = Baruwa::Scanner::Config::Value('spamassassinprefsfile');
-          #$settings{userprefs_filename} = $prefs if defined $prefs;
+        # This file is now read directly by SpamAssassin's normal startup code.
+        #$prefs = Baruwa::Scanner::Config::Value('spamassassinprefsfile');
+        #$settings{userprefs_filename} = $prefs if defined $prefs;
         $val = $Baruwa::Scanner::SA::Debug;
         $settings{debug} = $val;
 
@@ -170,23 +138,16 @@ sub initialise {
         $settings{use_auto_whitelist} = $val2 ? 1 : 0;
         $settings{save_pattern_hits} = 1;
 
-        if ( $val ne "" ) {    # ie. if SAinstallprefix is set
-                # for finding rules in the absence of the above settings
+        if ( $val ne "" ) {
             $settings{PREFIX} = $val;
-
-          # for finding the SpamAssassin libraries
-          # Use unshift rather than push so that their given location is
-          # always searched *first* and not last in the include path.
-          #my $perl_vers = $PERL_VERSION < 5.006 ? $PERL_VERSION
-          #                                      : sprintf("%vd",$PERL_VERSION);
             my $perl_vers = $] < 5.006 ? $] : sprintf( "%vd", $^V );
             unshift @INC, "$val/lib/perl5/site_perl/$perl_vers";
         }
 
         # Now we have the path built, try to find the SpamAssassin modules
         unless ( eval "require Mail::SpamAssassin" ) {
-            Baruwa::Scanner::Log::WarnLog("You want to use SpamAssassin but have not installed it.");
-            Baruwa::Scanner::Log::WarnLog("I will run without SpamAssassin for now.");
+            Baruwa::Scanner::Log::WarnLog("SpamAssassin is not installed.");
+            Baruwa::Scanner::Log::WarnLog("I will run without for now.");
             $SpamAssassinInstalled = 0;
             return;
         }
@@ -194,24 +155,19 @@ sub initialise {
         # SpamAssassin "require"d okay.
         $SpamAssassinInstalled = 1;
 
-        # Find the version number
-        $SAversion = $Mail::SpamAssassin::VERSION + 0.0;
-
-        #
         # Load the SQLite support for the SA data cache
-        #
         $SQLiteInstalled = 0;
         unless ( Baruwa::Scanner::Config::IsSimpleValue('usesacache')
             && !Baruwa::Scanner::Config::Value('usesacache') )
         {
             unless ( eval "require DBD::SQLite" ) {
-                Baruwa::Scanner::Log::WarnLog("WARNING: DBI and/or DBD::SQLite Perl modules are not properly installed!");
+                Baruwa::Scanner::Log::WarnLog("WARNING: DBI and/or DBD::SQLite Perl modules are installed!");
                 $SQLiteInstalled = 0;
             }
             else {
                 $SQLiteInstalled = 1;
                 unless ( eval "require Digest::MD5" ) {
-                    Baruwa::Scanner::Log::WarnLog("WARNING: Digest::MD5 Perl module is not properly installed!");
+                    Baruwa::Scanner::Log::WarnLog("WARNING: Digest::MD5 Perl module is installed!");
                     $SQLiteInstalled = 0;
                 }
                 else {
@@ -276,10 +232,7 @@ sub initialise {
             #Baruwa::Scanner::Log::InfoLog('SpamAssassin Bayes database rebuild preparing');
             # Tell the other children that we are trying to start a rebuild
             my $RebuildStartH = new FileHandle;
-            unless (
-                $RebuildStartH->open(
-                    "+>$Baruwa::Scanner::SA::BayesRebuildStartLock")
-              )
+            unless ($RebuildStartH->open("+>$Baruwa::Scanner::SA::BayesRebuildStartLock"))
             {
                 Baruwa::Scanner::Log::WarnLog(
                     "Bayes rebuild process could not write to "
@@ -309,7 +262,6 @@ sub initialise {
                 $0 = 'Baruwa: rebuilding Bayes database';
                 Baruwa::Scanner::Log::InfoLog('SpamAssassin Bayes database rebuild starting');
                 eval {
-                    $Baruwa::Scanner::SA::SAspamtest->init(1) if $SAversion < 3;
                     $Baruwa::Scanner::SA::SAspamtest->init_learner(
                         {
                             force_expire      => 1,
@@ -345,19 +297,11 @@ sub initialise {
             }
 
             # Now the rebuild has properly finished, we let the other children back
-            #20090107 unlink $Baruwa::Scanner::SA::BayesRebuildStartLock;
             $RebuildStartH->close();
         }
 
         if ( Baruwa::Scanner::Config::Value('spamassassinautowhitelist') ) {
-            # JKF 14/6/2002 Enable the auto-whitelisting functionality
             Baruwa::Scanner::Log::InfoLog("Enabling SpamAssassin auto-whitelist functionality...");
-            if ( $SAversion < 3 ) {
-                require Mail::SpamAssassin::DBBasedAddrList;
-                # create a factory for the persistent address list
-                my $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
-                $Baruwa::Scanner::SA::SAspamtest->set_persistent_address_list_factory($addrlistfactory);
-            }
         }
 
         # If the Bayes database lock file is still present due to the process
@@ -558,7 +502,6 @@ sub Checks {
         if ($Lockopen) {
             #Baruwa::Scanner::Log::InfoLog("Bayes lock is open");
             if ($Baruwa::Scanner::SA::WaitForRebuild) {
-
                 # Do a normal lock and wait for it
                 flock( $RebuildLockH, $LOCK_SH )
                   or Baruwa::Scanner::Log::WarnLog(
@@ -650,7 +593,6 @@ sub Checks {
         $md5 = Digest::MD5->new;
         eval { $md5->add(@WholeBody) };
         if ( $@ ne "" || @WholeBody <= 1 ) {
-
             # The eval failed
             $md5digest = "unknown";
             $testcache = 0;
@@ -671,11 +613,6 @@ sub Checks {
 
         #print STDERR "Not going to use cache\n";
     }
-
-    # Now construct the SpamAssassin object for version < 3
-    my $spammail;
-    $spammail = Mail::SpamAssassin::NoMailAudit->new( 'data' => \@WholeMessage )
-      if $SAversion < 3;
 
     if ($testcache) {
         if ( my $cachehash = CheckCache($md5digest) ) {
@@ -720,19 +657,10 @@ sub Checks {
             # Do the actual SpamAssassin call
             #print STDERR "Cache miss for " . $message->{id} . "\n";
 
-            # Test it for spam-ness
-            if ( $SAversion < 3 ) {
-                ( $SAResult, $HighScoring, $SAHitList, $SAScore, $SAReport ) =
-                  SAForkAndTest( $GSHits, $Baruwa::Scanner::SA::SAspamtest,
-                    $spammail, $message );
-            }
-            else {
-                #print STDERR "Check 1, report template = \"" .
-                #      $Baruwa::Scanner::SA::SAspamtest->{conf}->{report_template} . "\"\n";
-                ( $SAResult, $HighScoring, $SAHitList, $SAScore, $SAReport ) =
-                  SAForkAndTest( $GSHits, $Baruwa::Scanner::SA::SAspamtest,
-                    \@WholeMessage, $message );
-            }
+            #print STDERR "Check 1, report template = \"" .
+            #      $Baruwa::Scanner::SA::SAspamtest->{conf}->{report_template} . "\"\n";
+            ($SAResult, $HighScoring, $SAHitList, $SAScore, $SAReport) =
+              SAForkAndTest( $GSHits, $Baruwa::Scanner::SA::SAspamtest, \@WholeMessage, $message );
 
             # Log the fact we didn't get it from the cache. Must not add the
             # "not cached" word on the front here or it will be put into the
@@ -778,19 +706,10 @@ sub Checks {
     else {
         # No cache here
 
-        # Test it for spam-ness
-        if ( $SAversion < 3 ) {
-            ( $SAResult, $HighScoring, $SAHitList, $SAScore, $SAReport ) =
-              SAForkAndTest( $GSHits, $Baruwa::Scanner::SA::SAspamtest,
-                $spammail, $message );
-        }
-        else {
-            #print STDERR "Check 1, report template = \"" .
-            #      $Baruwa::Scanner::SA::SAspamtest->{conf}->{report_template} . "\"\n";
-            ( $SAResult, $HighScoring, $SAHitList, $SAScore, $SAReport ) =
-              SAForkAndTest( $GSHits, $Baruwa::Scanner::SA::SAspamtest,
-                \@WholeMessage, $message );
-        }
+        #print STDERR "Check 1, report template = \"" .
+        #      $Baruwa::Scanner::SA::SAspamtest->{conf}->{report_template} . "\"\n";
+        ($SAResult, $HighScoring, $SAHitList, $SAScore, $SAReport) =
+          SAForkAndTest($GSHits, $Baruwa::Scanner::SA::SAspamtest, \@WholeMessage, $message);
 
         #Baruwa::Scanner::Log::WarnLog("Done SAForkAndTest");
         #print STDERR "SAResult = $SAResult\nHighScoring = $HighScoring\n" .
@@ -925,54 +844,30 @@ sub SAForkAndTest {
     die "Can't fork: $!" unless defined($pid);
 
     if ( $pid == 0 ) {
-
         # In the child
         my ( $spamness, $SAResult, $HitList, @HitNames, $Hit );
         $pipe->writer();
         $pipe->autoflush();
 
         # Do the actual tests and work out the integer result
-        if ( $SAversion < 3 ) {
-            $spamness = $Test->check($Mail);
-        }
-        else {
-            my $mail = $Test->parse( $Mail, 1 );
-            $spamness = $Test->check($mail);
-        }
-        print $pipe ($SAversion < 3 ? $spamness->get_hits() : $spamness->get_score() )
-          . "\n";
+        my $mail = $Test->parse( $Mail, 1 );
+        $spamness = $Test->check($mail);
+        print $pipe $spamness->get_score() . "\n";
         $HitList = $spamness->get_names_of_tests_hit();
         if ($IncludeScores) {
             @HitNames = split( /\s*,\s*/, $HitList );
             $HitList = "";
             foreach $Hit (@HitNames) {
-                $HitList .=
-                    ( $HitList ? ', ' : '' )
+                $HitList .= ( $HitList ? ', ' : '' )
                   . $Hit . ' '
                   . sprintf( "%1.2f", $spamness->{conf}->{scores}->{$Hit} );
             }
         }
 
-        # Get the autolearn status
-        if ( $SAversion < 3 ) {
-            # Old code
-            if ( !defined $spamness->{auto_learn_status} ) {
-                $AutoLearn = "no";
-            }
-            elsif ( $spamness->{auto_learn_status} ) {
-                $AutoLearn = "spam";
-            }
-            else {
-                $AutoLearn = "not spam";
-            }
-        }
-        else {
-            # New code
-            $spamness->learn();
-            $AutoLearn = $spamness->{auto_learn_status};
-            $AutoLearn = 'no' if $AutoLearn eq 'failed' || $AutoLearn eq "";
-            $AutoLearn = 'not spam' if $AutoLearn eq 'ham';
-        }
+        $spamness->learn();
+        $AutoLearn = $spamness->{auto_learn_status};
+        $AutoLearn = 'no' if $AutoLearn eq 'failed' || $AutoLearn eq "";
+        $AutoLearn = 'not spam' if $AutoLearn eq 'ham';
 
         print $pipe $AutoLearn . "\n";
 
@@ -1179,17 +1074,11 @@ sub SATest {
 
     my ( $spamness, $SAResult, $HitList, @HitNames, $Hit );
 
-    # Do the actual tests and work out the integer result
-    if ( $SAversion < 3 ) {
-        $spamness = $Test->check($Mail);
-    }
-    else {
-        my $mail = $Test->parse( $Mail, 1 );
-        $spamness = $Test->check($mail);
-    }
+    my $mail = $Test->parse( $Mail, 1 );
+    $spamness = $Test->check($mail);
 
     # 1st output is get_hits or get_score \n
-    $SAHits = ( $SAversion < 3 ? $spamness->get_hits() : $spamness->get_score() ) + 0.0;
+    $SAHits = $spamness->get_score() + 0.0;
     $HitList = $spamness->get_names_of_tests_hit();
     if ($IncludeScores) {
         @HitNames = split( /\s*,\s*/, $HitList );
@@ -1202,27 +1091,10 @@ sub SATest {
         }
     }
 
-    # Get the autolearn status
-    if ( $SAversion < 3 ) {
-
-        # Old code
-        if ( !defined $spamness->{auto_learn_status} ) {
-            $AutoLearn = "no";
-        }
-        elsif ( $spamness->{auto_learn_status} ) {
-            $AutoLearn = "spam";
-        }
-        else {
-            $AutoLearn = "not spam";
-        }
-    }
-    else {
-        # New code
-        $spamness->learn();
-        $AutoLearn = $spamness->{auto_learn_status};
-        $AutoLearn = 'no' if $AutoLearn eq 'failed' || $AutoLearn eq "";
-        $AutoLearn = 'not spam' if $AutoLearn eq 'ham';
-    }
+    $spamness->learn();
+    $AutoLearn = $spamness->{auto_learn_status};
+    $AutoLearn = 'no' if $AutoLearn eq 'failed' || $AutoLearn eq "";
+    $AutoLearn = 'not spam' if $AutoLearn eq 'ham';
 
     # 3rd output is $HitList \n
     $SAHitList = $HitList;
