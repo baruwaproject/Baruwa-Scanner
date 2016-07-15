@@ -211,7 +211,6 @@ if ($Versions) {
     IO/String.pm
     IO/Zlib.pm
     IP/Country.pm
-    Mail/ClamAV.pm
     Mail/SpamAssassin.pm
     Mail/SPF.pm
     Mail/SPF/Query.pm
