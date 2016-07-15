@@ -41,7 +41,7 @@ eval { Sys::Syslog::setlogsock('unix'); };
 ####################################
 
 $PackageDir = shift || "/opt/f-prot";
-$LockFile = "/var/lock/MailScanner/Locks/f-prot-6Busy.lock";
+$LockFile = "/var/lock/baruwa/Locks/f-prot-6Busy.lock";
 
 $LOCK_SH = 1;
 $LOCK_EX = 2;

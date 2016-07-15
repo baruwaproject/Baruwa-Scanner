@@ -47,7 +47,7 @@ fi
 #
 
 # Check to see if Sophos is using the Sophos install directory,
-# rather than the MailScanner Sophos update directory.
+# rather than the Baruwa Sophos update directory.
 SAV_IDE=$PackageDir/ide
 if [ \! -x ${PackageDir}/ide -a -x ${PackageDir}/sav ]; then
   SAV_IDE=$PackageDir/sav
