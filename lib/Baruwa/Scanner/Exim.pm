@@ -1431,7 +1431,7 @@ sub CreateBatch {
 
                 # Optimised by binning the 50% that aren't H files first
                 next unless $file =~ /$mta->{HFileRegexp}/;
-
+                next unless -f "$queuedirname/$1-D";
                 #print STDERR "Found message file $file\n";
                 $MsgsInQueue++;    # Count the size of the queue
                 push @SortedFiles, "$queuedirname/$file";
@@ -1527,7 +1527,7 @@ sub CreateBatch {
 
                 if ( @attempts && $attempts[1] >= $maxattempts ) {
                     Baruwa::Scanner::Log::WarnLog(
-"Warning: skipping message %s as it has been attempted too many times",
+                        "Warning: skipping message %s as it has been attempted too many times",
                         $id
                     );
 
