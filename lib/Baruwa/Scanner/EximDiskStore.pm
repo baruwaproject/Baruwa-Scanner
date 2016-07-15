@@ -114,25 +114,10 @@ sub Lock {
 
     #print STDERR "About to lock " . $this->{hpath} . " and " .
     #             $this->{dpath} . "\n";
-    Baruwa::Scanner::Lock::openlock( $this->{inhhandle}, '+<' . $this->{hpath},
-        'w', 'quiet' )
-      or return 0;
-
-    #print STDERR "Got hlock\n";
-
-    # If locking the dfile fails, then must close and unlock the qffile too
-    unless (
-        Baruwa::Scanner::Lock::openlock(
-            $this->{indhandle}, '+<' . $this->{dpath},
-            'w', 'quiet'
-        )
-      )
-    {
-        Baruwa::Scanner::Lock::unlockclose( $this->{inhhandle} );
-        return 0;
-    }
-
+    Baruwa::Scanner::Lock::openlock($this->{indhandle}, '+<' . $this->{dpath}, 'w', 'quiet') or return 0;
     #print STDERR "Got dlock\n";
+    Baruwa::Scanner::Lock::openlock($this->{inhhandle}, '+<' . $this->{hpath},' w', 'quiet' ) or return 0;
+    #print STDERR "Got hlock\n";
     return 0 unless $this->{inhhandle} && $this->{indhandle};
     return 1;
 }
@@ -250,7 +235,6 @@ sub LinkData {
     # move on to the next one. This one will get delivered when
     # the previous one with the same name has been delivered.
     unless ( link $InDPath, $OutDPath ) {
-
         # The link failed, so get the inode numbers of the two files
         my ( $ininode, $outinode );
         $ininode  = ( stat $InDPath )[1];

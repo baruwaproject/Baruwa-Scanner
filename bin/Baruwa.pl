@@ -557,9 +557,6 @@ if ( $WantLintOnly || $WantLintLiteOnly ) {
     Baruwa::Scanner::Sendmail::initialise();
     Baruwa::Scanner::SweepViruses::initialise();
     CreateProcessingDatabase(1);            # Just do a Lint check
-    Baruwa::Scanner::Lock::initialise();
-
-    #print STDERR "\nLock type = " . Baruwa::Scanner::Lock::ReportLockType() . "\n";
 
     # Find the list of virus scanners installed
     print STDERR "baruwa.conf says \"Virus Scanners = "
@@ -982,19 +979,6 @@ sub WorkForHours {
         MTA        => $mta,
         Quarantine => $quar
     );
-
-    # Setup the lock type depending on which MTA we are using
-    Baruwa::Scanner::Lock::initialise();
-
-    # Clean up the entire outgoing sendmail queue in case I was
-    # killed off half way through processing some messages.
-    # JKF Can't do this easily any more as the outgoing queue dir is the
-    # result of a ruleset.
-    # And I can't work out which class to put it in :-(
-    #my($CleanUpList);
-    #$CleanUpList = $global::MS->{inq}->ListWholeQueue(
-    #                 $global::MS->{inq}->{dir});
-    #Sendmail::ClearOutQueue($CleanUpList, $Config::OutQueueDir);
 
     my $batch;    # Looks pretty insignificant, doesn't it? :-)
 

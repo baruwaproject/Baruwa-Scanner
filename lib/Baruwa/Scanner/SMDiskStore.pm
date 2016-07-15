@@ -113,27 +113,10 @@ sub Lock {
 
     #print STDERR "About to lock " . $this->{hpath} . " and " .
     #             $this->{dpath} . "\n";
-    Baruwa::Scanner::Lock::openlock( $this->{inhhandle}, '+<' . $this->{hpath},
-        'w', 'quiet' )
-      or return undef;
-
-    #print STDERR "Got hlock\n";
-
-    # If locking the dfile fails, then must close and unlock the qffile too
-    # 14/12/2004 Try putting this back in for now.
-    unless (
-        Baruwa::Scanner::Lock::openlock(
-            $this->{indhandle}, '+<' . $this->{dpath},
-            'w', 'quiet'
-        )
-      )
-    {
-        #JKF 14/12/2004 open($this->{indhandle}, '+<' . $this->{dpath})) {
-        Baruwa::Scanner::Lock::unlockclose( $this->{inhhandle} );
-        return undef;
-    }
-
+    Baruwa::Scanner::Lock::openlock($this->{indhandle}, '+<' . $this->{dpath}, 'w', 'quiet') or return undef;
     #print STDERR "Got dlock\n";
+    Baruwa::Scanner::Lock::openlock($this->{inhhandle}, '+<' . $this->{hpath}, 'w', 'quiet' ) or return undef;
+    # #print STDERR "Got hlock\n";
     return undef unless $this->{inhhandle} && $this->{indhandle};
     return 1;
 }
