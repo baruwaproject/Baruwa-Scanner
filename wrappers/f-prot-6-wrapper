@@ -19,8 +19,8 @@
 # :author: Julian Field
 # :copyright: Copyright (C) 2002  Julian Field
 #
-# f-prot-6-wrapper --	invoke F-Prot version 6 AV for use with
-# 			mailscanner
+# f-prot-6-wrapper --	invoke F-Prot version 6 AV for use with Baruwa
+#
 
 
 # You may want to check this script for bash-isms

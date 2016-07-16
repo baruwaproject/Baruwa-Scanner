@@ -19,8 +19,7 @@
 # :author: Julian Field
 # :copyright: Copyright (C) 2002  Julian Field
 #
-# f-securewrapper --	invoke F-Secure AV for use with
-# 			mailscanner
+# f-securewrapper --	invoke F-Secure AV for use with Baruwa
 #
 
 # Look to see what version we have got installed.
@@ -60,7 +59,7 @@ else
       fi
       # I'm only listing ones which we may find useful...
       #
-      # The *required* options are passed to us by mailscanner.
+      # The *required* options are passed to us by Baruwa
       # currently these are "--auto --dumb --archive" (2/1/02) -- nwp
       #
       ScanOptions=""

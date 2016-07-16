@@ -19,7 +19,7 @@
 # :author: Julian Field
 # :copyright: Copyright (C) 2002  Julian Field
 #
-# esets-wrapper --	invoke ESET for use with mailscanner
+# esets-wrapper --	invoke ESET for use with Baruwa
 
 ScanOptions=""
 PackageDir=$1
