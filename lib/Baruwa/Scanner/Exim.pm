@@ -267,7 +267,6 @@ sub ReadQf {
     # and tracking them in %{$metadata{dashvars}}
     while ( chomp( $line = <$RQf> ) ) {
         $line =~ s/^-(\w+) ?// or last;
-
         # ACLs patch starts here
         #$metadata{dashvars}{$1} = 0;
         #$line eq "" and $metadata{"dv_$1"} = 1, next;
@@ -276,7 +275,6 @@ sub ReadQf {
         # ACLs can be -acl or -aclc or -aclm.
         $acltype = $1;
         if ( $acltype =~ /^acl[cm]?$/ ) {
-
             # we need to handle acl vars differently
             if ( $line =~ /^(\w+|_[[:alnum:]_]+) (\d+)$/ ) {
                 my $buf;
@@ -341,25 +339,25 @@ sub ReadQf {
         return 0;
     }
 
-   # FIXME: we haven't really defined what $message{clientip} should
-   # be when it's a locally-submitted message... so the rest of
-   # the code probably doesn't deal with it well.
-   #
-   #     JKF: Sendmail apparently generates "root@localhost" as the client ip
-   #     address, which I currently don't handle at all, oops!
-   #     It *doesn't* contain a numerical IP address, as opposed to SMTP
-   #     connections from localhost, which get a numerical IP address as normal.
-   #     So how do we describe them? Personally I think we should always treat
-   #     them as normal messages, maybe just coming from 127.0.0.1. I'm not
-   #     convinced that created messages should be handled differently from
-   #     messages from 127.0.0.1, as that will discourage users from doing silly
-   #     things like not scanning created messages.
-   #     I have changed the sendmail code so it puts in 127.0.0.1.
-   #
-   # OK, well I'll probably try having a look at what it would take to
-   # differentiate it later, then... (i.e. put 'local' back in and see
-   # what breaks)
-   #
+    # FIXME: we haven't really defined what $message{clientip} should
+    # be when it's a locally-submitted message... so the rest of
+    # the code probably doesn't deal with it well.
+    #
+    #     JKF: Sendmail apparently generates "root@localhost" as the client ip
+    #     address, which I currently don't handle at all, oops!
+    #     It *doesn't* contain a numerical IP address, as opposed to SMTP
+    #     connections from localhost, which get a numerical IP address as normal.
+    #     So how do we describe them? Personally I think we should always treat
+    #     them as normal messages, maybe just coming from 127.0.0.1. I'm not
+    #     convinced that created messages should be handled differently from
+    #     messages from 127.0.0.1, as that will discourage users from doing silly
+    #     things like not scanning created messages.
+    #     I have changed the sendmail code so it puts in 127.0.0.1.
+    #
+    # OK, well I'll probably try having a look at what it would take to
+    # differentiate it later, then... (i.e. put 'local' back in and see
+    # what breaks)
+    #
     $message->{clientip} =
       ( exists $metadata{dv_host_address}
           && defined $metadata{dv_host_address} )
@@ -379,13 +377,12 @@ sub ReadQf {
         while ($nodecount) {
             chomp( $line = <$RQf> );
             unless ($line) {
-
-          #Baruwa::Scanner::Log::WarnLog("Batch: Ignoring invalid queue file for " .
-          #                          "message %s", $metadata{id});
+                #Baruwa::Scanner::Log::WarnLog("Batch: Ignoring invalid queue file for " .
+                #                          "message %s", $metadata{id});
                 return 0;
             }
 
-       # $line eq "" and **** --- invalid queue file - JKF won't get here if bad
+            # $line eq "" and **** --- invalid queue file - JKF won't get here if bad
             ( $branches, $address ) = split / /, $line;
             $nodecount--;
             $metadata{nonrcpts}{$address} = 1;
@@ -402,7 +399,6 @@ sub ReadQf {
     # Read in recipient list
     for ( my $i = 0 ; $i < $metadata{numrcpts} ; $i++ ) {
         chomp( $line = <$RQf> );
-
         #print STDERR "Read $line\n";
         unless ( defined $line && $line ne "" ) {
             #Baruwa::Scanner::Log::WarnLog("Batch: Ignoring invalid queue file for " .
@@ -451,13 +447,11 @@ sub ReadQf {
 
     my $header = {};
     while (<$RQf>) {
-
         # chomp()ing here would screw the header length calculations
         $line = $_;
         $line =~ s/\0//g;    # Delete all null bytes
 
         if ($InHeader) {
-
             # We are expecting a continuation line...
             $InHeader -= ( length($line) );
             if ( $InHeader < 0 ) {
@@ -530,13 +524,11 @@ sub ReadQf {
 
             # Ignore it if it's flagged as deleted
             unless ($InDel) {
-
                 # It's not deleted, so push it onto headers array
                 push @headers, $headerstring;
 
                 # And if it's the subject, deal with it + track it
                 if ( "subject:" eq lc $1 ) {
-
                     # Make $metadata{subject} and the relevant header
                     # entry point to the same object, just to save hunting
                     # for it later.
@@ -552,19 +544,9 @@ sub ReadQf {
                     my $rcvdip   = '127.0.0.1';
                     if ( $received =~ /\[(\d+\.\d+\.\d+\.\d+)\]/i ) {
                         $rcvdip = $1;
-
-                        #unless ($read1strcvd) {
-                        #  $ipfromheader = $1;
-                        #  $read1strcvd = 1;
-                        #}
                     }
                     elsif ( $received =~ /\[([\dabcdef.:]+)\]/i ) {
                         $rcvdip = $1;
-
-                        #unless ($read1strcvd) {
-                        #  $ipfromheader = $1;
-                        #  $read1strcvd = 1;
-                        #}
                     }
                     push @rcvdiplist, $rcvdip;
                 }
@@ -575,7 +557,6 @@ sub ReadQf {
             $InSubject = ( $InSubject && $InHeader );
             next;
         }
-
         # Weren't expecting a continuation, but didn't find
         # something that looked like the first line of a header
         # either...
@@ -604,7 +585,6 @@ sub ReadQf {
           Encode::decode( 'MIME-Header', $message->{subject} );
     };
     if ($@) {
-
         # Eval failed - store a copy of the subject before MIME::WordDecoder
         # is run, as this appears to destroy the characters of some subjects
         $message->{utf8subject} = $message->{subject};
@@ -619,7 +599,6 @@ sub ReadQf {
     # Decode the ISO encoded Subject line
     my $TmpSubject = MIME::WordDecoder::unmime( $message->{subject} );
     if ( $TmpSubject ne $message->{subject} ) {
-
         # The unmime function dealt with an encoded subject, as it did
         # something. Allow up to 10 trailing spaces so that SweepContent
         # is more kind to us and doesn't go and replace the whole subject,
@@ -651,7 +630,6 @@ sub ReadQf {
 
 sub AddHeadersToQf {
     my ( $this, $message, $headers ) = @_;
-
     my ( $header, $h, @newheaders );
 
     #print STDERR Dumper($message->{headers});
@@ -709,7 +687,6 @@ sub RealAddHeadersToQf {
     my $InDel     = 0;
 
     foreach (@newheaders) {
-
         # This line to identify problems rather than just work
         # round them (which costs efficiency).
         s/\n\Z//
@@ -720,9 +697,7 @@ sub RealAddHeadersToQf {
         chomp( $line = $_ );
 
         if ( $InHeader && ( $line =~ /^[\t ]/ ) ) {
-
             # Continuation
-
             # Add it to metadata header object (already
             # built the rest)
             $header->{body} .= $line . "\n";
@@ -733,7 +708,6 @@ sub RealAddHeadersToQf {
             next;
         }
         elsif ( $line =~ /^([^: ]+:)(.*)$/ ) {
-
             # Actually header names *MUST* only contain
             # ASCII 33-126 decimal inclusive...
             # ...but we'll be gentle, just in case.
@@ -784,7 +758,6 @@ sub RealAddHeadersToQf {
 
 sub AddStringOfHeadersToQf {
     my ( $this, $message, $headers ) = @_;
-
     my @headers;
 
     @headers = split( /\n/, $headers );
@@ -840,7 +813,6 @@ sub DeleteHeader {
     my ( $hdrnum, $line );
     my $metadata = $message->{metadata};
     for ( $hdrnum = 0 ; $hdrnum < @{ $metadata->{headers} } ; $hdrnum++ ) {
-
         # Skip if they are using a header name and it doesn't match
         # Quotemeta the header name we are checking as we have done it to $key.
         next
@@ -868,7 +840,6 @@ sub UniqHeader {
     my $metadata = $message->{metadata};
     for ( $hdrnum = 0 ; $hdrnum < @{ $metadata->{headers} } ; $hdrnum++ ) {
         next unless lc $metadata->{headers}[$hdrnum]{name} eq lc $key;
-
         # Have found the header line, skip it if we haven't seen it before
         ( $foundat = $hdrnum ), next if $foundat == -1;
 
@@ -930,7 +901,6 @@ sub AppendHeader {
     my $header = FindHeader( $this, $message, $key );
 
     if ( defined $header ) {
-
         # Found it :)
         chomp( $header->{body} );
         $header->{body} .= $sep . $newvalue . "\n";
@@ -948,7 +918,6 @@ sub PrependHeader {
     my $header = FindHeader( $this, $message, $key );
 
     if ( defined $header ) {
-
         # Found it :)
         #$header->{body} = $newvalue . $sep . $header->{body};
         chomp( $header->{body} );
@@ -1035,7 +1004,6 @@ sub KickMessage {
 
     while (@ids) {
         @ThisBatch = splice @ids, $[, 30;
-
         # This code is the simpler version of the #JJH code below here.
         my $idlist = join( ' ', @ThisBatch );
         $idlist .= ' &' if Baruwa::Scanner::Config::Value('deliverinbackground');
@@ -1132,7 +1100,6 @@ sub CreateQf {
     #  Baruwa::Scanner::Log::InfoLog(Dumper($metadata->{headers}));
     foreach ( @{ $metadata->{headers} } ) {
         my $htext = $_->{name} . $_->{body};
-
         # We want exactly one \n at the end of each header
         # but this *should* be inefficient and unnecessary
         # $htext =~ s/\n*\Z/\n/;
@@ -1169,7 +1136,6 @@ sub FindAndFlag {
 
     my $foundone = 0;
     foreach (@$headerary) {
-
         $_->{flag} ne " " and next;
         $headers{ uc($flag) } . ":" eq lc $_->{name} or next;
 
@@ -1521,7 +1487,6 @@ sub CreateBatch {
                         "Warning: skipping message %s as it has been attempted too many times",
                         $id
                     );
-
                     # JKF 20090301 next;
                     # Instead of just skipping it, quarantine it and notify
                     # the local postmaster.
@@ -1531,7 +1496,6 @@ sub CreateBatch {
                         $attempts[1], $attempts[2] );
                 }
                 elsif ( defined $attempts[1] ) {
-
                     # We have tried this message before
                     if ( time >= $attempts[2] ) {
 
@@ -1629,9 +1593,7 @@ sub OriginalMsgHeaders {
 
 sub CheckQueueIsFlat {
     my ($dir) = @_;
-
     # FIXME: What is the purpose of this?
-
     return 1;
 }
 

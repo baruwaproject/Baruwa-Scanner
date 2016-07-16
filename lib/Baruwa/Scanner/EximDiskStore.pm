@@ -337,7 +337,6 @@ sub ReadBody {
     }
     else {
         while (<$dh>) {
-
             # End of line characters are already there, so don't add them
             #push @{$body}, $_ . "\n";
             push @{$body}, $_;
@@ -394,9 +393,6 @@ sub CopyToDir {
 
 # Write a message to a filehandle
 sub WriteEntireMessage {
-
-    #my($this, $message, $handle) = @_;
-
     my ( $this, $message, $handle, $pipe ) = @_;
 
     # Do this in a subprocess in order to avoid breaking POSIX locks.
