@@ -25,6 +25,7 @@ package Baruwa::Scanner::Lock;
 
 use strict;
 use File::FcntlLock::XS;
+use Fcntl qw(:DEFAULT :flock);
 use POSIX qw(:unistd_h :errno_h);
 
 # Open and lock a file.
@@ -57,11 +58,13 @@ sub openlock {
         l_start => 0,
         l_len => 0
     );
-    $lh->lock($fh, F_SETLK) and return 1;
+    $lh->lock($fh, F_SETLK) and flock($fh, ($rw eq 'w' ? LOCK_EX : LOCK_SH) + LOCK_NB) and return 1;
     close($fh);
 
-    if ( ( $lh->lock_errno() == POSIX::EAGAIN ) || ( $lh->lock_errno() == POSIX::EACCES ) ) {
-        Baruwa::Scanner::Log::DebugLog( "Failed to lock $fn: %s", $lh->error() )
+    if (($lh->lock_errno() == POSIX::EAGAIN) || ($lh->lock_errno() == POSIX::EACCES)
+        || ($! == POSIX::EAGAIN) || ($! == POSIX::EACCES))
+    {
+        MailScanner::Log::DebugLog( "Failed to lock $fn: %s", $lh->error() )
           unless $quiet;
     }
     else {
@@ -82,6 +85,7 @@ sub unlockclose {
         l_len => 0
     );
     $lh->lock($fh, F_SETLK);
+    flock($fh, LOCK_UN);
     close($fh);
     return 1;
 }
