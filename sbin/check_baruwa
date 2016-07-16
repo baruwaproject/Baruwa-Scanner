@@ -1,0 +1,61 @@
+#!/bin/sh
+# -*- coding: utf-8 -*-
+# vim: ai ts=4 sts=4 et sw=4
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This file was forked from MailScanner in July 2016.
+# Original author, and relevant copyright and licensing information is below:
+# :author: Julian Field
+# :copyright: Copyright (C) 2002  Julian Field
+#
+
+# Check that the content scanner is still running.
+# Re-start it if necessary.
+# This can also be used from the init script to
+# start it in the first place.
+# This can be called with a "-q" command-line option so that it is quiet
+# unless Baruwa actually had to be started.
+
+process=Baruwa
+msbindir=/usr/sbin
+config=/etc/mail/baruwa/baruwa.conf
+
+# These seem to get put all over the shop...
+PATH=/usr/bin:/bin
+export PATH
+EGREP=egrep
+PS=ps
+
+#TAINTWARN='-Tw'
+TAINTWARN=
+
+RETVALUE=" Done."
+
+pid=`$PS axww | $EGREP $process'[:]|\['$process'\]|[ ]'$msbindir/$process | awk '{ print $1 }'`
+
+if [ "x$pid" = "x" ]; then
+  # Quietly try to raise the open_files limit
+  ulimit -n 2000 >/dev/null 2>&1
+  # Restart it
+  PATH=${msbindir}:$PATH
+  echo -n 'Starting Baruwa...'
+  cd $msbindir
+  $process $config 2>/dev/null || RETVALUE=" Failed."
+  echo "$RETVALUE"
+else
+  if [ "x$1" != "x-q" ]; then
+    echo Baruwa running with pid $pid
+  fi
+fi
+

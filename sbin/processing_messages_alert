@@ -1,0 +1,53 @@
+#!/bin/sh
+# -*- coding: utf-8 -*-
+# vim: ai ts=4 sts=4 et sw=4
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This file was forked from MailScanner in July 2016.
+# Original author, and relevant copyright and licensing information is below:
+# :author: Julian Field
+# :copyright: Copyright (C) 2002  Julian Field
+#
+noticesfrom=`/usr/sbin/Quick.Peek noticesfrom /etc/mail/baruwa/baruwa.conf`
+localpostmaster=`/usr/sbin/Quick.Peek localpostmaster /etc/mail/baruwa/baruwa.conf`
+noticesto=`/usr/sbin/Quick.Peek noticesto /etc/mail/baruwa/baruwa.conf`
+sendnotices=`/usr/sbin/Quick.Peek sendnotices /etc/mail/baruwa/baruwa.conf`
+
+# Only do this if they want to send notices to postmaster at all
+if [ "x$sendnotices" = "xno" ]; then
+  exit 0
+fi
+
+# If there was a / at the start of the destination email address, then the
+# setting was a ruleset which Quick.Peek does not support. So use the
+# localpostmaster setting instead, it's better than creating an error.
+if ( echo $noticesto | grep -q '^/' ); then
+  noticesto=$localpostmaster
+fi
+
+alert=`/usr/sbin/Baruwa --processing`
+
+if [ \! "x$alert" = "x" ]; then
+  sendmail -oem -t <<EOM
+From: $noticesfrom <$localpostmaster>
+To: Baruwa Administrator <$noticesto>
+Subject: Problem Messages
+
+$alert
+
+-- 
+Baruwa
+EOM
+fi
+
