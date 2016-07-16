@@ -44,7 +44,6 @@ my $UnsortedBatchesLeft;
 # $HFileRegexp                  set by new
 # $TFileRegexp                  set by new
 # $QueueFileRegexp              set by new
-# $LockType                     set by new
 #
 
 # If the sendmail and/or sendmail2 config variables aren't set, then
@@ -70,8 +69,6 @@ sub new {
     $this->{TFileRegexp}     = '^([-\\w]*)-T$';
     $this->{QueueFileRegexp} = '^([-\\w]*)-[A-Z]$';
 
-    $this->{LockType} = "posix";
-
     bless $this, $type;
     return $this;
 }
@@ -94,9 +91,6 @@ sub new {
 # A regexp that will match any legitimate queue file name
 # and leave the queue id in $1.
 #
-# LockType:
-# The way we should usually do spool file locking for
-# this MTA ("posix" or "flock")
 #
 # Required subs are:
 #

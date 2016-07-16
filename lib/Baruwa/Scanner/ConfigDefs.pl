@@ -185,7 +185,6 @@ scanmail			= scanmessages
 scoreformat			= spamscorenumberformat
 secondlevellist                 = countrysubdomainslist
 sendercontentreport		= senderbadcontentreport
-# JKF 19/12/2007 senderpasswordreport		= senderbadpasswordprotectedarchivereport
 senderfilenamereport		= senderbadfilenamereport
 senderrblspamreport		= senderspamlistreport
 sendersaspamreport		= senderspamassassinreport
@@ -350,8 +349,6 @@ inqueuedir		/var/spool/exim.in/input
 LDAPbase
 LDAPserver
 LDAPsite
-# LockType *must not* have a static default
-LockType
 LogFacility		mail
 LogSock
 BaruwaVersionNumber	1.0.0
@@ -472,7 +469,6 @@ WarnVirusSenders	0	no	0	yes	1
 WarnNameSenders		1	no	0	yes	1
 WarnSizeSenders		0	no	0	yes	1
 WarnOtherSenders	1	no	0	yes	1
-# JKF 19/12/2007 WarnPasswordSenders    1       no      0       yes     1
 
 [First,File]
 DeletedContentMessage	/etc/mail/baruwa/reports/en/deleted.content.message.txt
@@ -536,7 +532,7 @@ unzipmaxsize			50000
 [First,Other]
 Antiword			/usr/bin/antiword -f
 ArchivesAre			zip rar ole
-AttachmentCharset		ISO-8859-1
+AttachmentCharset		UTF-8
 attachimageinternalname
 attachimagename
 AttachmentWarningFilename	VirusWarning.txt
@@ -566,7 +562,7 @@ NoticeSignature			-- \nBaruwa\nEmail Content Scanner\nwww.baruwa.com
 PhishingSubjectTag		{Fraud?}
 ScannedSubjectText		{Scanned}
 ScoreFormat			%d
-Sendmail2			/usr/sbin/sendmail
+Sendmail2			/usr/sbin/exim -C /etc/exim/exim_out.conf
 SpamHeader			X-Baruwa-SpamCheck:
 SpamList
 SpamVirusHeader			X-Baruwa-SpamVirus-Report:
@@ -574,7 +570,7 @@ MCPSubjectText			{MCP?}
 SpamSubjectText			{Spam?}
 SpamStarsHeader			X-Baruwa-SpamScore:
 MCPHeader			X-Baruwa-MCPCheck:
-UnscannedHeader			Not scanned: please contact your Internet E-Mail Service Provider for details
+UnscannedHeader			Not Post-SMTP Content scanned
 VirusSubjectText		{Virus?}
 WebBugURL			http://datafeeds.baruwa.com/1x1spacer.gif
 HamActions		deliver header "X-Spam-Status: No"

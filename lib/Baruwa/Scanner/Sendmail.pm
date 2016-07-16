@@ -46,7 +46,6 @@ my %IsNestedQueue;
 # $HFileRegexp                  set by new
 # $TFileRegexp                  set by new
 # $QueueFileRegexp              set by new
-# $LockType                     set by new
 #
 
 # If the sendmail and/or sendmail2 config variables aren't set, then
@@ -75,22 +74,6 @@ sub new {
     $this->{TFileRegexp}     = '^tf([-\\w]*)$';
     $this->{QueueFileRegexp} = '^..([-\\w]*)$';
 
-    # JKF 2006-01-23 Changed default to posix as this probably is now what
-    #                most systems (particularly new ones) have.
-    $this->{LockType} = "posix";
-
-  #$this->{LockType} = "flock";
-  # Patch by Kevin Spicer to detect HASFLOCK
-  # JKF -- Does not work as old sendmail versions don't say HASFLOCK but do.
-  # Automatically detect locking type
-  #my $cmd = Baruwa::Scanner::Config::Value('sendmail') . " -bt -d0.10 < /dev/null";
-  #if ( grep /HASFLOCK/, `$cmd` ) {
-  #  $this->{LockType} = "flock";
-  #} else {
-  #  $this->{LockType} = "posix";
-  #}
-  # End patch
-
     bless $this, $type;
     return $this;
 }
@@ -112,10 +95,6 @@ sub new {
 # QueueFileRegexp:
 # A regexp that will match any legitimate queue file name
 # and leave the queue id in $1.
-#
-# LockType:
-# The way we should usually do spool file locking for
-# this MTA ("posix" or "flock")
 #
 # Required subs are:
 #
