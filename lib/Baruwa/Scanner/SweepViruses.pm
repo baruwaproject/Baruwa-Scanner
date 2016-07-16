@@ -355,8 +355,7 @@ sub initialise {
 sub InitialiseSAVI {
 
     # Initialise Sophos SAVI library
-    Baruwa::Scanner::Log::DieLog("SAVI Perl module not found, did you install it?")
-      unless eval 'require SAVI';
+    Baruwa::Scanner::Log::DieLog("SAVI Perl module not found") unless eval 'require SAVI';
 
     my $SAVIidedir = Baruwa::Scanner::Config::Value('sophoside');
     $SAVIidedir = '/usr/local/Sophos/ide' unless $SAVIidedir;
@@ -2532,23 +2531,6 @@ sub ClamdScan {
     my $ScanDir = "$global::MS->{work}->{dir}/$dirname";
     $ScanDir =~ s/\/\.$//;
 
-    # If we don't have the required perl libs exit in a fashion the
-    # parser will understand
-    unless ( eval ' require IO::Socket::INET ' ) {
-        print "ERROR:: You Need IO-Socket-INET To Use clamd As A "
-          . "Scanner :: $dirname\n"
-          unless $lintonly;
-        print "ScAnNeRfAiLeD\n" unless $lintonly;
-        return 1;
-    }
-    unless ( eval ' require IO::Socket::UNIX ' ) {
-        print "ERROR:: You Need IO-Socket-INET To Use clamd As A "
-          . "Scanner :: $dirname\n"
-          unless $lintonly;
-        print "ScAnNeRfAiLeD\n" unless $lintonly;
-        return 1;
-    }
-
     # The default scan type is set here and if threading has been enabled
     # switch to threaded scanning
     my $ScanType = "CONTSCAN";
@@ -2866,16 +2848,6 @@ sub Fprotd6Scan {
     # so let's build the scan dir here and remove that pesky \. at the end
     my $ScanDir = "$global::MS->{work}->{dir}/$dirname";
     $ScanDir =~ s/\/\.$//;
-
-    # If we don't have the required perl libs exit in a fashion the
-    # parser will understand
-    unless ( eval ' require IO::Socket::INET ' ) {
-        print "ERROR:: You Need IO-Socket-INET To Use f-protd-6 As A "
-          . "Scanner :: $dirname\n"
-          unless $lintonly;
-        print "ScAnNeRfAiLeD\n" unless $lintonly;
-        return 1;
-    }
 
     my $TimeOut = Baruwa::Scanner::Config::Value('virusscannertimeout');
     my $Port    = Baruwa::Scanner::Config::Value('fprotd6port');

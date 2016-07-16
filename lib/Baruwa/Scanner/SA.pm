@@ -30,7 +30,10 @@ no strict 'subs';    # Allow bare words for parameter %'s
 use IO qw(Pipe);
 use POSIX qw(:signal_h);    # For Solaris 9 SIG bug workaround
 use DBI;
+use DBD::SQLite;
+use Digest::MD5;
 use Compress::Zlib;
+use Mail::SpamAssassin;
 
 our $VERSION = '4.086000';
 
@@ -46,7 +49,7 @@ my ($LOCK_UN) = 8;
 my @SAsuccessqueue;    # queue of failure history
 my $SAsuccessqsum;     # current sum of history queue
 
-my ( $SAspamtest, $SABayesLock, $SABayesRebuildLock, $SpamAssassinInstalled );
+my ( $SAspamtest, $SABayesLock, $SABayesRebuildLock );
 
 my ( $SQLiteInstalled, $cachedbh, $cachefilename, $NextCacheExpire );
 
@@ -141,72 +144,47 @@ sub initialise {
             unshift @INC, "$val/lib/perl5/site_perl/$perl_vers";
         }
 
-        # Now we have the path built, try to find the SpamAssassin modules
-        unless ( eval "require Mail::SpamAssassin" ) {
-            Baruwa::Scanner::Log::WarnLog("SpamAssassin is not installed.");
-            Baruwa::Scanner::Log::WarnLog("I will run without for now.");
-            $SpamAssassinInstalled = 0;
-            return;
-        }
-
-        # SpamAssassin "require"d okay.
-        $SpamAssassinInstalled = 1;
-
         # Load the SQLite support for the SA data cache
         $SQLiteInstalled = 0;
-        unless ( Baruwa::Scanner::Config::IsSimpleValue('usesacache')
-            && !Baruwa::Scanner::Config::Value('usesacache') )
+        unless (Baruwa::Scanner::Config::IsSimpleValue('usesacache') && !Baruwa::Scanner::Config::Value('usesacache'))
         {
-            unless ( eval "require DBD::SQLite" ) {
-                Baruwa::Scanner::Log::WarnLog("WARNING: DBI and/or DBD::SQLite Perl modules are installed!");
-                $SQLiteInstalled = 0;
+            Baruwa::Scanner::Log::InfoLog("Using SpamAssassin results cache");
+            $SQLiteInstalled = 1;
+            # Put the SA cache database initialisation code here!
+            $Baruwa::Scanner::SA::cachefilename = Baruwa::Scanner::Config::Value("sacache");
+            $Baruwa::Scanner::SA::cachedbh = DBI->connect(
+                "dbi:SQLite:$Baruwa::Scanner::SA::cachefilename",
+                "", "", { PrintError => 0, InactiveDestroy => 1 } );
+            $NextCacheExpire = $ExpireFrequency + time;
+            if ($Baruwa::Scanner::SA::cachedbh) {
+                Baruwa::Scanner::Log::InfoLog("Connected to SpamAssassin cache database");
+                # Rebuild all the tables and indexes. The PrintError=>0 will make it
+                # fail quietly if they already exist.
+                # Speed up writes at the cost of database integrity. Only tmp data!
+                $Baruwa::Scanner::SA::cachedbh->do("PRAGMA default_synchronous = OFF");
+                $Baruwa::Scanner::SA::cachedbh->do("CREATE TABLE cache (
+                    md5 TEXT, count INTEGER, last TIMESTAMP, first TIMESTAMP,
+                    sasaysspam INT, sahighscoring INT, sascore FLOAT, saheader BLOB,
+                    salongreport BLOB, virusinfected INT)"
+                );
+                $Baruwa::Scanner::SA::cachedbh->do("CREATE UNIQUE INDEX md5_uniq ON cache(md5)");
+                $Baruwa::Scanner::SA::cachedbh->do("CREATE INDEX last_seen_idx ON cache(last)");
+                $Baruwa::Scanner::SA::cachedbh->do("CREATE INDEX first_seen_idx ON cache(first)");
+                $SQLiteInstalled = 1;
+                SetCacheTimes();
+                # Now expire all the old tokens
+                CacheExpire() unless $WantLintOnly;
             }
             else {
-                $SQLiteInstalled = 1;
-                unless ( eval "require Digest::MD5" ) {
-                    Baruwa::Scanner::Log::WarnLog("WARNING: Digest::MD5 Perl module is installed!");
-                    $SQLiteInstalled = 0;
-                }
-                else {
-                    Baruwa::Scanner::Log::InfoLog("Using SpamAssassin results cache");
-                    $SQLiteInstalled = 1;
-                    # Put the SA cache database initialisation code here!
-                    $Baruwa::Scanner::SA::cachefilename = Baruwa::Scanner::Config::Value("sacache");
-                    $Baruwa::Scanner::SA::cachedbh = DBI->connect(
-                        "dbi:SQLite:$Baruwa::Scanner::SA::cachefilename",
-                        "", "", { PrintError => 0, InactiveDestroy => 1 } );
-                    $NextCacheExpire = $ExpireFrequency + time;
-                    if ($Baruwa::Scanner::SA::cachedbh) {
-                        Baruwa::Scanner::Log::InfoLog("Connected to SpamAssassin cache database");
-                        # Rebuild all the tables and indexes. The PrintError=>0 will make it
-                        # fail quietly if they already exist.
-                        # Speed up writes at the cost of database integrity. Only tmp data!
-                        $Baruwa::Scanner::SA::cachedbh->do("PRAGMA default_synchronous = OFF");
-                        $Baruwa::Scanner::SA::cachedbh->do("CREATE TABLE cache (
-                            md5 TEXT, count INTEGER, last TIMESTAMP, first TIMESTAMP,
-                            sasaysspam INT, sahighscoring INT, sascore FLOAT, saheader BLOB,
-                            salongreport BLOB, virusinfected INT)"
-                        );
-                        $Baruwa::Scanner::SA::cachedbh->do("CREATE UNIQUE INDEX md5_uniq ON cache(md5)");
-                        $Baruwa::Scanner::SA::cachedbh->do("CREATE INDEX last_seen_idx ON cache(last)");
-                        $Baruwa::Scanner::SA::cachedbh->do("CREATE INDEX first_seen_idx ON cache(first)");
-                        $SQLiteInstalled = 1;
-                        SetCacheTimes();
-                        # Now expire all the old tokens
-                        CacheExpire() unless $WantLintOnly;
-                    }
-                    else {
-                        Baruwa::Scanner::Log::WarnLog("Could not create SpamAssassin cache database %s",
-                            $Baruwa::Scanner::SA::cachefilename );
-                        $SQLiteInstalled = 0;
-                        print STDERR "Could not create SpamAssassin cache database $Baruwa::Scanner::SA::cachefilename\n"
-                          if $WantLintOnly;
-                    }
-                }
+                Baruwa::Scanner::Log::WarnLog("Could not create SpamAssassin cache database %s",
+                    $Baruwa::Scanner::SA::cachefilename );
+                $SQLiteInstalled = 0;
+                print STDERR "Could not create SpamAssassin cache database $Baruwa::Scanner::SA::cachefilename\n"
+                  if $WantLintOnly;
             }
         }
 
-        $Baruwa::Scanner::SA::SAspamtest = new Mail::SpamAssassin( \%settings );
+        $Baruwa::Scanner::SA::SAspamtest = new Mail::SpamAssassin(\%settings);
 
         if ($WantLintOnly) {
             my $errors = $Baruwa::Scanner::SA::SAspamtest->lint_rules();
@@ -364,9 +342,6 @@ sub new {
 # Do the SpamAssassin checks on the passed in message
 sub Checks {
     my $message = shift;
-
-    # If they never actually installed SpamAssassin, then just bail out quietly.
-    return ( 0, 0, "", 0, "" ) unless $SpamAssassinInstalled;
 
     my ( $dfhandle,    $SAReqHits, $HighScoreVal );
     my ( $dfilename,   $dfile,     @WholeMessage, $SAResult, $SAHitList );

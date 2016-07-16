@@ -27,6 +27,7 @@ no strict 'subs';    # Allow bare words for parameter %'s
 
 use POSIX qw(:signal_h);    # For Solaris 9 SIG bug workaround
 use IO qw(Pipe);
+use Mail::SpamAssassin;
 
 our $VERSION = '4.086000';
 our ($SAspamtest $SABayesLock);
@@ -86,10 +87,6 @@ sub initialise {
             unshift @INC, "$val/lib/perl5/site_perl/$perl_vers";
         }
 
-        # Now we have the path built, try to find the SpamAssassin modules
-        Baruwa::Scanner::Log::DieLog(
-            "Message Content Protection SpamAssassin installation could not be found"
-        ) unless eval "require Mail::SpamAssassin";
         $SAversion = $Mail::SpamAssassin::VERSION + 0.0;
 
         $Baruwa::Scanner::MCP::SAspamtest = new Mail::SpamAssassin( \%settings );

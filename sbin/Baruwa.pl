@@ -25,16 +25,16 @@ no strict 'subs';
 use POSIX;
 require 5.005;
 
+use DBI;
+use IO::File;
 use FileHandle;
 use File::Path;
 use IO::Handle;
-use IO::File;
+use DBD::SQLite;
+use Filesys::Df;
 use Getopt::Long;
 use Time::HiRes qw ( time );
-use Filesys::Df;
-use IO::Stringy;
 use Sys::Hostname::Long;
-use DBI;
 use Baruwa::Scanner::Antiword;
 use Baruwa::Scanner::Config;
 use Baruwa::Scanner::CustomConfig;
@@ -143,15 +143,15 @@ if ($WantHelp) {
 # Are we just printing version numbers and exiting?
 if ($Versions) {
     my @Modules = qw/
-    AnyDBM_File
     Archive::Zip
-    bignum
     Carp
     Compress::Zlib
-    Convert::BinHex
     Convert::TNEF
     Data::Dumper
     Date::Parse
+    DBD::SQLite
+    DBI
+    Digest::MD5
     DirHandle
     Fcntl
     File::Basename
@@ -160,6 +160,7 @@ if ($Versions) {
     File::Path
     File::Temp
     Filesys::Df
+    Getopt::Long
     HTML::Entities
     HTML::Parser
     HTML::TokeParser
@@ -167,8 +168,8 @@ if ($Versions) {
     IO::File
     IO::Pipe
     Mail::Header
-    Math::BigInt
-    Math::BigRat
+    Mail::SpamAssassin
+    Mail::SPF
     MIME::Base64
     MIME::Decoder
     MIME::Decoder::UU
@@ -176,63 +177,23 @@ if ($Versions) {
     MIME::Parser
     MIME::QuotedPrint
     MIME::Tools
+    Net::DNS
+    Net::DNS::Resolver::Programmable
     Net::CIDR
-    Net::IP
+    Net::LDAP
     OLE::Storage_Lite
-    Pod::Escapes
-    Pod::Simple
     POSIX
-    Scalar::Util
     Socket
-    Storable
     Sys::Hostname::Long
     Sys::Syslog
-    Test::Pod
-    Test::Simple
     Time::HiRes
     Time::localtime/;
-    my @Optional = qw#Archive/Tar.pm
-    bignum.pm
-    Business/ISBN.pm
-    Business/ISBN/Data.pm
-    Data/Dump.pm
-    DB_File.pm
-    DBD/SQLite.pm
-    DBI.pm
-    Digest.pm
-    Digest/HMAC.pm
-    Digest/MD5.pm
-    Digest/SHA1.pm
-    Encode/Detect.pm
-    Error.pm
-    ExtUtils/CBuilder.pm
-    ExtUtils/ParseXS.pm
-    Getopt/Long.pm Inline.pm
-    IO/String.pm
-    IO/Zlib.pm
-    IP/Country.pm
-    Mail/SpamAssassin.pm
-    Mail/SPF.pm
-    Mail/SPF/Query.pm
-    Module/Build.pm
-    Net/CIDR/Lite.pm
-    Net/DNS.pm
-    Net/DNS/Resolver/Programmable.pm
-    Net/LDAP.pm
-    NetAddr/IP.pm
-    Parse/RecDescent.pm
-    SAVI.pm
-    Test/Harness.pm
-    Test/Manifest.pm
-    Text/Balanced.pm
-    URI.pm
-    version.pm
-    YAML.pm#;
+    my @Optional = qw#SAVI.pm#;
 
     my ( $module, $s, $v, $m );
 
     printf( "Running on\n%s", `uname -a` );
-    printf( "This is %s",     `cat /etc/redhat-release` ) if -f "/etc/redhat-release";
+    printf( "This is %s",     `cat /etc/system-release` ) if -f "/etc/system-release";
     printf( "This is Perl version %f (%vd)\n", $], $^V );
     print "\nThis is Baruwa version " . $Baruwa::Scanner::Config::BaruwaVersion . "\n";
     print "Module versions are:\n";
@@ -256,20 +217,6 @@ if ($Versions) {
 
 # Set the Debug flag if the DebugSpamAssassin flag was set
 $Debug = 1 if $DebugSpamAssassin;
-
-# Check version of MIME-tools against its requirements
-my $error = 0;
-if ( $MIME::Tools::VERSION > 5.420 ) {
-    if ( $IO::VERSION < 1.23 ) {
-        print STDERR "\n\n**** ERROR: Perl IO module > 1.23 required\n\n";
-        $error = 1;
-    }
-    if ( $IO::Stringy::VERSION < 2.110 ) {
-        print STDERR "\n\n**** ERROR: Perl IO::Stringy module > 2.110 required\n\n";
-        $error = 1;
-    }
-}
-exit 1 if $error;
 
 # Work out what directory we're in and add it onto the front
 # of the include path so that we can work if we're just chucked
@@ -1620,13 +1567,6 @@ sub WritePIDFile {
 sub DumpProcessingDatabase {
     my ( $filename, $minimum ) = @_;
 
-    unless ( eval "require DBD::SQLite" ) {
-        Baruwa::Scanner::Log::WarnLog(
-            "WARNING: DBI and/or DBD::SQLite Perl modules are not properly installed!"
-        );
-        return;
-    }
-
     my $DBH = DBI->connect( "dbi:SQLite:$filename", "", "",
         { PrintError => 0, InactiveDestroy => 1 } );
 
@@ -1681,12 +1621,6 @@ sub CreateProcessingDatabase {
 
     # Master switch!
     return unless Baruwa::Scanner::Config::Value('procdbattempts');
-
-    unless ( eval "require DBD::SQLite" ) {
-        Baruwa::Scanner::Log::WarnLog(
-            "WARNING: DBI and/or DBD::SQLite Perl modules are not properly installed!"
-        );
-    }
 
     $Baruwa::Scanner::ProcDBName = Baruwa::Scanner::Config::Value("procdbname");
     if ($WantLint) {
