@@ -323,14 +323,14 @@ sub SAForkAndTest {
         if ( $maxfailures > 0 ) {
             if ( $safailures > $maxfailures ) {
                 Baruwa::Scanner::Log::WarnLog(
-"Message Content Protection SpamAssassin timed out (with no RBL"
+                    "Message Content Protection SpamAssassin timed out (with no RBL"
                       . " checks) and was killed, consecutive failure "
                       . $safailures . " of "
                       . $maxfailures * 2 );
             }
             else {
                 Baruwa::Scanner::Log::WarnLog(
-"Message Content Protection SpamAssassin timed out and was killed, "
+                    "Message Content Protection SpamAssassin timed out and was killed, "
                       . "consecutive failure "
                       . $safailures . " of "
                       . $maxfailures );
@@ -338,7 +338,7 @@ sub SAForkAndTest {
         }
         else {
             Baruwa::Scanner::Log::WarnLog(
-"Message Content Protection SpamAssassin timed out and was killed"
+                "Message Content Protection SpamAssassin timed out and was killed"
             );
         }
 
