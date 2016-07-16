@@ -1,0 +1,5 @@
+# ClamAV rules
+header			MS_FOUND_SPAMVIRUS		exists:X-BARUWA-BaruwaFW-SpamVirus-Report
+describe		MS_FOUND_SPAMVIRUS		Message matched a ClamAV Spam signature
+score			MS_FOUND_SPAMVIRUS		15.0
+
