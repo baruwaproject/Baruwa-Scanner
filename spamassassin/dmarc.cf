@@ -1,8 +1,0 @@
-header		DMARC_PASS		X-Baruwa-Dmarc =~ /accept/
-describe	DMARC_PASS		DMARC validation checks passed
-tflags		DMARC_PASS		nice
-score		DMARC_PASS		-1.1
-
-header		DMARC_FAIL		X-Baruwa-Dmarc =~ /reject|quarantine/
-describe	DMARC_FAIL		DMARC validation checks failed
-score		DMARC_FAIL		5.5
