@@ -28,9 +28,7 @@ no strict 'subs';    # Allow bare words for parameter %'s
 use DirHandle;
 use POSIX qw(:signal_h setsid);    # For Solaris 9 SIG bug workaround
 
-use vars qw($VERSION);
-
-$VERSION = '4.086000';
+our $VERSION = '4.086000';
 
 # Attributes are
 #

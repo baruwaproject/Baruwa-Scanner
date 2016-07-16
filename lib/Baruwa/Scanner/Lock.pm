@@ -28,6 +28,8 @@ use File::FcntlLock::XS;
 use Fcntl qw(:DEFAULT :flock);
 use POSIX qw(:unistd_h :errno_h);
 
+our $VERSION = '4.086000';
+
 # Open and lock a file.
 #
 # Pass in a filehandle, a filespec (including ">", "<", or

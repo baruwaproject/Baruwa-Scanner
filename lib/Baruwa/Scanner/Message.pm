@@ -51,10 +51,7 @@ install MIME::Decoder::UU 'uuencode';
 # Install an extra MIME decoder for binhex-encoded attachments.
 install MIME::Decoder::BinHex 'binhex','binhex40','mac-binhex40','mac-binhex';
 
-use vars qw($VERSION);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 5099 $, 10;
+our $VERSION = '4.086000';
 
 # Attributes are
 #

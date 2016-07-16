@@ -30,10 +30,9 @@ use DirHandle;
 use IO::Socket::INET;
 use IO::Socket::UNIX;
 
-use vars qw($VERSION $ScannerPID);
+our ($ScannerPID);
 
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 5086 $, 10;
+our $VERSION = '4.086000';
 
 # Locking definitions for flock() which is used to lock the Lock file
 my ($LOCK_SH) = 1;

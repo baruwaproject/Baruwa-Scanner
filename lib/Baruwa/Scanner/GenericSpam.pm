@@ -25,18 +25,10 @@ use strict 'vars';
 use strict 'refs';
 no strict 'subs';    # Allow bare words for parameter %'s
 
-#use English; # Needed for $PERL_VERSION to work in all versions of Perl
-
 use IO qw(Pipe);
 use POSIX qw(:signal_h);    # For Solaris 9 SIG bug workaround
 
-# Don't do this any more as SpamAssassin prefers to do it itself
-# use AnyDBM_File; # Doing this here keeps SpamAssassin quiet
-
-use vars qw($VERSION);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 3116 $, 10;
+our $VERSION = '4.086000';
 
 # Attributes are
 #

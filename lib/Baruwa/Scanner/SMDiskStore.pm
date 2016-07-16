@@ -25,31 +25,17 @@ use strict 'vars';
 use strict 'refs';
 no strict 'subs';    # Allow bare words for parameter %'s
 
-use File::Basename;
-use File::Copy;
 use IO::File;
 use IO::Pipe;
-
+use File::Copy;
+use File::Basename;
 use Baruwa::Scanner::Lock;
 use Baruwa::Scanner::Config;
 
-use vars qw($VERSION @DeletesPending);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 4694 $, 10;
+our $VERSION = '4.086000';
 
 # List of pending delete operations so we can clear up properly when killed
-@DeletesPending = ();
-
-#################################
-#package Baruwa::Scanner::SMDiskStore;
-#
-#@Baruwa::Scanner::SMDiskStore::ISA = qw(Baruwa::Scanner::DiskStore);
-#
-#use vars qw($VERSION);
-#
-#### The package version, both in 1.23 style *and* usable by MakeMaker:
-#$VERSION = substr q$Revision: 4694 $, 10;
+our @DeletesPending = ();
 
 # Attributes are
 #

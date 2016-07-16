@@ -28,13 +28,8 @@ no strict 'subs';    # Allow bare words for parameter %'s
 use POSIX qw(:signal_h);    # For Solaris 9 SIG bug workaround
 use IO qw(Pipe);
 
-# Don't do this any more as SpamAssassin prefers to do it itself
-# use AnyDBM_File; # Doing this here keeps SpamAssassin quiet
-
-use vars qw($VERSION $SAspamtest $SABayesLock);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 3813 $, 10;
+our $VERSION = '4.086000';
+our ($SAspamtest $SABayesLock);
 
 # Attributes are
 #
@@ -43,10 +38,7 @@ $VERSION = substr q$Revision: 3813 $, 10;
 my $SAversion;
 my ($safailures) = 0;
 
-#my($SAspamtest, $SABayesLock);
-
 sub initialise {
-
     my ( %settings, $val, $val2, $prefs );
 
     # Can't just do this when sendmail.pl loads, as we are still running as

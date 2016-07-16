@@ -27,6 +27,8 @@ use DBI;
 use Sys::Hostname;
 use Sys::SigAction qw( set_sig_handler );
 
+our $VERSION = '4.086000';
+
 # Package globals
 our (%PercentVars);
 my ($disabled) = 0;

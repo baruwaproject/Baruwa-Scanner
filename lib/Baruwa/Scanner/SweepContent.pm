@@ -28,10 +28,7 @@ no strict 'subs';    # Allow bare words for parameter %'s
 use MIME::Head;
 use DirHandle;
 
-use vars qw($VERSION);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 5044 $, 10;
+our $VERSION = '4.086000';
 
 # Attributes are
 #

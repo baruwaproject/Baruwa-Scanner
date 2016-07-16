@@ -32,10 +32,7 @@ use POSIX qw(:signal_h);    # For Solaris 9 SIG bug workaround
 use DBI;
 use Compress::Zlib;
 
-use vars qw($VERSION);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 5090 $, 10;
+our $VERSION = '4.086000';
 
 # Attributes are
 #

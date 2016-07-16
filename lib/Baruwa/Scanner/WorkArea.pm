@@ -30,10 +30,7 @@ use File::Path;
 use File::Temp qw/ tempfile tempdir /;
 use Cwd 'abs_path';
 
-use vars qw($VERSION);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 5002 $, 10;
+our $VERSION = '4.086000';
 
 #
 # Attributes:

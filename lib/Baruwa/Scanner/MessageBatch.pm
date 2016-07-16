@@ -35,10 +35,7 @@ use POSIX;
 use File::Temp qw ( tempfile tempdir );
 use DBI qw(:sql_types);
 
-use vars qw($VERSION);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 5048 $, 10;
+our $VERSION = '4.086000';
 
 my $maxcleanbytes    = 0;
 my $maxcleanmessages = 0;

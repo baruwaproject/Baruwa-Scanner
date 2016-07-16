@@ -30,10 +30,7 @@ use File::Path qw(remove_tree);
 use File::Temp qw/ tempfile tempdir /;
 use POSIX qw(:signal_h setsid);    # For Solaris 9 SIG bug workaround
 
-use vars qw($VERSION);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 5102 $, 10;
+our $VERSION = '4.086000';
 
 my ($UseTNEFModule) = 0;
 

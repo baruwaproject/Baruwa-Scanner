@@ -37,10 +37,7 @@ use HTML::TokeParser;
 # Install an extra MIME decoder for badly-header uue messages.
 install MIME::Decoder::UU 'uuencode';
 
-use vars qw($VERSION);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 4073 $, 10;
+our $VERSION = '4.086000';
 
 # Is this message spam? Try to build the spam report and store it in
 # the message.

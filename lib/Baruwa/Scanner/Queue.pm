@@ -25,10 +25,7 @@ use strict 'vars';
 use strict 'refs';
 no strict 'subs';    # Allow bare words for parameter %'s
 
-use vars qw($VERSION);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 917 $, 10;
+our $VERSION = '4.086000';
 
 # Attributes are
 #

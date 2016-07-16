@@ -29,10 +29,7 @@ use DirHandle;
 use Encode;
 use DBI;
 
-use vars qw($VERSION);
-
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 5080 $, 10;
+our $VERSION = '4.086000';
 
 # Command-line options you need to give to sendmail to sensibly process a
 # message that is piped to it. Still need to add "-f" for specifying the

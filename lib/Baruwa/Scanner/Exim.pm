@@ -25,15 +25,12 @@ use strict 'vars';
 use strict 'refs';
 no strict 'subs';    # Allow bare words for parameter %'s
 
-use vars qw($VERSION);
-
 use Data::Dumper;
 use IO::Pipe;
 use Carp;
 use Encode;
 
-### The package version, both in 1.23 style *and* usable by MakeMaker:
-$VERSION = substr q$Revision: 3638 $, 10;
+our $VERSION = '4.086000';
 
 # Command-line options you need to give to sendmail to sensibly process
 # a message that is piped to it. Still need to add the envelope sender
