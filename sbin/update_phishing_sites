@@ -20,8 +20,6 @@
 # :copyright: Copyright (C) 2002  Julian Field
 #
 
-PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/etc:/usr/local/bin:/usr/sfw/bin
-export PATH
 DOWNLOAD_URL=https://datafeeds.baruwa.com/phishing.safe.sites/phishing.safe.sites.conf.master
 
 if [ -d /etc/mail/baruwa ]; then
@@ -33,8 +31,8 @@ else
     exit 1
 fi
 
-wget $DOWNLOAD_URL || curl -O $DOWNLOAD_URL || \
-( logger -p mail.warn -t update.phishing.sites Cannot find wget or curl, update failed. ; echo Cannot find wget or curl to do phishing sites update. ; exit 1 )
+curl -O $DOWNLOAD_URL || \
+( logger -p mail.warn -t update.phishing.sites Cannot find curl, update failed. ; echo Cannot find curl to do phishing sites update. ; exit 1 )
 
 if [ -s phishing.safe.sites.conf.master ]; then
     cat phishing.safe.sites.conf.master phishing.safe.sites.conf | \
@@ -49,4 +47,3 @@ fi
 rm -f phishing.safe.sites.conf.master
 
 exit 0
-
