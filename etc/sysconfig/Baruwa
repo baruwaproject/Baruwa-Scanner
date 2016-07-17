@@ -1,1 +1,6 @@
 # Baruwa options
+UPDATEMAXDELAY=0
+dbhost=/tmp
+dbport=5432
+dbuser=baruwa
+dbname=baruwa

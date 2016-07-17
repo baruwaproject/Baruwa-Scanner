@@ -22,6 +22,7 @@ my $builder = Module::Build->new(
     release_status      => 'testing',
     etc_files           => find_files('etc'),
     sbin_files          => find_files('sbin'),
+    sql_files           => find_files('sql'),
     wrapper_files       => find_files('wrapper'),
     configure_requires => {
         'File::Find::Rule' => 0,
@@ -83,8 +84,10 @@ my $builder = Module::Build->new(
 # print Dumper $builder;
 $builder->install_path(etc => '/etc');
 $builder->install_path(sbin => '/usr/sbin');
+$builder->install_path(sql => '/usr/share/Baruwa/sql');
 $builder->install_path(wrapper => '/usr/libexec/Baruwa');
 $builder->add_build_element('etc');
+$builder->add_build_element('sql');
 $builder->add_build_element('sbin');
 $builder->add_build_element('wrapper');
 $builder->create_build_script();
