@@ -16,3 +16,4 @@ pod2htm*.tmp
 pm_to_blib
 Baruwa-Scanner-*
 Baruwa-Scanner-*.tar.gz
+MANIFEST.bak
