@@ -2,14 +2,29 @@ use 5.006;
 use strict;
 use warnings;
 use Module::Build;
+use File::Find::Rule;
+# use Data::Dumper qw(Dumper);
+
+sub find_files {
+    my ($dirname) = @_;
+    my (%content, @content);
+    @content = File::Find::Rule->file()->in($dirname);
+    @content{@content} = @content;
+    return \%content;
+}
 
 my $builder = Module::Build->new(
     module_name         => 'Baruwa::Scanner',
+    dist_abstract       => 'Baruwa::Scanner',
     license             => 'gpl_3',
     dist_author         => q{Andrew Colin Kissa <andrew@topdog.za.net>},
     dist_version_from   => 'lib/Baruwa/Scanner.pm',
     release_status      => 'testing',
+    etc_files           => find_files('etc'),
+    sbin_files          => find_files('sbin'),
+    wrapper_files       => find_files('wrapper'),
     configure_requires => {
+        'File::Find::Rule' => 0,
         'Module::Build' => 0,
     },
     build_requires => {
@@ -65,5 +80,11 @@ my $builder = Module::Build->new(
     add_to_cleanup     => [ 'Baruwa-Scanner-*' ],
     create_makefile_pl => 'traditional',
 );
-
+# print Dumper $builder;
+$builder->install_path(etc => '/etc');
+$builder->install_path(sbin => '/usr/sbin');
+$builder->install_path(wrapper => '/usr/libexec/Baruwa');
+$builder->add_build_element('etc');
+$builder->add_build_element('sbin');
+$builder->add_build_element('wrapper');
 $builder->create_build_script();
