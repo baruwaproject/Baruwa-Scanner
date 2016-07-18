@@ -417,14 +417,10 @@ if ( $WantLintOnly || $WantLintLiteOnly ) {
     my $mailheader = Baruwa::Scanner::Config::Value('mailheader');
     if ( $mailheader !~ /^[_a-zA-Z0-9-]+:?$/ ) {
         print STDERR "\n";
-        print STDERR
-          "Your setting \"Mail Header\" contains illegal characters.\n";
-        print STDERR
-          "This is most likely caused by your \"%org-name%\" setting\n";
-        print STDERR
-          "which must not contain any spaces, \".\" or \"_\" characters\n";
-        print STDERR
-          "as these are known to cause problems with many mail systems.\n";
+        print STDERR "Your setting \"Mail Header\" contains illegal characters.\n";
+        print STDERR "This is most likely caused by your \"%org-name%\" setting\n";
+        print STDERR "which must not contain any spaces, \".\" or \"_\" characters\n";
+        print STDERR "as these are known to cause problems with many mail systems.\n";
         print STDERR "\n";
     }
 
@@ -830,15 +826,13 @@ for ( ; ; ) {
                 die "Cannot fork off child process, $!";
             }
             if ( $born_pid == 0 ) {
-
                 # I am a child process.
                 # Set up SIGHUP handler and
                 # Run Baruwa for a few hours.
                 WorkForHours($RebuildDue);
                 exit 0;
             }
-            print STDOUT "\tRe-forked OK - new child is [$born_pid]\n"
-              if $RunInForeground;
+            print STDOUT "\tRe-forked OK - new child is [$born_pid]\n" if $RunInForeground;
 
             # I am the parent process.
             $Children{$born_pid} = 1;
@@ -894,8 +888,7 @@ sub WorkForHours {
     # Check the home directory exists and is writable,
     # otherwise SA will fail, as it wants to write Bayes databases and all
     # sorts of other stuff in the home directory.
-    CheckHomeDir()
-      if Baruwa::Scanner::Config::Value('spamassassinuserstatedir') eq "";
+    CheckHomeDir() if Baruwa::Scanner::Config::Value('spamassassinuserstatedir') eq "";
 
     # Initialise class variables now we are the right user
     Baruwa::Scanner::MessageBatch::initialise();
@@ -1053,7 +1046,6 @@ sub WorkForHours {
           unless Baruwa::Scanner::Config::IsSimpleValue('mcpchecks')
           && !Baruwa::Scanner::Config::Value('mcpchecks');
         if ( $FirstCheck =~ /mcp/i ) {
-
             # Do the MCP checks
             if ($UsingMCP) {
                 $0 = 'Baruwa: MCP checks';
@@ -1376,7 +1368,6 @@ sub ForkDaemon {
         print STDERR "In Debugging mode, not forking...\n";
     }
     elsif ($RunInForeground) {
-
         # PERT-BBY we don't close STDXX neither fork() nor setsid()
         #          if we want to run in the foreground
         print STDOUT "Baruwa $Baruwa::Scanner::Config::BaruwaVersion "
@@ -1385,7 +1376,6 @@ sub ForkDaemon {
     else {
         $SIG{'CHLD'} = \&Reaper;
         if ( fork == 0 ) {
-
             # This child's parent is perl
             #print STDERR "In the child\n";
             # Close i/o streams to break connection with tty
@@ -1527,7 +1517,6 @@ sub CheckQueuesAreTogether {
 
     my ($inqdir);
     foreach $inqdir (@inqdirs) {
-
         # FIXME: $inqdir is somehow tained: work out why!
         $inqdir =~ /(.*)/;
         $inqdir = $1;
