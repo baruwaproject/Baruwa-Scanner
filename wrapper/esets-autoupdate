@@ -25,7 +25,7 @@ use Sys::Syslog;
 $esetsRoot  = shift || "/usr/local/esets";
 
 $esetsAuth  = "esets.auth";
-$LockFile = shift || "/var/lock/Baruwa/Locks/esetsBusy.lock";
+$LockFile = shift || "/var/lock/Baruwa/esetsBusy.lock";
 
 $LOCK_SH = 1;
 $LOCK_EX = 2;

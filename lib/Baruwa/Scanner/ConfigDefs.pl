@@ -286,7 +286,7 @@ SQLDebug		0	no	0	yes	1
 # These should be checked for dir existence
 [Simple,Dir]
 incomingworkdir		/var/spool/baruwa/incoming
-lockfiledir		/var/lock/Baruwa/Locks
+lockfiledir		/var/lock/Baruwa
 
 # Check the first word of these for file existence
 [Simple,File]

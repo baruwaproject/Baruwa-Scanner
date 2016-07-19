@@ -29,7 +29,7 @@ use File::Copy qw(copy move);
 use Fcntl qw(:flock);
 
 # Ensure only one instance runs
-my $lockfile = '/var/lock/Baruwa/Locks/phishing.bad.update.lock';
+my $lockfile = '/var/lock/Baruwa/phishing.bad.update.lock';
 &lock();
 
 my $base = '/var/lib/baruwa';

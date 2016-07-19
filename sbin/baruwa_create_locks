@@ -32,7 +32,7 @@ my $lduname      = shift;
 my $ldgname      = shift;
 
 # Turn them all into numbers and stuff with sensible defaults
-$locksdirname = '/var/lock/Baruwa/Locks' unless $locksdirname =~ /^\//;
+$locksdirname = '/var/lock/Baruwa' unless $locksdirname =~ /^\//;
 my $lduid = getpwnam($lduname);
 my $ldgid = getgrnam($ldgname);
 
@@ -93,12 +93,12 @@ foreach $lockfname ( 'Baruwa.bayes.rebuild.lock', 'Baruwa.bayes.starting.lock' )
     push @locknames, $lockname;
 }
 
-# Set perms and ownership of /v/s/M/i/Locks to
+# Set perms and ownership of /v/s/M/i to
 # drwxr-x--- root run-as-group
 chmod 0750, $locksdirname unless $locksdirname =~ /^\/tmp/;
 chown -1, $ldgid, $locksdirname;
 
-# Set perms and ownership of /v/s/M/i/Locks/*.lock to
+# Set perms and ownership of /v/s/M/i/*.lock to
 # -rw------- run-as-user run-as-group
 chmod 0600, @locknames;
 chown $lduid, $ldgid, @locknames;
