@@ -26,7 +26,7 @@
 Disabled=no;
 
 if [ "x$Disabled" = "xyes" ]; then
-  exit;
+    exit;
 fi
 
 # Insert a random delay up to this value, to spread virus updates round
@@ -35,17 +35,17 @@ fi
 UPDATEMAXDELAY=0
 MSSAUPDATE=/usr/sbin/update_spamassassin
 if [ -f /etc/sysconfig/update_spamassassin ] ; then
-        . /etc/sysconfig/update_spamassassin
+    . /etc/sysconfig/update_spamassassin
 fi
 export UPDATEMAXDELAY
 export MSSAUPDATE
 
 [ -x $MSSAUPDATE ] || exit 0
 if [ "x$UPDATEMAXDELAY" = "x0" ]; then
-  :
+    :
 else
-  logger -p mail.info -t update_spamassassin Delaying cron job up to $UPDATEMAXDELAY seconds
-  perl -e "sleep int(rand($UPDATEMAXDELAY));"
+    logger -p mail.info -t update_spamassassin Delaying cron job up to $UPDATEMAXDELAY seconds
+    perl -e "sleep int(rand($UPDATEMAXDELAY));"
 fi
 exec $MSSAUPDATE
 exit 0
