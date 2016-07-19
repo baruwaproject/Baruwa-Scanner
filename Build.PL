@@ -1,4 +1,4 @@
-use 5.006;
+use v5.10;
 use strict;
 use warnings;
 use Module::Build;
@@ -18,8 +18,9 @@ my $builder = Module::Build->new(
     dist_abstract       => 'Baruwa::Scanner',
     license             => 'gpl_3',
     dist_author         => q{Andrew Colin Kissa <andrew@topdog.za.net>},
-    dist_version_from   => 'lib/Baruwa/Scanner.pm',
-    release_status      => 'testing',
+    dist_version        => '4.86.0',
+    # dist_version_from   => 'lib/Baruwa/Scanner.pm',
+    # release_status      => 'testing',
     etc_files           => find_files('etc'),
     sbin_files          => find_files('sbin'),
     sql_files           => find_files('sql'),
@@ -79,7 +80,7 @@ my $builder = Module::Build->new(
         'Time::localtime' => 0,
     },
     add_to_cleanup     => [ 'Baruwa-Scanner-*' ],
-    create_makefile_pl => 'traditional',
+    # create_makefile_pl => 'traditional',
 );
 # print Dumper $builder;
 $builder->install_path(etc => '/etc');
