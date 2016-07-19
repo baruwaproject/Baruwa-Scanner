@@ -366,7 +366,7 @@ if ( $WantLintOnly || $WantLintLiteOnly ) {
     my $lockdir = Baruwa::Scanner::Config::QuickPeek( $ConfFile, 'lockfiledir' );
     if ( $lockdir eq "" || $lockdir =~ /tmp$/i ) {
         print STDERR "Please move your \"Lockfile Dir\" setting in baruwa.conf.\n";
-        print STDERR "It should point outside /tmp, preferably /var/lock/baruwa/Locks\n";
+        print STDERR "It should point outside /tmp, preferably /var/lock/Baruwa/Locks\n";
     }
     my $cluid = Baruwa::Scanner::Config::QuickPeek( $ConfFile, 'runasuser' );
     my $clgid = Baruwa::Scanner::Config::QuickPeek( $ConfFile, 'runasgroup' );
@@ -652,7 +652,7 @@ Baruwa::Scanner::SA::CreateTempDir( $uid,
 my $locksdir = Baruwa::Scanner::Config::QuickPeek( $ConfFile, 'lockfiledir' );
 if ( $locksdir eq "" || $locksdir =~ /tmp$/i ) {
     print STDERR "Please move your \"Lockfile Dir\" setting in baruwa.conf.\n";
-    print STDERR "It should point outside /tmp, preferably /var/lock/baruwa/Locks\n";
+    print STDERR "It should point outside /tmp, preferably /var/lock/Baruwa/Locks\n";
 }
 my $cl = system("/usr/sbin/baruwa_create_locks \"$locksdir\" \"$uname\" \"$gname\"");
 print STDERR "Error: Attempt to create locks in $locksdir failed!\n" if ( $cl >> 8 ) != 0;

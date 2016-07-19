@@ -29,10 +29,10 @@ use File::Copy qw(copy move);
 use Fcntl qw(:flock);
 
 # Ensure only one instance runs
-my $lockfile = '/var/lock/baruwa/Locks/phishing.bad.update.lock';
+my $lockfile = '/var/lock/Baruwa/Locks/phishing.bad.update.lock';
 &lock();
 
-my $base = '/var/lib/baruwa/scanner';
+my $base = '/var/lib/baruwa';
 if ( -f '/etc/mail/baruwa/baruwa.conf' ) {
     $base = Baruwa::Scanner::Config::QuickPeek('/etc/mail/baruwa/baruwa.conf', '%spool-dir%');
 } else {
