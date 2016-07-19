@@ -21,10 +21,10 @@
 
 package Baruwa::Scanner;
 
+use v5.10;
 use strict 'vars';
 use strict 'refs';
 no strict 'subs';
-require 5.006_001;
 
 our $VERSION = '4.086000';
 our $AUTHORITY = 'cpan:DATOPDOG';
