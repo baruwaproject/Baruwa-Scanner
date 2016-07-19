@@ -1,6 +1,16 @@
 # Baruwa options
-UPDATEMAXDELAY=0
 dbhost=/tmp
 dbport=5432
 dbuser=baruwa
 dbname=baruwa
+prog=Baruwa
+updatemaxdelay=0
+qpeek=/usr/sbin/Quick.Peek
+exec=/usr/sbin/Baruwa
+config=/etc/mail/baruwa/baruwa.conf
+workdir=$(${qpeek} IncomingWorkDir ${config})
+quardir=$(${qpeek} QuarantineDir ${config})
+baruwapid=$(${qpeek} PIDfile ${config})
+exim=/usr/sbin/exim
+eximpid=/var/run/exim.pid
+eximlock=/var/lock/subsys/exim
