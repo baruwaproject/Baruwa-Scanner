@@ -286,7 +286,7 @@ SQLDebug		0	no	0	yes	1
 # These should be checked for dir existence
 [Simple,Dir]
 incomingworkdir		/var/spool/baruwa/incoming
-lockfiledir		/var/lock/baruwa/Locks
+lockfiledir		/var/lock/Baruwa/Locks
 
 # Check the first word of these for file existence
 [Simple,File]
@@ -340,7 +340,7 @@ qmailintdhashnumber		1
 # filename containing a list of directories.
 [Simple,Other]
 cachetiming		1800,300,10800,172800,600
-CustomFunctionsDir	/usr/share/baruwa/CustomFunctions
+CustomFunctionsDir	/usr/share/Baruwa/CustomFunctions
 FileCommand		/usr/bin/file
 FirstCheck		mcp
 getipfromheader		0
@@ -366,7 +366,7 @@ SAVIWatchFiles		/usr/local/Sophos/ide/*.zip
 SophosAllowedErrors
 sophoside
 sophoslib
-spamassassintempdir	/var/spool/baruwa/incoming/SpamAssassin-Temp
+spamassassintempdir	/var/spool/baruwa/SpamAssassin-Temp
 SpamAssassinUserStateDir
 SpamAssassinSiteRulesDir
 SpamAssassinLocalRulesDir
@@ -486,7 +486,6 @@ recipientmcpreport	/etc/mail/baruwa/reports/en/recipient.mcp.report.txt
 recipientspamreport	/etc/mail/baruwa/reports/en/recipient.spam.report.txt
 rejectionreport		/etc/mail/baruwa/reports/en/message.rejection.report.txt
 sendercontentreport 	/etc/mail/baruwa/reports/en/sender.content.report.txt
-# JKF 19/12/2007 senderpasswordreport   /etc/mail/baruwa/reports/en/sender.password.report.txt
 sendererrorreport 	/etc/mail/baruwa/reports/en/sender.error.report.txt
 senderfilenamereport	/etc/mail/baruwa/reports/en/sender.filename.report.txt
 SenderRBLSpamReport	/etc/mail/baruwa/reports/en/sender.spam.rbl.report.txt
@@ -501,7 +500,7 @@ StoredSizeMessage	/etc/mail/baruwa/reports/en/stored.size.message.txt
 StoredVirusMessage	/etc/mail/baruwa/reports/en/stored.virus.message.txt
 
 [First,Command]
-Sendmail		/usr/sbin/sendmail
+Sendmail		/usr/sbin/exim
 
 [First,Dir]
 OutQueueDir			/var/spool/exim/input
