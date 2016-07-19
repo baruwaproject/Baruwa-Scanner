@@ -32,3 +32,8 @@
 ^MYMETA\.json$
 ^ignore\.txt$
 ^.travis\.yml$
+
+# Avoid local files
+\bpackaging
+\bEXAMPLES$
+languages\.conf\.strings$

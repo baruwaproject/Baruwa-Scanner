@@ -29,7 +29,6 @@ etc/mail/baruwa/reports/af/inline.spam.warning.txt
 etc/mail/baruwa/reports/af/inline.warning.html
 etc/mail/baruwa/reports/af/inline.warning.txt
 etc/mail/baruwa/reports/af/languages.conf
-etc/mail/baruwa/reports/af/languages.conf.strings
 etc/mail/baruwa/reports/af/recipient.mcp.report.txt
 etc/mail/baruwa/reports/af/recipient.spam.report.txt
 etc/mail/baruwa/reports/af/rejection.report.txt
@@ -57,7 +56,6 @@ etc/mail/baruwa/reports/ar/inline.spam.warning.txt
 etc/mail/baruwa/reports/ar/inline.warning.html
 etc/mail/baruwa/reports/ar/inline.warning.txt
 etc/mail/baruwa/reports/ar/languages.conf
-etc/mail/baruwa/reports/ar/languages.conf.strings
 etc/mail/baruwa/reports/ar/recipient.mcp.report.txt
 etc/mail/baruwa/reports/ar/recipient.spam.report.txt
 etc/mail/baruwa/reports/ar/rejection.report.txt
@@ -85,7 +83,6 @@ etc/mail/baruwa/reports/bg/inline.spam.warning.txt
 etc/mail/baruwa/reports/bg/inline.warning.html
 etc/mail/baruwa/reports/bg/inline.warning.txt
 etc/mail/baruwa/reports/bg/languages.conf
-etc/mail/baruwa/reports/bg/languages.conf.strings
 etc/mail/baruwa/reports/bg/recipient.mcp.report.txt
 etc/mail/baruwa/reports/bg/recipient.spam.report.txt
 etc/mail/baruwa/reports/bg/rejection.report.txt
@@ -113,7 +110,6 @@ etc/mail/baruwa/reports/ca/inline.spam.warning.txt
 etc/mail/baruwa/reports/ca/inline.warning.html
 etc/mail/baruwa/reports/ca/inline.warning.txt
 etc/mail/baruwa/reports/ca/languages.conf
-etc/mail/baruwa/reports/ca/languages.conf.strings
 etc/mail/baruwa/reports/ca/recipient.mcp.report.txt
 etc/mail/baruwa/reports/ca/recipient.spam.report.txt
 etc/mail/baruwa/reports/ca/rejection.report.txt
@@ -141,7 +137,6 @@ etc/mail/baruwa/reports/cs/inline.spam.warning.txt
 etc/mail/baruwa/reports/cs/inline.warning.html
 etc/mail/baruwa/reports/cs/inline.warning.txt
 etc/mail/baruwa/reports/cs/languages.conf
-etc/mail/baruwa/reports/cs/languages.conf.strings
 etc/mail/baruwa/reports/cs/recipient.mcp.report.txt
 etc/mail/baruwa/reports/cs/recipient.spam.report.txt
 etc/mail/baruwa/reports/cs/rejection.report.txt
@@ -169,7 +164,6 @@ etc/mail/baruwa/reports/da/inline.spam.warning.txt
 etc/mail/baruwa/reports/da/inline.warning.html
 etc/mail/baruwa/reports/da/inline.warning.txt
 etc/mail/baruwa/reports/da/languages.conf
-etc/mail/baruwa/reports/da/languages.conf.strings
 etc/mail/baruwa/reports/da/recipient.mcp.report.txt
 etc/mail/baruwa/reports/da/recipient.spam.report.txt
 etc/mail/baruwa/reports/da/rejection.report.txt
@@ -197,7 +191,6 @@ etc/mail/baruwa/reports/de/inline.spam.warning.txt
 etc/mail/baruwa/reports/de/inline.warning.html
 etc/mail/baruwa/reports/de/inline.warning.txt
 etc/mail/baruwa/reports/de/languages.conf
-etc/mail/baruwa/reports/de/languages.conf.strings
 etc/mail/baruwa/reports/de/recipient.mcp.report.txt
 etc/mail/baruwa/reports/de/recipient.spam.report.txt
 etc/mail/baruwa/reports/de/rejection.report.txt
@@ -225,7 +218,6 @@ etc/mail/baruwa/reports/el/inline.spam.warning.txt
 etc/mail/baruwa/reports/el/inline.warning.html
 etc/mail/baruwa/reports/el/inline.warning.txt
 etc/mail/baruwa/reports/el/languages.conf
-etc/mail/baruwa/reports/el/languages.conf.strings
 etc/mail/baruwa/reports/el/recipient.mcp.report.txt
 etc/mail/baruwa/reports/el/recipient.spam.report.txt
 etc/mail/baruwa/reports/el/rejection.report.txt
@@ -253,7 +245,6 @@ etc/mail/baruwa/reports/en/inline.spam.warning.txt
 etc/mail/baruwa/reports/en/inline.warning.html
 etc/mail/baruwa/reports/en/inline.warning.txt
 etc/mail/baruwa/reports/en/languages.conf
-etc/mail/baruwa/reports/en/languages.conf.strings
 etc/mail/baruwa/reports/en/recipient.mcp.report.txt
 etc/mail/baruwa/reports/en/recipient.spam.report.txt
 etc/mail/baruwa/reports/en/rejection.report.txt
@@ -281,7 +272,6 @@ etc/mail/baruwa/reports/es/inline.spam.warning.txt
 etc/mail/baruwa/reports/es/inline.warning.html
 etc/mail/baruwa/reports/es/inline.warning.txt
 etc/mail/baruwa/reports/es/languages.conf
-etc/mail/baruwa/reports/es/languages.conf.strings
 etc/mail/baruwa/reports/es/recipient.mcp.report.txt
 etc/mail/baruwa/reports/es/recipient.spam.report.txt
 etc/mail/baruwa/reports/es/rejection.report.txt
@@ -309,7 +299,6 @@ etc/mail/baruwa/reports/fa/inline.spam.warning.txt
 etc/mail/baruwa/reports/fa/inline.warning.html
 etc/mail/baruwa/reports/fa/inline.warning.txt
 etc/mail/baruwa/reports/fa/languages.conf
-etc/mail/baruwa/reports/fa/languages.conf.strings
 etc/mail/baruwa/reports/fa/recipient.mcp.report.txt
 etc/mail/baruwa/reports/fa/recipient.spam.report.txt
 etc/mail/baruwa/reports/fa/rejection.report.txt
@@ -337,7 +326,6 @@ etc/mail/baruwa/reports/fi/inline.spam.warning.txt
 etc/mail/baruwa/reports/fi/inline.warning.html
 etc/mail/baruwa/reports/fi/inline.warning.txt
 etc/mail/baruwa/reports/fi/languages.conf
-etc/mail/baruwa/reports/fi/languages.conf.strings
 etc/mail/baruwa/reports/fi/recipient.mcp.report.txt
 etc/mail/baruwa/reports/fi/recipient.spam.report.txt
 etc/mail/baruwa/reports/fi/rejection.report.txt
@@ -365,7 +353,6 @@ etc/mail/baruwa/reports/fr/inline.spam.warning.txt
 etc/mail/baruwa/reports/fr/inline.warning.html
 etc/mail/baruwa/reports/fr/inline.warning.txt
 etc/mail/baruwa/reports/fr/languages.conf
-etc/mail/baruwa/reports/fr/languages.conf.strings
 etc/mail/baruwa/reports/fr/recipient.mcp.report.txt
 etc/mail/baruwa/reports/fr/recipient.spam.report.txt
 etc/mail/baruwa/reports/fr/rejection.report.txt
@@ -393,7 +380,6 @@ etc/mail/baruwa/reports/he/inline.spam.warning.txt
 etc/mail/baruwa/reports/he/inline.warning.html
 etc/mail/baruwa/reports/he/inline.warning.txt
 etc/mail/baruwa/reports/he/languages.conf
-etc/mail/baruwa/reports/he/languages.conf.strings
 etc/mail/baruwa/reports/he/recipient.mcp.report.txt
 etc/mail/baruwa/reports/he/recipient.spam.report.txt
 etc/mail/baruwa/reports/he/rejection.report.txt
@@ -421,7 +407,6 @@ etc/mail/baruwa/reports/hi/inline.spam.warning.txt
 etc/mail/baruwa/reports/hi/inline.warning.html
 etc/mail/baruwa/reports/hi/inline.warning.txt
 etc/mail/baruwa/reports/hi/languages.conf
-etc/mail/baruwa/reports/hi/languages.conf.strings
 etc/mail/baruwa/reports/hi/recipient.mcp.report.txt
 etc/mail/baruwa/reports/hi/recipient.spam.report.txt
 etc/mail/baruwa/reports/hi/rejection.report.txt
@@ -449,7 +434,6 @@ etc/mail/baruwa/reports/hu/inline.spam.warning.txt
 etc/mail/baruwa/reports/hu/inline.warning.html
 etc/mail/baruwa/reports/hu/inline.warning.txt
 etc/mail/baruwa/reports/hu/languages.conf
-etc/mail/baruwa/reports/hu/languages.conf.strings
 etc/mail/baruwa/reports/hu/recipient.mcp.report.txt
 etc/mail/baruwa/reports/hu/recipient.spam.report.txt
 etc/mail/baruwa/reports/hu/rejection.report.txt
@@ -477,7 +461,6 @@ etc/mail/baruwa/reports/id/inline.spam.warning.txt
 etc/mail/baruwa/reports/id/inline.warning.html
 etc/mail/baruwa/reports/id/inline.warning.txt
 etc/mail/baruwa/reports/id/languages.conf
-etc/mail/baruwa/reports/id/languages.conf.strings
 etc/mail/baruwa/reports/id/recipient.mcp.report.txt
 etc/mail/baruwa/reports/id/recipient.spam.report.txt
 etc/mail/baruwa/reports/id/rejection.report.txt
@@ -505,7 +488,6 @@ etc/mail/baruwa/reports/it/inline.spam.warning.txt
 etc/mail/baruwa/reports/it/inline.warning.html
 etc/mail/baruwa/reports/it/inline.warning.txt
 etc/mail/baruwa/reports/it/languages.conf
-etc/mail/baruwa/reports/it/languages.conf.strings
 etc/mail/baruwa/reports/it/recipient.mcp.report.txt
 etc/mail/baruwa/reports/it/recipient.spam.report.txt
 etc/mail/baruwa/reports/it/rejection.report.txt
@@ -533,7 +515,6 @@ etc/mail/baruwa/reports/ja/inline.spam.warning.txt
 etc/mail/baruwa/reports/ja/inline.warning.html
 etc/mail/baruwa/reports/ja/inline.warning.txt
 etc/mail/baruwa/reports/ja/languages.conf
-etc/mail/baruwa/reports/ja/languages.conf.strings
 etc/mail/baruwa/reports/ja/recipient.mcp.report.txt
 etc/mail/baruwa/reports/ja/recipient.spam.report.txt
 etc/mail/baruwa/reports/ja/rejection.report.txt
@@ -561,7 +542,6 @@ etc/mail/baruwa/reports/ko/inline.spam.warning.txt
 etc/mail/baruwa/reports/ko/inline.warning.html
 etc/mail/baruwa/reports/ko/inline.warning.txt
 etc/mail/baruwa/reports/ko/languages.conf
-etc/mail/baruwa/reports/ko/languages.conf.strings
 etc/mail/baruwa/reports/ko/recipient.mcp.report.txt
 etc/mail/baruwa/reports/ko/recipient.spam.report.txt
 etc/mail/baruwa/reports/ko/rejection.report.txt
@@ -589,7 +569,6 @@ etc/mail/baruwa/reports/lv/inline.spam.warning.txt
 etc/mail/baruwa/reports/lv/inline.warning.html
 etc/mail/baruwa/reports/lv/inline.warning.txt
 etc/mail/baruwa/reports/lv/languages.conf
-etc/mail/baruwa/reports/lv/languages.conf.strings
 etc/mail/baruwa/reports/lv/recipient.mcp.report.txt
 etc/mail/baruwa/reports/lv/recipient.spam.report.txt
 etc/mail/baruwa/reports/lv/rejection.report.txt
@@ -617,7 +596,6 @@ etc/mail/baruwa/reports/nl/inline.spam.warning.txt
 etc/mail/baruwa/reports/nl/inline.warning.html
 etc/mail/baruwa/reports/nl/inline.warning.txt
 etc/mail/baruwa/reports/nl/languages.conf
-etc/mail/baruwa/reports/nl/languages.conf.strings
 etc/mail/baruwa/reports/nl/recipient.mcp.report.txt
 etc/mail/baruwa/reports/nl/recipient.spam.report.txt
 etc/mail/baruwa/reports/nl/rejection.report.txt
@@ -645,7 +623,6 @@ etc/mail/baruwa/reports/no/inline.spam.warning.txt
 etc/mail/baruwa/reports/no/inline.warning.html
 etc/mail/baruwa/reports/no/inline.warning.txt
 etc/mail/baruwa/reports/no/languages.conf
-etc/mail/baruwa/reports/no/languages.conf.strings
 etc/mail/baruwa/reports/no/recipient.mcp.report.txt
 etc/mail/baruwa/reports/no/recipient.spam.report.txt
 etc/mail/baruwa/reports/no/rejection.report.txt
@@ -673,7 +650,6 @@ etc/mail/baruwa/reports/pl/inline.spam.warning.txt
 etc/mail/baruwa/reports/pl/inline.warning.html
 etc/mail/baruwa/reports/pl/inline.warning.txt
 etc/mail/baruwa/reports/pl/languages.conf
-etc/mail/baruwa/reports/pl/languages.conf.strings
 etc/mail/baruwa/reports/pl/recipient.mcp.report.txt
 etc/mail/baruwa/reports/pl/recipient.spam.report.txt
 etc/mail/baruwa/reports/pl/rejection.report.txt
@@ -701,7 +677,6 @@ etc/mail/baruwa/reports/pt/inline.spam.warning.txt
 etc/mail/baruwa/reports/pt/inline.warning.html
 etc/mail/baruwa/reports/pt/inline.warning.txt
 etc/mail/baruwa/reports/pt/languages.conf
-etc/mail/baruwa/reports/pt/languages.conf.strings
 etc/mail/baruwa/reports/pt/recipient.mcp.report.txt
 etc/mail/baruwa/reports/pt/recipient.spam.report.txt
 etc/mail/baruwa/reports/pt/rejection.report.txt
@@ -729,7 +704,6 @@ etc/mail/baruwa/reports/ro/inline.spam.warning.txt
 etc/mail/baruwa/reports/ro/inline.warning.html
 etc/mail/baruwa/reports/ro/inline.warning.txt
 etc/mail/baruwa/reports/ro/languages.conf
-etc/mail/baruwa/reports/ro/languages.conf.strings
 etc/mail/baruwa/reports/ro/recipient.mcp.report.txt
 etc/mail/baruwa/reports/ro/recipient.spam.report.txt
 etc/mail/baruwa/reports/ro/rejection.report.txt
@@ -757,7 +731,6 @@ etc/mail/baruwa/reports/ru/inline.spam.warning.txt
 etc/mail/baruwa/reports/ru/inline.warning.html
 etc/mail/baruwa/reports/ru/inline.warning.txt
 etc/mail/baruwa/reports/ru/languages.conf
-etc/mail/baruwa/reports/ru/languages.conf.strings
 etc/mail/baruwa/reports/ru/recipient.mcp.report.txt
 etc/mail/baruwa/reports/ru/recipient.spam.report.txt
 etc/mail/baruwa/reports/ru/rejection.report.txt
@@ -785,7 +758,6 @@ etc/mail/baruwa/reports/se/inline.spam.warning.txt
 etc/mail/baruwa/reports/se/inline.warning.html
 etc/mail/baruwa/reports/se/inline.warning.txt
 etc/mail/baruwa/reports/se/languages.conf
-etc/mail/baruwa/reports/se/languages.conf.strings
 etc/mail/baruwa/reports/se/recipient.mcp.report.txt
 etc/mail/baruwa/reports/se/recipient.spam.report.txt
 etc/mail/baruwa/reports/se/rejection.report.txt
@@ -813,7 +785,6 @@ etc/mail/baruwa/reports/sk/inline.spam.warning.txt
 etc/mail/baruwa/reports/sk/inline.warning.html
 etc/mail/baruwa/reports/sk/inline.warning.txt
 etc/mail/baruwa/reports/sk/languages.conf
-etc/mail/baruwa/reports/sk/languages.conf.strings
 etc/mail/baruwa/reports/sk/recipient.mcp.report.txt
 etc/mail/baruwa/reports/sk/recipient.spam.report.txt
 etc/mail/baruwa/reports/sk/rejection.report.txt
@@ -841,7 +812,6 @@ etc/mail/baruwa/reports/sv/inline.spam.warning.txt
 etc/mail/baruwa/reports/sv/inline.warning.html
 etc/mail/baruwa/reports/sv/inline.warning.txt
 etc/mail/baruwa/reports/sv/languages.conf
-etc/mail/baruwa/reports/sv/languages.conf.strings
 etc/mail/baruwa/reports/sv/recipient.mcp.report.txt
 etc/mail/baruwa/reports/sv/recipient.spam.report.txt
 etc/mail/baruwa/reports/sv/rejection.report.txt
@@ -869,7 +839,6 @@ etc/mail/baruwa/reports/sw/inline.spam.warning.txt
 etc/mail/baruwa/reports/sw/inline.warning.html
 etc/mail/baruwa/reports/sw/inline.warning.txt
 etc/mail/baruwa/reports/sw/languages.conf
-etc/mail/baruwa/reports/sw/languages.conf.strings
 etc/mail/baruwa/reports/sw/recipient.mcp.report.txt
 etc/mail/baruwa/reports/sw/recipient.spam.report.txt
 etc/mail/baruwa/reports/sw/rejection.report.txt
@@ -897,7 +866,6 @@ etc/mail/baruwa/reports/th/inline.spam.warning.txt
 etc/mail/baruwa/reports/th/inline.warning.html
 etc/mail/baruwa/reports/th/inline.warning.txt
 etc/mail/baruwa/reports/th/languages.conf
-etc/mail/baruwa/reports/th/languages.conf.strings
 etc/mail/baruwa/reports/th/recipient.mcp.report.txt
 etc/mail/baruwa/reports/th/recipient.spam.report.txt
 etc/mail/baruwa/reports/th/rejection.report.txt
@@ -925,7 +893,6 @@ etc/mail/baruwa/reports/tr/inline.spam.warning.txt
 etc/mail/baruwa/reports/tr/inline.warning.html
 etc/mail/baruwa/reports/tr/inline.warning.txt
 etc/mail/baruwa/reports/tr/languages.conf
-etc/mail/baruwa/reports/tr/languages.conf.strings
 etc/mail/baruwa/reports/tr/recipient.mcp.report.txt
 etc/mail/baruwa/reports/tr/recipient.spam.report.txt
 etc/mail/baruwa/reports/tr/rejection.report.txt
@@ -953,7 +920,6 @@ etc/mail/baruwa/reports/uk/inline.spam.warning.txt
 etc/mail/baruwa/reports/uk/inline.warning.html
 etc/mail/baruwa/reports/uk/inline.warning.txt
 etc/mail/baruwa/reports/uk/languages.conf
-etc/mail/baruwa/reports/uk/languages.conf.strings
 etc/mail/baruwa/reports/uk/recipient.mcp.report.txt
 etc/mail/baruwa/reports/uk/recipient.spam.report.txt
 etc/mail/baruwa/reports/uk/rejection.report.txt
@@ -981,7 +947,6 @@ etc/mail/baruwa/reports/ur/inline.spam.warning.txt
 etc/mail/baruwa/reports/ur/inline.warning.html
 etc/mail/baruwa/reports/ur/inline.warning.txt
 etc/mail/baruwa/reports/ur/languages.conf
-etc/mail/baruwa/reports/ur/languages.conf.strings
 etc/mail/baruwa/reports/ur/recipient.mcp.report.txt
 etc/mail/baruwa/reports/ur/recipient.spam.report.txt
 etc/mail/baruwa/reports/ur/rejection.report.txt
@@ -1009,7 +974,6 @@ etc/mail/baruwa/reports/vi/inline.spam.warning.txt
 etc/mail/baruwa/reports/vi/inline.warning.html
 etc/mail/baruwa/reports/vi/inline.warning.txt
 etc/mail/baruwa/reports/vi/languages.conf
-etc/mail/baruwa/reports/vi/languages.conf.strings
 etc/mail/baruwa/reports/vi/recipient.mcp.report.txt
 etc/mail/baruwa/reports/vi/recipient.spam.report.txt
 etc/mail/baruwa/reports/vi/rejection.report.txt
@@ -1037,7 +1001,6 @@ etc/mail/baruwa/reports/xh/inline.spam.warning.txt
 etc/mail/baruwa/reports/xh/inline.warning.html
 etc/mail/baruwa/reports/xh/inline.warning.txt
 etc/mail/baruwa/reports/xh/languages.conf
-etc/mail/baruwa/reports/xh/languages.conf.strings
 etc/mail/baruwa/reports/xh/recipient.mcp.report.txt
 etc/mail/baruwa/reports/xh/recipient.spam.report.txt
 etc/mail/baruwa/reports/xh/rejection.report.txt
@@ -1065,7 +1028,6 @@ etc/mail/baruwa/reports/zh/inline.spam.warning.txt
 etc/mail/baruwa/reports/zh/inline.warning.html
 etc/mail/baruwa/reports/zh/inline.warning.txt
 etc/mail/baruwa/reports/zh/languages.conf
-etc/mail/baruwa/reports/zh/languages.conf.strings
 etc/mail/baruwa/reports/zh/recipient.mcp.report.txt
 etc/mail/baruwa/reports/zh/recipient.spam.report.txt
 etc/mail/baruwa/reports/zh/rejection.report.txt
@@ -1093,7 +1055,6 @@ etc/mail/baruwa/reports/zu/inline.spam.warning.txt
 etc/mail/baruwa/reports/zu/inline.warning.html
 etc/mail/baruwa/reports/zu/inline.warning.txt
 etc/mail/baruwa/reports/zu/languages.conf
-etc/mail/baruwa/reports/zu/languages.conf.strings
 etc/mail/baruwa/reports/zu/recipient.mcp.report.txt
 etc/mail/baruwa/reports/zu/recipient.spam.report.txt
 etc/mail/baruwa/reports/zu/rejection.report.txt
@@ -1125,8 +1086,8 @@ etc/mail/baruwa/spam.lists.conf
 etc/mail/baruwa/virus.scanners.conf
 etc/mail/spamassassin/baruwa.cf
 etc/mail/spamassassin/baruwa.pre
+etc/mail/spamassassin/channel.d/baruwa.conf
 etc/mail/spamassassin/channel.d/german.conf
-etc/mail/spamassassin/channel.d/saupdate.baruwa.com.conf
 etc/mail/spamassassin/dmarc.cf
 etc/mail/spamassassin/sem.cf
 etc/sysconfig/Baruwa
@@ -1163,7 +1124,8 @@ lib/Baruwa/Scanner/WorkArea.pm
 lib/Mail/SpamAssassin/Plugin/BaruwaSAPhishingChecks.pm
 LICENSE
 MANIFEST			This list of files
-README
+META.json
+META.yml
 README.pod
 sbin/analyse_SpamAssassin_cache
 sbin/Baruwa
@@ -1180,7 +1142,6 @@ t/00-load.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
-test.pl
 wrapper/esets-autoupdate
 wrapper/esets-wrapper
 wrapper/f-prot-6-autoupdate
