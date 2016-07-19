@@ -1,1 +1,2 @@
 SAUPDATEARGS="-D --gpgkey 6C6191E3 --channel sought.rules.yerp.org --gpgkey 40F74481 --channel sa.zmi.at --gpgkey 70F416A6 --channel saupdate.baruwa.com --channel updates.spamassassin.org"
+LOGFILE=/var/log/sa-update.log
