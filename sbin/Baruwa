@@ -177,6 +177,7 @@ if ($Versions) {
     MIME::Parser
     MIME::QuotedPrint
     MIME::Tools
+    NetAddr::IP
     Net::DNS
     Net::DNS::Resolver::Programmable
     Net::CIDR
