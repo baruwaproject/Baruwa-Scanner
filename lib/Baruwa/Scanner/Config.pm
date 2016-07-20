@@ -22,6 +22,7 @@
 package Baruwa::Scanner::Config;
 
 use Net::CIDR;
+use NetAddr::IP;
 use Socket;
 use strict 'vars';
 use strict 'refs';
@@ -563,12 +564,17 @@ sub FirstMatchValue {
         elsif ( $direction =~ /f/ ) {
             # Can only check these with From:, not To: addresses
             # Match against the SMTP Client IP address
-            my (@cidr) = split( ',', $regexp2 );
-            eval {
-                if (Net::CIDR::cidrlookup( $msg->{clientip}, @cidr )) {
-                    return $value;
+            if(Net::CIDR::cidrvalidate($msg->{clientip}) and Net::CIDR::cidrvalidate($regexp2)){
+                #print STDERR "Matching IP " . $msg->{clientip} .
+                #             " against " . $regexp2 . "\n";
+                my ($check1, $check2);
+                $check1 = new NetAddr::IP($msg->{clientip});
+                $check2 = new NetAddr::IP($regexp2);
+                if ($check1->version() == $check2->version()) {
+                    my (@cidr) = split(',', $regexp2);
+                    return $value if (Net::CIDR::cidrlookup($msg->{clientip}, @cidr));
                 }
-            };
+            }
         }
         if ( $direction =~ /[tb]/ ) {
             # Don't know the target IP address
@@ -728,13 +734,17 @@ sub AllMatchesValue {
         elsif ( $direction =~ /f/ ) {
             # Can only check these with From:, not To: addresses
             # Match against the SMTP Client IP address
-            my (@cidr) = split( ',', $regexp2 );
-            #print STDERR "Matching IP " . $msg->{clientip} .
-            #             " against " . join(',',@cidr) . "\n";
-            eval {
-                push @matches, split( " ", $value )
-                  if Net::CIDR::cidrlookup( $msg->{clientip}, @cidr );
-            };
+            if(Net::CIDR::cidrvalidate($msg->{clientip}) and Net::CIDR::cidrvalidate($regexp2)){
+                #print STDERR "Matching IP " . $msg->{clientip} .
+                #             " against " . $regexp2 . "\n";
+                my ($check1, $check2);
+                $check1 = new NetAddr::IP($msg->{clientip});
+                $check2 = new NetAddr::IP($regexp2);
+                if ($check1->version() == $check2->version()) {
+                    my (@cidr) = split( ',', $regexp2 );
+                    push @matches, split(" ", $value) if Net::CIDR::cidrlookup($msg->{clientip}, @cidr);
+                }
+            }
         }
         if ( $direction =~ /[tb]/ ) {
             # Don't know the target IP address
