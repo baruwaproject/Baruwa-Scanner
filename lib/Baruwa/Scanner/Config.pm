@@ -564,7 +564,11 @@ sub FirstMatchValue {
             # Can only check these with From:, not To: addresses
             # Match against the SMTP Client IP address
             my (@cidr) = split( ',', $regexp2 );
-            return $value if Net::CIDR::cidrlookup( $msg->{clientip}, @cidr );
+            eval {
+                if (Net::CIDR::cidrlookup( $msg->{clientip}, @cidr )) {
+                    return $value;
+                }
+            };
         }
         if ( $direction =~ /[tb]/ ) {
             # Don't know the target IP address
@@ -727,8 +731,10 @@ sub AllMatchesValue {
             my (@cidr) = split( ',', $regexp2 );
             #print STDERR "Matching IP " . $msg->{clientip} .
             #             " against " . join(',',@cidr) . "\n";
-            push @matches, split( " ", $value )
-              if Net::CIDR::cidrlookup( $msg->{clientip}, @cidr );
+            eval {
+                push @matches, split( " ", $value )
+                  if Net::CIDR::cidrlookup( $msg->{clientip}, @cidr );
+            };
         }
         if ( $direction =~ /[tb]/ ) {
             # Don't know the target IP address
