@@ -363,8 +363,11 @@ sub ReadQf {
           && defined $metadata{dv_host_address} )
       ? $metadata{dv_host_address}
       : "127.0.0.1";
-    $message->{clientip} =~ s/^(\d+\.\d+\.\d+\.\d+)(\..*)?/$1/;
-    $message->{clientip} =~ s/^([a-f\d]*)(:[a-f\d]*){6}.*$/$1$2/;
+    if ($message->{clientip} =~ /^(\d+\.\d+\.\d+\.\d+)(\..*)?/) {
+        $message->{clientip} =~ $1;
+    } else {
+        $message->{clientip} =~ s/\.(\d+)$//;
+    }
 
     # Deal with b-tree of non-recipients
     $metadata{nonrcpts} = {};
