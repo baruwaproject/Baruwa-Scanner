@@ -6810,7 +6810,7 @@ sub DisarmEndtagCallback {
       # Known Dangerous Sites List code here
       #
       my $AlreadyReported = 0;
-      if (InPhishingBlacklist($linkurl)) {
+      if (InPhishingBlacklist($linkurl) and not InPhishingWhitelist($linkurl)) {
         use bytes;
         print Baruwa::Scanner::Config::LanguageValue(0, 'definitefraudstart') .
               ' "' . $linkurl . '"' .
