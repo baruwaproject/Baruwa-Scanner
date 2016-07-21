@@ -364,7 +364,7 @@ sub ReadQf {
       ? $metadata{dv_host_address}
       : "127.0.0.1";
     if ($message->{clientip} =~ /^(\d+\.\d+\.\d+\.\d+)(\..*)?/) {
-        $message->{clientip} =~ $1;
+        $message->{clientip} = $1;
     } else {
         $message->{clientip} =~ s/\.(\d+)$//;
     }
