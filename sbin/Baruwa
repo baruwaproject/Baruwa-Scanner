@@ -340,8 +340,8 @@ else {
     $MTAmod   = 'Sendmail.pm';
     $MTADSmod = 'SMDiskStore.pm';
 }
-require "Baruwa/$MTAmod";
-require "Baruwa/$MTADSmod";
+require "Baruwa/Scanner/$MTAmod";
+require "Baruwa/Scanner/$MTADSmod";
 
 # All they want is the list of settings that have been changed from the
 # default values hard-coded into ConfigDefs.pl. These values may well be
