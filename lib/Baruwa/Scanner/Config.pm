@@ -1471,10 +1471,12 @@ sub ReadFilenameRules {
     $namelist = $StaticScalars{$keyword};
 
     #print STDERR "Filename-rules: keyword is $keyword, filename is $namelist\n";
-    foreach $filename ( split( " ", $namelist ) ) {
-        $donefile{"$filename"} = 1;
-        $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-        #print STDERR "Storing: $filename is " . $FilenameRules{$filename} . "\n";
+    if (defined($namelist)) {
+        foreach $filename ( split( " ", $namelist ) ) {
+            $donefile{"$filename"} = 1;
+            $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
+            #print STDERR "Storing: $filename is " . $FilenameRules{$filename} . "\n";
+        }
     }
 
     # Do the default filename list if there is one
@@ -1534,10 +1536,12 @@ sub ReadFiletypeRules {
     $namelist = $StaticScalars{$keyword};
 
     #print STDERR "Filetype-rules: keyword is $keyword, filename is $namelist\n";
-    foreach $filename ( split( " ", $namelist ) ) {
-        $donefile{"$filename"} = 1;
-        $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-        #print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
+    if (defined($namelist)) {
+        foreach $filename ( split( " ", $namelist ) ) {
+            $donefile{"$filename"} = 1;
+            $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
+            #print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
+        }
     }
 
     # Do the default filename list if there is one
@@ -1592,11 +1596,12 @@ sub ReadLanguageStrings {
 
     # Do the static filename list if there is one
     $namelist = $StaticScalars{$keyword};
-    foreach $filename ( split( " ", $namelist ) ) {
-        $donefile{"$filename"} = 1;
-        $LanguageStrings{$filename} = ReadOneLanguageStringsFile($filename);
-
-        #print STDERR "Storing: $filename is " . $LanguageStrings{$filename} . "\n";
+    if (defined($namelist)) {
+        foreach $filename ( split( " ", $namelist ) ) {
+            $donefile{"$filename"} = 1;
+            $LanguageStrings{$filename} = ReadOneLanguageStringsFile($filename);
+            #print STDERR "Storing: $filename is " . $LanguageStrings{$filename} . "\n";
+        }
     }
 
     # Iterate through every possible rule containing a filename
@@ -1749,7 +1754,7 @@ sub Store1FilenameRule {
 
     ( $allow, $regexp, $iregexp, $logtext, $usertext ) =
       split( /\t+/, $line, 5 );
-    if ( $usertext eq "" ) {
+    if (!defined($usertext) || $usertext eq "" ) {
         # They didn't specify the iregexp so set it to "-"
         # and push the rest along by 1.
         $usertext = $logtext;
@@ -2830,7 +2835,7 @@ sub ReadRuleset {
             $default =~ s/\s+/-/g if $keyword =~ /header$/i && $default =~ /:$/;
             $Defaults{$keyword} = $default;
         }
-        $errors += $error;
+        $errors += $error if (defined($error));
     }
 
     # Unlock and close rules file
