@@ -1,4 +1,4 @@
-#!/usr/bin/perl -t -w
+#!/usr/bin/perl -t
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4
 # This program is free software: you can redistribute it and/or modify
@@ -235,21 +235,24 @@ $Baruwa::Scanner::Config::BaruwaProcessName = "";
 $Baruwa::Scanner::Config::BaruwaProcessName = $2;
 
 # Add my directory onto the front of the include path
-unless ($autoinstalled) {
-    unshift @INC, "$dir/Baruwa";
-    unshift @INC, $dir;
-}
+# unless ($autoinstalled) {
+#     unshift @INC, "$dir/Baruwa";
+#     unshift @INC, $dir;
+# }
 
 # Set umask nice and safe so no-one else can access anything!
 umask 0077;
 
 # Fix bug in GetOptions where it rarely leaves switches on the command-line.
 if ( $WantLintOnly || $WantLintLiteOnly ) {
-    shift unless -f $ARGV[0];
+    if (defined($ARGV[0])) {
+        shift unless -f $ARGV[0];
+    }
 }
 
 # Find the baruwa.conf file, with a default just in case.
-my $ConfFile = $ARGV[0];
+my $ConfFile = "";
+$ConfFile = $ARGV[0] if (defined($ARGV[0]));
 
 # Use the default if we couldn't find theirs. Will save a lot of grief.
 $ConfFile = '/etc/mail/baruwa/baruwa.conf' if $ConfFile eq "" || !( -f $ConfFile );
@@ -485,7 +488,7 @@ if ( $WantLintOnly || $WantLintLiteOnly ) {
         MTA        => $mta,
         Quarantine => $quar
     );
-    SetUidGid( $uid, $gid, $qgid, $igid );
+    SetUidGid( $uid, $gid, $qgid, $igid, $uname, $gname );
 
     # Other initialisation needed to fake a batch for scanner testing
     Baruwa::Scanner::MessageBatch::initialise();
@@ -524,6 +527,7 @@ if ( $WantLintOnly || $WantLintLiteOnly ) {
     # Print all the v infections in the batch
     my $m   = $batch->{messages}->{"1"};
     my $rep = $m->{virusreports}->{'neicar.com'};
+    $rep = "" if (!defined($rep));
     my @rep = split "\n", $rep;
     print STDERR "=" x 75 . "\n";
     print STDERR "Virus Scanner test reports:\n" if @rep;
@@ -658,7 +662,7 @@ if ( $locksdir eq "" || $locksdir =~ /tmp$/i ) {
 my $cl = system("/usr/sbin/baruwa_create_locks \"$locksdir\" \"$uname\" \"$gname\"");
 print STDERR "Error: Attempt to create locks in $locksdir failed!\n" if ( $cl >> 8 ) != 0;
 
-SetUidGid( $uid, $gid, $qgid, $igid );
+SetUidGid( $uid, $gid, $qgid, $igid, $uname, $gname );
 CheckModuleVersions();
 
 # Can't do this here, config not read yet: CheckQueuesAreTogether();
@@ -1414,7 +1418,7 @@ sub ForkDaemon {
 }
 
 sub SetUidGid {
-    my ( $uid, $gid, $qgid, $igid ) = @_;
+    my ( $uid, $gid, $qgid, $igid, $uname, $gname ) = @_;
 
     if ($gid) {    # Only do this if setting to non-root
                    #print STDERR "Setting GID to $gid\n";
@@ -1563,7 +1567,7 @@ sub DumpProcessingDatabase {
     # Do they just want a dump of the database table?
     if ($DBH) {
         my $currenttable = '';
-        my $rows         = $DBH->selectall_arrayref(
+        my $rows = $DBH->selectall_arrayref(
             "SELECT id,count,nexttime FROM processing WHERE count>$minimum ORDER BY nexttime DESC",
             { Slice => {} }
         );
@@ -1581,7 +1585,7 @@ sub DumpProcessingDatabase {
         }
 
         my $archivetable = '';
-        my $rows         = $DBH->selectall_arrayref(
+        $rows = $DBH->selectall_arrayref(
             "SELECT id,count,nexttime FROM archive WHERE count>$minimum ORDER BY nexttime DESC",
             { Slice => {} }
         );

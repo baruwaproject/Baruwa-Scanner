@@ -120,7 +120,7 @@ sub ScanBatch {
             #print STDERR "Boundary = \"" . $message->{entity}->head->multipart_boundary . "\"\n";
 
             # MIME content boundary longer than 138 ==> Eudora exploit
-            if ( $message->{entity}
+            if ( $message->{entity} && $message->{entity}->head->multipart_boundary
                 && length( $message->{entity}->head->multipart_boundary ) >=
                 138 )
             {
@@ -163,7 +163,8 @@ sub ScanBatch {
             next unless Baruwa::Scanner::Config::Value( 'dangerscan', $message ) =~ /1/;
 
             # Find the name of the TNEF winmail.dat if it exists
-            my $tnefname = substr( $message->{tnefname}, 1 );
+            my $tnefname = "";
+            $tnefname = substr( $message->{tnefname}, 1 ) if $message->{tnefname};
 
             #print STDERR "TNEF Filename is $tnefname\n";
 
@@ -264,7 +265,7 @@ sub ScanBatch {
                 my $MatchFound = 0;
                 my ( $logtext, $usertext );
 
-                if ( $TypeIndicator =~ /$ArchivesAre/ ) {
+                if (defined($ArchivesAre) && ($TypeIndicator =~ /$ArchivesAre/) ) {
                     $allowexists = $Aallowexists;
                     $megaallow   = $Amegaallow;
                 } else {
@@ -282,7 +283,7 @@ sub ScanBatch {
                     }
                 }
 
-                if ( $TypeIndicator =~ /$ArchivesAre/ ) {
+                if (defined($ArchivesAre) && ($TypeIndicator =~ /$ArchivesAre/) ) {
                     $denyexists = $Adenyexists;
                     $megadeny   = $Amegadeny;
                 } else {
@@ -314,7 +315,7 @@ sub ScanBatch {
                 # Work through the attachment filename rules,
                 # using the first rule that matches.
                 my ( $i, $FilenameRules );
-                if ( $TypeIndicator =~ /$ArchivesAre/ ) {
+                if (defined($ArchivesAre) && ($TypeIndicator =~ /$ArchivesAre/) ) {
                     $FilenameRules = Baruwa::Scanner::Config::AFilenameRulesValue($message);
                 } else {
                     $FilenameRules = Baruwa::Scanner::Config::NFilenameRulesValue($message);
@@ -642,7 +643,8 @@ sub CheckFileTypesRules {
     my $counter = 0;
 
     # winmail.dat will always be a normal attachment
-    $tnefname = substr( $message->{tnefname}, 1 );
+    $tnefname = "";
+    $tnefname = substr( $message->{tnefname}, 1 ) if $message->{tnefname};
 
     my $lastid = '';
     while ( ( $id, $attachtypes ) = each %$FileOutput ) {
@@ -721,7 +723,7 @@ sub CheckFileTypesRules {
             my $MatchFound = 0;
             my ( $logtext, $usertext );
 
-            if ( $TypeIndicator =~ /$ArchivesAre/ ) {
+            if ( defined($ArchivesAre) && ($TypeIndicator =~ /$ArchivesAre/) ) {
                 $allowexists   = $Aallowexists;
                 $megaallow     = $Amegaallow;
                 $denyexists    = $Adenyexists;

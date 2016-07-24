@@ -92,7 +92,7 @@ sub UnpackZipMembers {
     }
 
     # Loop through each member of each zip file to add them to the message
-    my ( $zipname, $memberlist, $unsafemember, $safemember );
+    my ( $zipname, $unsafemember, $safemember );
     while ( ( $zipname, $memberlist ) = each %memberlist ) {
         next unless $memberlist;
         #print STDERR "Memberlist = $memberlist\n";

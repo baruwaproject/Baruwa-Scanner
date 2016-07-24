@@ -208,7 +208,7 @@ my %Scanners = (
     },
     "clamd" => {
         Name             => 'Clamd',
-        Lock             => 'clamavBusy.lock',
+        Lock             => 'clamdBusy.lock',
         CommonOptions    => '',
         DisinfectOptions => '',
         ScanOptions      => '',
@@ -1248,10 +1248,14 @@ sub ProcessClamAVModOutput {
         return 0;
     }
     else {
+        my $notype = '';
         # Must be an infection report
         ( $dot, $id, $part, @rest ) = split( /\//, $filename );
-        my $notype = substr( $part, 1 );
-        $logout =~ s/\Q$part\E/$notype/;
+        $part = '' if (!defined($part));
+        if ($part ne '') {
+            $notype = substr( $part, 1 );
+            $logout =~ s/\Q$part\E/$notype/;
+        }
 
         Baruwa::Scanner::Log::InfoLog( "%s::%s", $Name, $logout )
           unless $ClamAVAlreadyLogged{"$id"} && $part eq '';
@@ -2449,6 +2453,7 @@ sub InstalledScanners {
         next unless $scannername;
         next if $scannername =~ /generic|none/i;
         $nameandpath = Baruwa::Scanner::Config::ScannerCmds($scannername);
+        next unless defined($nameandpath);
         ( $name, $path ) = split( ',', $nameandpath );
         $command = "$name $path -IsItInstalled";
 
@@ -2535,7 +2540,7 @@ sub ClamdScan {
     # switch to threaded scanning
     my $ScanType = "CONTSCAN";
     my $LockFile = Baruwa::Scanner::Config::Value('clamdlockfile');
-    my $LockFile = '' if $lintonly;    # Not dependent on this for --lint
+    $LockFile = '' if $lintonly;    # Not dependent on this for --lint
     my $TCP      = 1;
     my $TimeOut    = Baruwa::Scanner::Config::Value('virusscannertimeout');
     my $UseThreads = Baruwa::Scanner::Config::Value('clamdusethreads');
@@ -2590,8 +2595,7 @@ sub ClamdScan {
     if ( $LockFile ne '' && !-e $LockFile ) {
         Baruwa::Scanner::Log::WarnLog(
             "Lock File %s Not Found, Assuming Clamd " . "Is Not Running",
-            $LockFile )
-          && !$lintonly;
+            $LockFile ) unless $lintonly;
         print "ERROR:: Lock File $LockFile was not found, assuming Clamd  "
           . "is not currently running :: $dirname\n"
           unless $lintonly;
