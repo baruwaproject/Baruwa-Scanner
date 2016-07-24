@@ -48,7 +48,7 @@ $SAVIinuse       = 0;
 %SAVIwatchfiles  = ();
 
 # ClamAV Module object and library directory modification time
-my ( $Clam, $Claminuse, %Clamwatchfiles );
+my ( $Clam, $Claminuse, %Clamwatchfiles, %ClamAVAlreadyLogged );
 $Claminuse      = 0;
 %Clamwatchfiles = ();
 

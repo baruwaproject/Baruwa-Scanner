@@ -30,7 +30,7 @@ use IO qw(Pipe);
 use Mail::SpamAssassin;
 
 our $VERSION = '4.086000';
-our ($SAspamtest $SABayesLock);
+our ($SAspamtest, $SABayesLock);
 
 # Attributes are
 #
