@@ -410,7 +410,7 @@ sub WriteMIMEBody {
     # If the incoming queue was nested, the dname will have any of qf,df,xf,tf
     # pre-pended to it, so we have to get rid of this before we produce the
     # outgoing queue directory name.
-    my $OutDPath = $this->{dname};
+    $OutDPath = $this->{dname};
     $OutDPath =~ s/^[qdxt]f\///;
     $dfile = $outq . '/' . $OutDPath;
 

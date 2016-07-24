@@ -687,7 +687,7 @@ sub IsSpam {
   # rblspamheader is useful start to spamreport if RBLsaysspam.
 
   # Do the Custom Spam Checker
-  my($gsscore, $gsreport);
+  my($gsscore);
   #print STDERR "In Message.pm about to look at gsscanner\n";
   if ($usegsscanner) {
     #print STDERR "In Message.pm about to run gsscanner\n";
@@ -1375,7 +1375,7 @@ sub HandleSpamBounce {
   $spamreport = $this->{spamreport};
   $longspamreport = $this->{salongreport};
   #print STDERR "longspamreport = \"$longspamreport\"\n";
-  my($to, %tolist);
+  my(%tolist);
   foreach $to (@{$this->{to}}) {
     $tolist{$to} = 1;
   }
@@ -1535,7 +1535,7 @@ sub HandleSpamNotify {
   my $datenumber = $this->{datenumber};
 
 
-  my($to, %tolist);
+  my(%tolist);
   foreach $to (@{$this->{to}}) {
     $tolist{$to} = 1;
   }
@@ -5566,7 +5566,7 @@ sub WarnSender {
   $messagesize = $this->{size};
   $maxmessagesize = $this->{maxmessagesize};
 
-  my($to, %tolist);
+  my(%tolist);
   foreach $to (@{$this->{to}}) {
     $tolist{$to} = 1;
   }
@@ -5798,7 +5798,7 @@ sub DeliverFiles {
   $MaxSubjectLength  = 25;
   $from = $this->{from};
   #$to   = join(', ', @{$this->{to}});
-  my($to, %tolist);
+  my(%tolist);
   foreach $to (@{$this->{to}}) {
     $tolist{$to} = 1;
   }
@@ -6229,7 +6229,7 @@ sub EncapsulateMessage {
   # the top of the message.
   $id = $this->{id};
   #$to = join(', ', @{$this->{to}});
-  my($to, %tolist);
+  my(%tolist);
   foreach $to (@{$this->{to}}) {
     $tolist{$to} = 1;
   }

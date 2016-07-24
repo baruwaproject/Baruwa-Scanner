@@ -577,7 +577,7 @@ sub HandleMCPNotify {
 
     my $datenumber = $this->{datenumber};
 
-    my ( $to, %tolist );
+    my (%tolist);
     foreach $to ( @{ $this->{to} } ) {
         $tolist{$to} = 1;
     }
