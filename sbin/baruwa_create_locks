@@ -1,4 +1,4 @@
-#!/usr/bin/perl -t -w
+#!/usr/bin/perl -T -w
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4
 # This program is free software: you can redistribute it and/or modify
@@ -31,6 +31,13 @@ my $locksdirname = shift;
 my $lduname      = shift;
 my $ldgname      = shift;
 
+$locksdirname =~ /^(.+)$/;
+$locksdirname = $1;
+$lduname =~ /^([a-z0-9_-]+)$/;
+$lduname = $1;
+$ldgname =~ /^([a-z0-9_-]+)$/;
+$ldgname = $1;
+
 # Turn them all into numbers and stuff with sensible defaults
 $locksdirname = '/var/lock/Baruwa' unless $locksdirname =~ /^\//;
 my $lduid = getpwnam($lduname);
@@ -50,7 +57,8 @@ $dh = new DirHandle "/usr/libexec/Baruwa";
 die "Can't read dir /usr/libexec/Baruwa to build list of -autoupdate scripts, $!" unless $dh;
 while ( defined( $updatename = $dh->read ) ) {
     next unless $updatename =~ s/-autoupdate$//;
-    next unless $updatename =~ /^[a-z0-9_-]+$/i;
+    next unless $updatename =~ /^([a-z0-9_-]+)$/i;
+    $updatename = $1;
     $lockname = "$locksdirname/$updatename" . "Busy.lock";
     lstat $lockname;
     unless ( -f _ ) {
