@@ -213,6 +213,7 @@ sub new {
   #print STDERR "Trying to lock message " . $this->{id} . "\n";
   $this->{store}->Lock() or return undef;
   #print STDERR "Locked message\n";
+  Baruwa::Scanner::Log::InfoLog("Locked message: %s", $this->{id});
 
   # getipfromheader used to be a yes or no option
   # It is now a number. yes = 1, no = 0.
