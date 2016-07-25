@@ -23,6 +23,7 @@ package Baruwa::Scanner::Config;
 
 use Net::CIDR;
 use NetAddr::IP;
+use CDB_File;
 use Socket;
 use strict 'vars';
 use strict 'refs';
@@ -63,9 +64,7 @@ my ( %CustomFunctions, %CustomFunctionsParams );
 my (%PercentVars);    # For putting substituted variables in all settings
 my ($RequireLDAPDone);
 
-use vars qw(%PhishingWhitelist);    # Whitelist of hostnames for Phishing Net
-use vars qw(%PhishingBlacklist);    # Blacklist of hostnames for Phishing Net
-use vars qw($LDAP $LDAPserver $LDAPbase $LDAPsite);    # LDAP connection info
+our ($PhishingWhitelist, $PhishingBlacklist, $LDAP, $LDAPserver, $LDAPbase, $LDAPsite);
 
 $RequireLDAPDone = 0;    # Have we done the "require Net::LDAP"?
 
@@ -1095,8 +1094,8 @@ sub Read {
 
     # Read in the Phishing Net whitelist.
     # This lists all the hostnames of places to ignore when phishing.
-    %PhishingWhitelist = ReadPhishingWhitelist( Value('phishingwhitelist') );
-    %PhishingBlacklist = ReadPhishingBlacklist( Value('phishingblacklist') );
+    $PhishingWhitelist = ReadPhishingWhitelist( Value('phishingwhitelist') );
+    $PhishingBlacklist = ReadPhishingBlacklist( Value('phishingblacklist') );
 
     # Call all the user's custom initialisation functions
     my ( $key, $param, $custom, $fn );
@@ -1169,121 +1168,27 @@ sub OverrideInQueueDirs {
 # so the white and black names are reversed from what would seem logical.
 sub ReadPhishingBlacklist {
     my ($filename) = @_;
-
-    my ( $fname, $fh, %whitelist, @blacklist, $counter );
-
-    %whitelist = ();
-
+    return unless(-f $filename);
     # Skip this if they have findphishing = no
     return
       if Baruwa::Scanner::Config::IsSimpleValue('findphishing')
       && !Baruwa::Scanner::Config::Value('findphishing');
 
-    $filename =~ s/^\s*//g;
-    $filename =~ s/\s*$//g;
-    return () unless $filename;
-
-    $counter = 0;
-    foreach $fname ( split( " ", $filename ) ) {
-        next unless $fname;
-        $fh = new FileHandle;
-        unless ( open( $fh, "<$fname" ) ) {
-            Baruwa::Scanner::Log::WarnLog(
-                "Could not read phishing blacklist file %s", $fname );
-            next;
-        }
-
-        while (<$fh>) {
-            chomp;
-            s/^#.*$//;      # Remove comments
-            s/^\s*//g;      # Remove leading white space
-            s/\s*$//g;      # Remove trailing white space
-            s/\s+.*$//g;    # Leave only the 1st word
-            next if /^$/;
-
-            # Entries in the list starting with "REMOVE " in capitals cause the entry
-            # to be forcibly removed from the phishing whitelist.
-            if (/^REMOVE\s+(\S+)/i) {
-                delete $whitelist{$1};
-                push @blacklist, $1;
-            }
-            else {
-                $whitelist{$_} = 1;
-                $counter++;
-            }
-        }
-
-        # Now process the blacklist
-        foreach (@blacklist) {
-            delete $whitelist{$_};
-        }
-
-        close $fh;
-    }
-    Baruwa::Scanner::Log::InfoLog( "Read %d hostnames from the phishing blacklists",
-        $counter );
-
-    return %whitelist;
+    my $cdb = CDB_File->TIEHASH($filename);
+    return \$cdb;
 }
 
 # Read the list of hostnames to be ignored when doing phishing tests.
 # Pass in the filename. Return the hash.
 sub ReadPhishingWhitelist {
     my ($filename) = @_;
-
-    my ( $fname, $fh, %whitelist, @blacklist, $counter );
-
-    %whitelist = ();
-
+    return unless(-f $filename);
     # Skip this if they have findphishing = no
     return
       if Baruwa::Scanner::Config::IsSimpleValue('findphishing')
       && !Baruwa::Scanner::Config::Value('findphishing');
-
-    $filename =~ s/^\s*//g;
-    $filename =~ s/\s*$//g;
-    return () unless $filename;
-
-    $counter = 0;
-    foreach $fname ( split( " ", $filename ) ) {
-        $fh = new FileHandle;
-        unless ( open( $fh, "<$fname" ) ) {
-            Baruwa::Scanner::Log::WarnLog(
-                "Could not read phishing whitelist file %s", $fname );
-            next;
-        }
-
-        while (<$fh>) {
-            chomp;
-            s/^#.*$//;      # Remove comments
-            s/^\s*//g;      # Remove leading white space
-            s/\s*$//g;      # Remove trailing white space
-            s/\s+.*$//g;    # Leave only the 1st word
-            next if /^$/;
-
-            # Entries in the list starting with "REMOVE " in capitals cause the entry
-            # to be forcibly removed from the phishing whitelist.
-            if (/^REMOVE\s+(\S+)/i) {
-                delete $whitelist{$1};
-                push @blacklist, $1;
-            }
-            else {
-                $whitelist{$_} = 1;
-                $counter++;
-            }
-        }
-
-        # Now process the blacklist
-        foreach (@blacklist) {
-            delete $whitelist{$_};
-        }
-
-        close $fh;
-    }
-    Baruwa::Scanner::Log::InfoLog( "Read %d hostnames from the phishing whitelist",
-        $counter );
-
-    return %whitelist;
+    my $cdb = CDB_File->TIEHASH($filename);
+    return \$cdb;
 }
 
 # Give all the user's custom functions a chance to clear up

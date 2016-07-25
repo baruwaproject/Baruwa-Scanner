@@ -35,6 +35,7 @@ my $builder = Module::Build->new(
     requires => {
         'Archive::Zip' => 0,
         'Carp' => 0,
+        'CDB_File' => 0,
         'Compress::Zlib' => 0,
         'Convert::TNEF' => 0,
         'Data::Dumper' => 0,

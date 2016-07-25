@@ -21,6 +21,7 @@
 #
 
 use strict;
+use CDB_File;
 use Net::DNS::Resolver;
 use LWP::UserAgent;
 use DirHandle;
@@ -37,6 +38,7 @@ my $cache   = $current . 'cache/';
 my $status  = $current . 'status';
 my $urlbase = "https://datafeeds.baruwa.com/phishing.bad.sites/";
 my $target  = "/var/lib/baruwa/phishingupdate/phishing.bad.sites.conf";
+my $cdbtarget  = "/var/lib/baruwa/phishingupdate/phishing.bad.sites";
 my $query   = "phishing.datafeed.baruwa.com";
 
 my $baseupdated = 0;
@@ -279,10 +281,15 @@ if ($generate) {
 
     move($target, "$target.old");
     copy($file, $target);
-
+    make_cdb();
     open( STATUS_FILE, ">$status" ) or die "Unable to open status file\n";
     print STATUS_FILE "$currentbase.$currentupdate\n";
     close(STATUS_FILE);
+} else {
+    unless(-f "$cdbtarget.cdb") {
+        print "Generating CDB file: $cdbtarget.cdb\n";
+        make_cdb();
+    }
 }
 
 my $queuedir = new DirHandle;
@@ -300,8 +307,26 @@ while ( defined( $file = $queuedir->read() ) ) {
 }
 $queuedir->close();
 
+sub make_cdb {
+    my $fh = new FileHandle;
+    my $cdb = new CDB_File ("$cdbtarget.cdb", "$cdbtarget.$$") or die "Could not open cdb: $!\n";
+    open( $fh, "<$target" ) or die "Could not open $target: $!\n";
+    while (<$fh>) {
+        chomp;
+        s/^#.*$//;      # Remove comments
+        s/^\s*//g;      # Remove leading white space
+        s/\s*$//g;      # Remove trailing white space
+        s/\s+.*$//g;    # Leave only the 1st word
+        next if /^$/;
+        next if /^REMOVE\s+\S+/;
+        $cdb->insert($_, 1);
+    }
+    close($fh);
+    $cdb->finish or die "$0: CDB_File finish failed: $!\n";
+}
+
 sub lock {
-    open( LOCK, ">$lockfile" ) or die "Unable to open lockfile: $!";
+    open( LOCK, ">$lockfile" ) or die "Unable to open lockfile: $!\n";
     flock( LOCK, LOCK_EX | LOCK_NB )
       or die "Failed to lock, another instance of the script maybe running: $!\n";
 }

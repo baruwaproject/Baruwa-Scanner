@@ -7034,14 +7034,13 @@ sub CleanLinkURL {
 sub InPhishingWhitelist {
   my($linkurl) = @_;
 
-  # Quick lookup
-  return 1 if $Baruwa::Scanner::Config::PhishingWhitelist{$linkurl};
-
-  # Trim host. off the front of the hostname
-  while ($linkurl ne "" && $linkurl =~ s/^[^.]+\.//) {
-    # And replace it with *. then look it up
-    #print STDERR "Looking up *.$linkurl\n";
-    return 1 if $Baruwa::Scanner::Config::PhishingWhitelist{'*.' . $linkurl};
+  if (defined($$Baruwa::Scanner::Config::PhishingWhitelist)) {
+    return 1 if ($$Baruwa::Scanner::Config::PhishingWhitelist->EXISTS($linkurl));
+    # Trim host. off the front of the hostname
+    while ($linkurl ne "" && $linkurl =~ s/^[^.]+\.//) {
+      #print STDERR "Looking up *.$linkurl\n";
+      return 1 if ($$Baruwa::Scanner::Config::PhishingWhitelist->EXISTS('*.' . $linkurl));
+    }
   }
 
   return 0;
@@ -7051,14 +7050,13 @@ sub InPhishingWhitelist {
 sub InPhishingBlacklist {
   my($linkurl) = @_;
 
-  # Quick lookup
-  return 1 if $Baruwa::Scanner::Config::PhishingBlacklist{$linkurl};
-
-  # Trim host. off the front of the hostname
-  while ($linkurl ne "" && $linkurl =~ s/^[^.]+\.//) {
-    # And replace it with *. then look it up
-    #print STDERR "Looking up *.$linkurl\n";
-    return 1 if $Baruwa::Scanner::Config::PhishingBlacklist{'*.' . $linkurl};
+  if (defined($$Baruwa::Scanner::Config::PhishingBlacklist)) {
+    return 1 if ($$Baruwa::Scanner::Config::PhishingBlacklist->EXISTS($linkurl));
+    # Trim host. off the front of the hostname
+    while ($linkurl ne "" && $linkurl =~ s/^[^.]+\.//) {
+      #print STDERR "Looking up *.$linkurl\n";
+      return 1 if ($$Baruwa::Scanner::Config::PhishingBlacklist->EXISTS('*.' . $linkurl));
+    }
   }
 
   return 0;

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/perl -t -w
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4
 # This program is free software: you can redistribute it and/or modify
@@ -20,30 +20,77 @@
 # :copyright: Copyright (C) 2002  Julian Field
 #
 
-DOWNLOAD_URL=https://datafeeds.baruwa.com/phishing.safe.sites/phishing.safe.sites.conf.master
+use strict;
+use CDB_File;
+use LWP::UserAgent;
+use Fcntl qw(:flock);
+use File::Copy qw(copy move);
 
-if [ -d /var/lib/baruwa/phishingupdate ]; then
-    cd /var/lib/baruwa/phishingupdate
-else
-    logger -p mail.warn -t update.phishing.sites Cannot find the target directory, update failed.
-    echo Cannot find Baruwa target directory.
-    echo Auto-updates of phishing.safe.sites.conf will not happen.
-    exit 1
-fi
+# Ensure only one instance runs
+my $lockfile = '/var/lock/Baruwa/phishing.safe.update.lock';
+&lock();
 
-curl -O $DOWNLOAD_URL || \
-( logger -p mail.warn -t update.phishing.sites Cannot find curl, update failed. ; echo Cannot find curl to do phishing sites update. ; exit 1 )
+my $generate = 0;
+my $url = "https://datafeeds.baruwa.com/phishing.safe.sites/phishing.safe.sites.conf.master";
+my $target  = "/var/lib/baruwa/phishingupdate/phishing.safe.sites.conf";
+my $cdbtarget  = "/var/lib/baruwa/phishingupdate/phishing.safe.sites";
 
-if [ -s phishing.safe.sites.conf.master ]; then
-    cat phishing.safe.sites.conf.master phishing.safe.sites.conf | \
-    sort | uniq > phishing.safe.sites.conf.new
-    cp -f phishing.safe.sites.conf phishing.safe.sites.conf.old
-    mv -f phishing.safe.sites.conf.new phishing.safe.sites.conf
-    chmod a+r phishing.safe.sites.conf
-    logger -p mail.info -t update.phishing.sites Phishing safe sites list updated
-else
-    logger -p mail.info -t update.phishing.sites Phishing safe sites list update failed!
-fi
-rm -f phishing.safe.sites.conf.master
+print "Downloading: $url\n";
+my $ua = LWP::UserAgent->new;
+$ua->agent("UpdateBadPhishingSites/0.2 ");
+$ua->env_proxy;
+my $res = $ua->mirror($url, "$target.master");
+if ($res->code == 304) {
+    print "The file has not changed\n";
+} elsif ($res->is_success) {
+    print "File: $target.master downloaded\n";
+    $generate = 1;
+} else {
+    warn "Unable to retrieve $url :" . $res->status_line, "\n";
+}
 
-exit 0
+if ($generate) {
+    print "Backing up current file to: $target.old\n";
+    move($target, "$target.old");
+    print "Coping new file to $target\n";
+    copy("$target.master", $target);
+    print "Generating CDB file: $cdbtarget.cdb\n";
+    make_cdb();
+    print "Completed processing\n";
+}
+
+sub make_cdb {
+    my $fh = new FileHandle;
+    my $cdb = new CDB_File ("$cdbtarget.cdb", "$cdbtarget.$$") or die "Could not open cdb: $!\n";
+    open( $fh, "<$target" ) or die "Could not open $target: $!\n";
+    while (<$fh>) {
+        chomp;
+        s/^#.*$//;      # Remove comments
+        s/^\s*//g;      # Remove leading white space
+        s/\s*$//g;      # Remove trailing white space
+        s/\s+.*$//g;    # Leave only the 1st word
+        next if /^$/;
+        next if /^REMOVE\s+\S+/;
+        $cdb->insert($_, 1);
+    }
+    close($fh);
+    $cdb->finish or die "$0: CDB_File finish failed: $!\n";
+}
+
+sub lock {
+    open( LOCK, ">$lockfile" ) or die "Unable to open lockfile: $!\n";
+    flock( LOCK, LOCK_EX | LOCK_NB )
+      or die "Failed to lock, another instance of the script maybe running: $!\n";
+}
+
+sub unlock {
+    flock( LOCK, LOCK_UN );
+    close LOCK;
+}
+
+END {
+    if ( -f $lockfile ) {
+        &unlock();
+    }
+}
+
