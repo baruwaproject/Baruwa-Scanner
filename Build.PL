@@ -88,6 +88,7 @@ $builder->install_path(etc => '/etc');
 $builder->install_path(sbin => '/usr/sbin');
 $builder->install_path(sql => '/usr/share/Baruwa/sql');
 $builder->install_path(wrapper => '/usr/libexec/Baruwa');
+$builder->add_build_element('pl');
 $builder->add_build_element('etc');
 $builder->add_build_element('sql');
 $builder->add_build_element('sbin');
