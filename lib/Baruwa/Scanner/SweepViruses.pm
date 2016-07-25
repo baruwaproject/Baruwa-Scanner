@@ -1746,8 +1746,7 @@ sub ProcessFSecureOutput {
         $line =~ s/: Infected: +(.+) \[.*?\]$//;
 
         #print STDERR "Line is \"$line\"\n";
-        Baruwa::Scanner::Log::NoticeLog( "Virus Scanning: F-Secure found virus %s",
-            $1 );
+        Baruwa::Scanner::Log::NoticeLog("Virus Scanning: F-Secure matched virus signature %s", $1);
 
         # We are now left with the filename, or
         # then archive name followed by the filename within the archive.
@@ -1786,7 +1785,7 @@ sub ProcessFSecureOutput {
             $virus = $1;
             $virus =~ s/^\s*(\S+).*$/$1/;    # 1st word after Infection: is the virus
             Baruwa::Scanner::Log::NoticeLog(
-                "Virus Scanning: F-Secure found virus %s", $virus );
+                "Virus Scanning: F-Secure matched virus signature %s", $virus );
 
             ( $dot, $id, $part, @rest ) = split( /\//, $line );
             my $notype = substr( $part, 1 );

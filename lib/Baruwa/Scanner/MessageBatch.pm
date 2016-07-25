@@ -446,7 +446,7 @@ sub VirusScan {
     # Call them with the scanning settings
     Baruwa::Scanner::Log::InfoLog("Virus and Content Scanning: Starting");
     my $viruses = Baruwa::Scanner::SweepViruses::ScanBatch( $this, 'scan' );
-    Baruwa::Scanner::Log::NoticeLog( "Virus Scanning: Found %d viruses", $viruses + 0 )
+    Baruwa::Scanner::Log::NoticeLog( "Virus Scanning: Found %d infections", $viruses + 0 )
       if defined $viruses && $viruses > 0;
 
     #Baruwa::Scanner::Log::InfoLog("Content Checks: Starting");
