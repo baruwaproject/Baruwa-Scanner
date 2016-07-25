@@ -1201,8 +1201,8 @@ sub ReadPhishingBlacklist {
             s/\s+.*$//g;    # Leave only the 1st word
             next if /^$/;
 
-       # Entries in the list starting with "REMOVE " in capitals cause the entry
-       # to be forcibly removed from the phishing whitelist.
+            # Entries in the list starting with "REMOVE " in capitals cause the entry
+            # to be forcibly removed from the phishing whitelist.
             if (/^REMOVE\s+(\S+)/i) {
                 delete $whitelist{$1};
                 push @blacklist, $1;
