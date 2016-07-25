@@ -257,13 +257,6 @@ sub SpamChecks {
 
         #print STDERR "Spam checks for $id\n";
 
-       # Tell SpamAssassin to apply rules to binary attachments
-       # This relies on a patch to Util.pm in SpamAssassin, fetch the patch from
-       # http://www.mailscanner.info/mcp.html#patches
-        $Baruwa::Scanner::MCP::SA_Decode_Binaries = 0;
-        $Baruwa::Scanner::MCP::SA_Decode_Binaries = 1
-          if Baruwa::Scanner::Config::Value( 'sadecodebins', $message ) =~ /1/;
-
         $counter += $message->IsSpam();
 
         if ( !Baruwa::Scanner::Config::Value( 'spamdetail', $message ) ) {
@@ -273,7 +266,6 @@ sub SpamChecks {
         }
     }
     Baruwa::Scanner::Log::NoticeLog("Spam Checks: Found $counter spam messages") if $counter > 0;
-    $Baruwa::Scanner::MCP::SA_Decode_Binaries = 0;    # Reset 'are we in MCP' flag
 }
 
 # Handle the spam results using the actions they have defined.
@@ -331,85 +323,6 @@ sub RejectMessages {
     }
 }
 
-# Do all the MCP checks.
-# Must have removed deleted messages from the batch first.
-sub MCPChecks {
-    my $this = shift;
-    my ( $id, $message );
-    my $counter = 0;
-
-    #print STDERR "Starting spam checks\n";
-    Baruwa::Scanner::Log::InfoLog("MCP Checks: Starting") if Baruwa::Scanner::Config::Value('logmcp');
-
-    # Tell SpamAssassin to apply rules to binary attachments
-    $Baruwa::Scanner::MCP::SA_Decode_Binaries = 1;
-
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
-        next if $message->{deleted};
-        next if !$message->{scanmail};
-        next unless Baruwa::Scanner::Config::Value( 'mcpchecks', $message );
-
-        #print STDERR "Spam checks for $id\n";
-        $counter += $message->IsMCP();
-        if ( !Baruwa::Scanner::Config::Value( 'mcpdetail', $message ) ) {
-            $message->{mcpreport} =
-              Baruwa::Scanner::Config::LanguageValue( $message,
-                ( $message->{ismcp} ? 'mcpspam' : 'mcpnotspam' ) );
-        }
-        #print STDERR "Spam header = \"" . $message->{spamreport} . "\"\n";
-    }
-    Baruwa::Scanner::Log::NoticeLog("MCP Checks: Found $counter MCP messages") if $counter > 0;
-    #print STDERR "$counter messages were spam\n";
-    # Tell SpamAssassin to return to normal behaviour
-    $Baruwa::Scanner::MCP::SA_Decode_Binaries = 0;
-}
-
-# Handle the spam results using the actions they have defined.
-# Can deliver, delete, store, and forward or any combination.
-sub HandleMCP {
-    my $this = shift;
-
-    my ( $id, $message );
-
-    #print STDERR "Starting to handle spam\n";
-
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
-
-        # Skip deleted and non-spam messages
-        next
-          if $message->{deleted}
-          || !$message->{ismcp}
-          || !$message->{scanmail}
-          || $message->{mcpwhitelisted};
-
-        #print STDERR "Spam checks for $id\n";
-        $message->HandleMCP('mcp');
-    }
-
-    #print STDERR "Finished handling spam\n\n";
-}
-
-# Handle the non-spam results using the actions they have defined.
-# Can deliver, delete, store, and forward or any combination.
-sub HandleNonMCP {
-    my $this = shift;
-
-    my ( $id, $message );
-
-    #print STDERR "Starting to handle ham\n";
-
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
-        # Skip deleted and non-spam messages
-        next
-          if $message->{deleted}
-          || !$message->{scanmail}
-          || $message->{ismcp};
-
-        #print STDERR "Ham checks for $id\n";
-        $message->HandleMCP('nonmcp');
-    }
-    #print STDERR "Finished handling ham\n\n";
-}
 
 # Return true if all the messages in the batch are deleted!
 # Return false otherwise.
@@ -582,8 +495,8 @@ sub ReportBadMessages {
     }
 }
 
-# Remove any infected spam or mcp from their archives. We have saved
-# all the spam+mcp archive places we stored this message, so go delete
+# Remove any infected spam from their archives. We have saved
+# all the spam archive places we stored this message, so go delete
 # the dirs and all the files in each one.
 sub RemoveInfectedSpam {
     my $this = shift;

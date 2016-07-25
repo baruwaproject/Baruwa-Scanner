@@ -107,14 +107,10 @@ hideworkdir			= hideincomingworkdir
 hideworkdirinnotice		= hideincomingworkdirinnotices
 highrbls                        = spamliststoreachhighscore
 highscorespamactions		= highscoringspamactions
-highscoremcpactions		= highscoringmcpactions
-highmcpmodifysubject		= highscoringmcpmodifysubject
 highspammodifysubject		= highscoringspammodifysubject
-highmcpsubjecttext		= highscoringmcpsubjecttext
 highspamsubjecttext		= highscoringspamsubjecttext
 htmltotext			= converthtmltotext
 includespamheader		= alwaysincludespamassassinreport
-includemcpheader		= alwaysincludemcpreport
 infoheader			= informationheader
 infovalue			= informationheadervalue
 insistpasszips			= ArchivesMustBePasswordProtected
@@ -125,7 +121,7 @@ inlinetextwarning		= inlinetextwarning
 inqueuedir			= incomingqueuedir
 ipverheader			= ipprotocolversionheader
 isareply			= dontsignhtmlifheadersexist
-keepspamarchiveclean		= keepspamandmcparchiveclean
+keepspamarchiveclean		= keepspamarchiveclean
 lastafterbatch			= alwayslookeduplastafterbatch
 lastlookup			= alwayslookeduplast
 listsascores                    = includescoresinspamassassinreport
@@ -188,7 +184,6 @@ sendercontentreport		= senderbadcontentreport
 senderfilenamereport		= senderbadfilenamereport
 senderrblspamreport		= senderspamlistreport
 sendersaspamreport		= senderspamassassinreport
-sendersamcpreport		= sendermcpreport
 sendersizereport		= sendersizereport
 senderbothspamreport		= senderspamreport
 showscanner			= includescannernameinreports
@@ -199,7 +194,6 @@ sophoside			= sophosidedir
 sophoslib			= sophoslibdir
 spamblacklist			= isdefinitelyspam
 spamdetail			= detailedspamreport
-mcpmodifysubject		= mcpmodifysubject
 sizemodifysubject		= sizemodifysubject
 sizesubjecttext			= sizesubjecttext
 spamassassintempdir		= spamassassintemporarydir
@@ -217,12 +211,6 @@ storedvirusmessage		= storedvirusmessagereport
 storeentireasdfqf		= quarantinewholemessagesasqueuefiles
 strictphishing                  = usestricterphishingnet
 stripdangeroustags		= convertdangeroushtmltotext
-mcpblacklist			= isdefinitelymcp
-mcpblacklistedishigh		= definitemcpishighscoring
-mcpdetail			= detailedmcpreport
-mcplistsascores			= includescoresinmcpreport
-mcpreqspamassassinscore		= mcprequiredspamassassinscore
-mcpwhitelist			= isdefinitelynotmcp
 syntaxcheck			= automaticsyntaxcheck
 unpackole			= UnpackMicrosoftDocuments
 unscannedheader			= unscannedheadervalue
@@ -232,7 +220,6 @@ unzipmaxmembers			= UnzipMaximumFilesPerArchive
 unzipmaxsize			= UnzipMaximumFileSize
 unzipmembers			= UnzipFilenames
 unzipmimetype			= UnzipMimeType
-#virusbeforespammcp		= virusscanningbeforespamormcp
 virusmodifysubject		= virusmodifysubject
 virusscan			= virusscanning
 warnsenders			= notifysenders
@@ -271,7 +258,6 @@ logsaactions		0	no	0	yes	1
 logsilentviruses	0	no	0	yes	1
 logspam			0	no	0	yes	1
 logspeed		0	no	0	yes	1
-logmcp			0	no	0	yes	1
 expandtnef		1	no	0	yes	1
 runinforeground		0	no	0	yes	1
 showscanner		1	no	0	yes	1
@@ -280,7 +266,6 @@ spliteximspool		0	no	0	yes	1
 storeentireasdfqf	0	no	0	yes	1
 syntaxcheck		1	no	0	yes	1
 usedefaultswithmanyrecips	0	no	0	yes	1
-#virusbeforespammcp	0	no	0	yes	1
 SQLDebug		0	no	0	yes	1
 
 # These should be checked for dir existence
@@ -296,7 +281,6 @@ pidfile			/var/run/baruwa/scanner/Baruwa.pid
 SecondLevelList         /etc/mail/baruwa/country.domains.conf
 #spamassassinprefsfile	/etc/mail/baruwa/spam.assassin.prefs.conf
 SpamListDefinitions	/etc/mail/baruwa/spam.lists.conf
-mcpspamassassinprefsfile /etc/mail/baruwa/mcp/mcp.spam.assassin.prefs.conf
 VirusScannerDefinitions	/etc/mail/baruwa/virus.scanners.conf
 
 # Check these to ensure they are just numbers
@@ -326,8 +310,6 @@ SATimeoutLen			30
 SpamListTimeout			10
 SpamAssassinTimeout		75
 VirusScannerTimeout		300
-MCPMaxSpamAssassinTimeouts	20
-MCPSpamAssassinTimeout		10
 TNEFTimeout			120
 UnrarTimeout			50
 WhitelistMaxRecips		20
@@ -342,7 +324,6 @@ qmailintdhashnumber		1
 cachetiming		1800,300,10800,172800,600
 CustomFunctionsDir	/usr/share/Baruwa/CustomFunctions
 FileCommand		/usr/bin/file
-FirstCheck		mcp
 getipfromheader		0
 GunzipCommand		/bin/gunzip
 inqueuedir		/var/spool/exim.in/input
@@ -375,11 +356,6 @@ SpamAssassinDefaultRulesDir
 SpamAssassinInstallPrefix
 SpamInfected		Sane*UNOFFICIAL
 SpamStarsCharacter	s
-MCPMaxSpamAssassinSize		100000
-MCPSpamAssassinUserStateDir
-MCPSpamAssassinLocalRulesDir	/etc/mail/baruwa/mcp
-MCPSpamAssassinDefaultRulesDir	/etc/mail/baruwa/mcp
-MCPSpamAssassinInstallPrefix	/etc/mail/baruwa/mcp
 TNEFExpander		/usr/bin/tnef --maxsize=100000000
 UnrarCommand		/usr/bin/unrar
 VirusScanners		auto  # Space-separated list
@@ -408,7 +384,6 @@ AllowExternal		0	no	0	yes	1
 AllowPartial		0	no	0	yes	1
 ArchivePublicKeys	0	no	0	yes	1
 blacklistedishigh	0	no	0	yes	1
-bouncemcpasattachment	0	no	0	yes	1
 bouncespamasattachment	0	no	0	yes	1
 CheckSAIfOnSpamList	1	no	0	yes	1
 ContentModifySubject	start	no	0	yes	1	start	start	end	end
@@ -422,10 +397,8 @@ findarchivesbycontent	1	no	0	yes	1
 gsscanner		0	no	0	yes	1
 HideWorkDir		1	no	0	yes	1
 HideWorkDirInNotice	0	no	0	yes	1
-HighMCPModifySubject	start	no	0	yes	1	start	start	end	end
 HighSpamModifySubject	start	no	0	yes	1	start	start	end	end
 IncludeSpamHeader	0	no	0	yes	1
-IncludeMCPHeader	0	no	0	yes	1
 KeepSpamArchiveClean	0	no	0	yes	1
 LastAfterBatch		0	no	0	yes	1
 LastLookup		0	no	0	yes	1
@@ -449,17 +422,10 @@ SizeModifySubject	start	no	0	yes	1	start	start	end	end
 SpamBlacklist		0	no	0	yes	1
 SpamDetail		1	no	0	yes	1
 SpamChecks		1	no	0	yes	1
-MCPModifySubject	start	no	0	yes	1	start	start	end	end
 SpamModifySubject	start	no	0	yes	1	start	start	end	end
 SpamScoreNotStars	0	no	0	yes	1
 SpamWhitelist		0	no	0	yes	1
 StripDangerousTags	0	no	0	yes	1
-MCPBlacklist		0	no	0	yes	1
-MCPblacklistedishigh	0	no	0	yes	1
-MCPChecks		0	no	0	yes	1
-MCPDetail		1	no	0	yes	1
-MCPListSAScores		0	no	0	yes	1
-MCPWhitelist		0	no	0	yes	1
 UnpackOle		1	no	0	yes	1
 UseSACache		1	no	0	yes	1
 VirusModifySubject	start	no	0	yes	1	start	start	end	end
@@ -482,7 +448,6 @@ inlinespamwarning	/etc/mail/baruwa/reports/en/inline.spam.warning.txt
 inlinetextsig		/etc/mail/baruwa/reports/en/inline.sig.txt
 inlinetextwarning	/etc/mail/baruwa/reports/en/inline.warning.txt
 languagestrings
-recipientmcpreport	/etc/mail/baruwa/reports/en/recipient.mcp.report.txt
 recipientspamreport	/etc/mail/baruwa/reports/en/recipient.spam.report.txt
 rejectionreport		/etc/mail/baruwa/reports/en/message.rejection.report.txt
 sendercontentreport 	/etc/mail/baruwa/reports/en/sender.content.report.txt
@@ -490,7 +455,6 @@ sendererrorreport 	/etc/mail/baruwa/reports/en/sender.error.report.txt
 senderfilenamereport	/etc/mail/baruwa/reports/en/sender.filename.report.txt
 SenderRBLSpamReport	/etc/mail/baruwa/reports/en/sender.spam.rbl.report.txt
 SenderSASpamReport	/etc/mail/baruwa/reports/en/sender.spam.sa.report.txt
-SenderSAMCPReport	/etc/mail/baruwa/reports/en/sender.mcp.report.txt
 SenderSizeReport	/etc/mail/baruwa/reports/en/sender.size.report.txt
 SenderBothSpamReport	/etc/mail/baruwa/reports/en/sender.spam.report.txt
 sendervirusreport 	/etc/mail/baruwa/reports/en/sender.virus.report.txt
@@ -517,9 +481,6 @@ MaxParts			200
 MaxSpamCheckSize		150000
 MaxSpamListTimeouts		7
 MaxZipDepth			2
-MCPErrorScore			1
-MCPHighSpamAssassinScore	10
-MCPReqSpamAssassinScore		1
 MinAttachmentSize		-1
 MinStars			0
 mshmacvalid			604800
@@ -544,7 +505,6 @@ DisarmSubjectText		{Disarmed}
 DisinfectedHeader		Disinfected
 EnvFromHeader			X-Baruwa-Envelope-From:
 EnvToHeader			X-Baruwa-Envelope-To:
-HighMCPSubjectText		{MCP?}
 HighSpamSubjectText		{Spam?}
 Hostname			the Baruwa
 IDHeader			X-Baruwa-ID:
@@ -565,19 +525,14 @@ Sendmail2			/usr/sbin/exim -C /etc/exim/exim_out.conf
 SpamHeader			X-Baruwa-SpamCheck:
 SpamList
 SpamVirusHeader			X-Baruwa-SpamVirus-Report:
-MCPSubjectText			{MCP?}
 SpamSubjectText			{Spam?}
 SpamStarsHeader			X-Baruwa-SpamScore:
-MCPHeader			X-Baruwa-MCPCheck:
 UnscannedHeader			Not Post-SMTP Content scanned
 VirusSubjectText		{Virus?}
 WebBugURL			http://datafeeds.baruwa.com/1x1spacer.gif
 HamActions		deliver header "X-Spam-Status: No"
 SpamActions		deliver header "X-Spam-Status: Yes"
 HighScoreSpamActions	deliver header "X-Spam-Status: Yes"
-NonMCPActions		deliver
-MCPActions		deliver
-HighScoreMCPActions	deliver
 SizeSubjectText		{Size}
 unzipmembers		*.txt *.ini *.log *.csv
 unzipmimetype		text/plain
@@ -621,7 +576,6 @@ ScanMail		1	no	0	yes	1	virus	2
 SpamStars		1	no	0	yes	1
 StrictPhishing          1       no      0       yes     1
 TagPhishingSubject	0	no	0 	yes	1	start	start	end	end
-MCPUseSpamAssassin	1	no	0	yes	1
 UseSpamAssassin		1	no	0	yes	1
 UseWatermarking		1	no	0	yes	1
 VirusScan		1	no	0	yes	1

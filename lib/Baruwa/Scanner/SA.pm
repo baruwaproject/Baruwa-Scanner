@@ -294,20 +294,7 @@ sub initialise {
         # Need to delete lock file now or compile_now may never return
         unlink $Baruwa::Scanner::SA::SABayesLock;
 
-        # If they are using MCP at all, then we need to compile SA differently
-        # here due to object clashes within SA.
-        if ( Baruwa::Scanner::Config::IsSimpleValue('mcpchecks')
-            && !Baruwa::Scanner::Config::Value('mcpchecks') )
-        {
-            # They are definitely not using MCP
-            $Baruwa::Scanner::SA::SAspamtest->compile_now();
-        }
-        else {
-            # They are possibly using MCP somewhere
-            # Next line should have a 0 parameter in it
-            #$Baruwa::Scanner::SA::SAspamtest->compile_now(0);
-            $Baruwa::Scanner::SA::SAspamtest->read_scoreonly_config($prefs);
-        }
+        $Baruwa::Scanner::SA::SAspamtest->compile_now();
     }
 
     # Turn off warnings again, as SpamAssassin switches them on

@@ -88,12 +88,6 @@ our $VERSION = '4.086000';
 # $sascore		set by IsSpam
 # $spamreport           set by IsSpam
 # $sarules		set by IsSpam (ref to hash of rulenames hit)
-# $mcpwhitelisted       set by IsMCP
-# $ismcp                set by IsMCP
-# $issamcp              set by IsMCP
-# $ishighmcp            set by IsMCP
-# $mcpsascore		set by IsMCP
-# $mcpreport            set by IsMCP
 # $deleted		set by delivery functions
 # $headerspath          set by WriterHeaderFile # file is read-only
 # $cantparse		set by Explode
@@ -135,9 +129,9 @@ our $VERSION = '4.086000';
 #				if infected with a silent virus
 # $noisy		set by FindSilentAndNoisyInfections
 #				if infected with a noisy virus
-# $needsstripping       set by HandleSpam and HandleMCP
+# $needsstripping       set by HandleSpam
 # $stillwarn		set by new # Still send warnings even if deleted
-# $needsencapsulating	set by HandleSpam and HAndleMCP
+# $needsencapsulating	set by HandleSpam
 # %postfixrecips	set by ReadQf in Postfix support only. Hash of all the
 #				'R' addresses in the message to aid rebuilding.
 # %originalrecips	set by ReadQf in Postfix support only. Hash of all the
@@ -148,13 +142,12 @@ our $VERSION = '4.086000';
 # $gonefromdisk		set by calls to DeleteUnlock
 # $subjectwasunsafe	set by SweepContent.pm
 # $safesubject		set by SweepContent.pm
-# $mcpdelivering        set by HandleMCP
 # $salongreport		set by SA::Checks (longest version of SA report)
 # @spamarchive          set by HandleHamAndSpam, list of places we have
-#                              quarantined spam/mcp message. Used later to
+#                              quarantined spam message. Used later to
 #                              delete infected spam from spam quarantine.
 # $dontdeliver          set by HandleHamAndSpam, true if the message was put
-#                              in the spam/mcp archive, but still needs to be
+#                              in the spam archive, but still needs to be
 #                              virus-scanned so we can remove it again if
 #                              necessary. But it doesn't need repairing, as we
 #                              won't be delivering it anyway.
@@ -920,7 +913,7 @@ sub HandleHamAndSpam {
 
   my(%lintoptions, $custom);
   foreach $action (@actions) {
-    # Allow for store-mcp, store-nonspam, etc.
+    # Allow for store-nonspam, etc.
     #$action =~ s/^store\W(\w+).*$/store-$1/;
     if ($action =~ /^custom\((.*)\)/) {
       Baruwa::Scanner::Config::CallCustomAction($this, 'yes', $1);
@@ -928,10 +921,6 @@ sub HandleHamAndSpam {
     }
 
     $lintoptions{$action} = 1 unless $action =~ /-\//;
-
-    # If the message is a MCP message then don't do the ham/spam "deliver"
-    # as the MCP actions will have provided a "deliver" if they want one.
-    next if $this->{ismcp} && $action eq 'deliver';
 
     $actions{$action} = 1;
     #print STDERR "Message: HandleSpam action is $action\n";
@@ -1030,7 +1019,7 @@ sub HandleHamAndSpam {
             Baruwa::Scanner::Config::CallCustomAction($this, 'no', $1);
           } else {
             #print STDERR "Removed $action from actions list\n";
-            # Support store-mcp, store-nonspam etc.
+            # Support store-nonspam etc.
             #$action =~ s/^store\W(\w+).*$/store-$1/;
             delete $actions{$action};
             $lintoptions{$action} = 1 unless $action =~ /-\//;
@@ -1064,7 +1053,7 @@ sub HandleHamAndSpam {
           } else {
             # It's some other action
             #print STDERR "Adding action $action\n";
-            # Support store-mcp, store-nonspam etc.
+            # Support store-nonspam etc.
             #$action =~ s/^store\W(\w+).*$/store-$1/;
             #print STDERR "Adding action $action after cleaning up stores\n";
             $actions{$action} = 1;
@@ -1087,8 +1076,6 @@ sub HandleHamAndSpam {
   delete $lintoptions{'deliver'};
   delete $lintoptions{'delete'};
   delete $lintoptions{'store'};
-  delete $lintoptions{'store-nonmcp'};
-  delete $lintoptions{'store-mcp'};
   delete $lintoptions{'store-nonspam'};
   delete $lintoptions{'store-spam'};
   delete $lintoptions{'bounce'};
@@ -1136,7 +1123,7 @@ sub HandleHamAndSpam {
       );
     }
     # Log every message being delivered
-    if ($actions{'deliver'}) { # || $this->{mcpdelivering}) {
+    if ($actions{'deliver'}) {
       Baruwa::Scanner::Log::NoticeLog(
         "Delivery of \u%s: message %s from %s to %s with subject %s",
         $HamSpam,
@@ -1152,7 +1139,7 @@ sub HandleHamAndSpam {
   # 1) The message is being delivered to at least 1 address,
   # 2) The message is not being delivered to anyone.
   # The extra addresses for forward it to have already been added.
-  if ($actions{'deliver'} || $actions{'forward'} || $this->{mcpdelivering}) {
+  if ($actions{'deliver'} || $actions{'forward'}) {
     #
     # Message is going to original recipient and/or extra recipients
     #
@@ -1215,11 +1202,8 @@ sub HandleHamAndSpam {
   # Store it if they want that
   my($store, @stores);
   push @stores, $HamSpam  if $actions{'store'};
-  push @stores, 'nonmcp'  if $actions{'store-nonmcp'};
-  push @stores, 'mcp'     if $actions{'store-mcp'};
   push @stores, 'nonspam' if $actions{'store-nonspam'};
   push @stores, 'spam'    if $actions{'store-spam'};
-  $this->{ismcp} = 1      if $actions{'store-mcp'}; # For MailWatch
   # Find all the absolute dir path stores
   foreach $store (keys %actions) {
     next unless $store =~ s/^store-//;
@@ -1746,12 +1730,6 @@ sub DeliverUnscanned {
   $global::MS->{mta}->ReplaceHeader($this, $ipverheader,
                              ( ($this->{clientip} =~ /:/)?'IPv6':'IPv4' ))
     if $ipverheader;
-    
-  # Add the MCP headers if necessary
-  $global::MS->{mta}->AddMultipleHeader($this, 'mcpheader',
-                                        $this->{mcpreport}, ', ')
-    if $this->{ismcp} ||
-       Baruwa::Scanner::Config::Value('includemcpheader', $this);
   # Add spam header if it's spam or they asked for it
   #$global::MS->{mta}->AddHeader($this,
   #                              Baruwa::Scanner::Config::Value('spamheader',$this),
@@ -1838,47 +1816,9 @@ sub DeliverUnscanned {
   }
 
 
-  # Modify the subject line for MCP
-  # if it's MCP AND they want to modify the subject line AND it's not
-  # already been modified by another of your Baruwas.
-  $starcount = int($this->{mcpsascore}) + 0;
-  $starcount = 0 if $this->{mcpwhitelisted}; # 0 stars if white-listed
-  $scorefmt = Baruwa::Scanner::Config::Value('scoreformat', $this);
-  $scorefmt = '%d' if $scorefmt eq '';
-  $scoretext = sprintf($scorefmt, $this->{mcpsascore}+0);
-  my $mcptag = Baruwa::Scanner::Config::Value('mcpsubjecttext', $this);
-  $mcptag =~ s/_SCORE_/$scoretext/;
-  $mcptag =~ s/_STARS_/$stars/i;
-
-  if ($this->{ismcp} && !$this->{ishighmcp}) {
-    my $where = Baruwa::Scanner::Config::Value('mcpmodifysubject',$this);
-    if ($where =~ /end/ && !$global::MS->{mta}->TextEndsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->AppendHeader($this, 'Subject:', $mcptag, ' ');
-    } elsif ($where =~ /start|1/ && !$global::MS->{mta}->TextStartsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->PrependHeader($this, 'Subject:', $mcptag, ' ');
-    }
-  }
-
-
-  # If it is high-scoring MCP, then add a different bit of text
-  $mcptag = Baruwa::Scanner::Config::Value('highmcpsubjecttext', $this);
-  $mcptag =~ s/_SCORE_/$scoretext/;
-  $mcptag =~ s/_STARS_/$stars/i;
-
-  if ($this->{ismcp} && $this->{ishighmcp}) {
-    my $where = Baruwa::Scanner::Config::Value('highmcpmodifysubject',$this);
-    if ($where =~ /end/ && !$global::MS->{mta}->TextEndsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->AppendHeader($this, 'Subject:', $mcptag, ' ');
-    } elsif ($where =~ /start|1/ && !$global::MS->{mta}->TextStartsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->PrependHeader($this, 'Subject:', $mcptag, ' ');
-    }
-  }
-
-
-  # Add the extra headers they want for MCP and spam messages
+  # Add the extra headers they want for spam messages
   my(@extraheaders, $extraheader);
   my($key, $value);
-  @extraheaders = @{$this->{extramcpheaders}} if $this->{extramcpheaders};
   push @extraheaders, @{$this->{extraspamheaders}} if $this->{extraspamheaders};
   foreach $extraheader (@extraheaders) {
     next unless $extraheader =~ /:/;
@@ -4736,17 +4676,6 @@ sub DeliverUnmodifiedBody {
     $global::MS->{mta}->AppendHeader($this, $svheader, $this->{spamvirusreport}, ' ');
   }
 
-  # Add the MCP header if necessary
-  $global::MS->{mta}->AddMultipleHeader($this, 'mcpheader',
-                                        $this->{mcpreport}, ', ')
-    if $this->{ismcp} ||
-       Baruwa::Scanner::Config::Value('includemcpheader', $this);
-
-  # Add the spam header if they want that
-  #$global::MS->{mta}->AddHeader($this,
-  #                              Baruwa::Scanner::Config::Value('spamheader',$this),
-  #                              $this->{spamreport})
-  # JKF 3/10/2005
   $global::MS->{mta}->AddMultipleHeader($this, 'spamheader',
                                         $this->{spamreport}, ', ')
     if Baruwa::Scanner::Config::Value('includespamheader', $this) ||
@@ -4866,44 +4795,6 @@ sub DeliverUnmodifiedBody {
   }
 
 
-  # Modify the subject line for MCP
-  # if it's MCP AND they want to modify the subject line AND it's not
-  # already been modified by another of your Baruwas.
-  $starcount = int($this->{mcpsascore}) + 0;
-  $starcount = 0 if $this->{mcpwhitelisted}; # 0 stars if white-listed
-  $scorefmt = Baruwa::Scanner::Config::Value('scoreformat', $this);
-  $scorefmt = '%d' if $scorefmt eq '';
-  $scoretext = sprintf($scorefmt, $this->{mcpsascore}+0);
-  my $mcptag = Baruwa::Scanner::Config::Value('mcpsubjecttext', $this);
-  $mcptag =~ s/_SCORE_/$scoretext/;
-
-  if ($this->{ismcp} && !$this->{ishighmcp}) {
-    my $where = Baruwa::Scanner::Config::Value('mcpmodifysubject',$this);
-    if ($where =~ /end/ && !$global::MS->{mta}->TextEndsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->AppendHeader($this, 'Subject:', $mcptag, ' ');
-      $subjectchanged = 1;
-    } elsif ($where =~ /start|1/ && !$global::MS->{mta}->TextStartsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->PrependHeader($this, 'Subject:', $mcptag, ' ');
-      $subjectchanged = 1;
-    }
-  }
-
-  # If it is high-scoring MCP, then add a different bit of text
-  $mcptag = Baruwa::Scanner::Config::Value('highmcpsubjecttext', $this);
-  $mcptag =~ s/_SCORE_/$scoretext/;
-
-  if ($this->{ismcp} && $this->{ishighmcp}) {
-    my $where = Baruwa::Scanner::Config::Value('highmcpmodifysubject',$this);
-    if ($where =~ /end/ && !$global::MS->{mta}->TextEndsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->AppendHeader($this, 'Subject:', $mcptag, ' ');
-      $subjectchanged = 1;
-    } elsif ($where =~ /start|1/ && !$global::MS->{mta}->TextStartsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->PrependHeader($this, 'Subject:', $mcptag, ' ');
-      $subjectchanged = 1;
-    }
-  }
-
-
   # Modify the subject line for scanning -- but only do it if the
   # subject hasn't already been modified by Baruwa for another reason.
   my $modifscan = Baruwa::Scanner::Config::Value('scannedmodifysubject', $this);
@@ -4927,10 +4818,9 @@ sub DeliverUnmodifiedBody {
     $global::MS->{mta}->DeleteHeader($this, $remove);
   }
 
-  # Add the extra headers they want for MCP and spam messages
+  # Add the extra headers they want for spam messages
   my(@extraheaders, $extraheader);
   my($key, $value);
-  @extraheaders = @{$this->{extramcpheaders}} if $this->{extramcpheaders};
   push @extraheaders, @{$this->{extraspamheaders}} if $this->{extraspamheaders};
   foreach $extraheader (@extraheaders) {
     #print STDERR "Unmod Adding extra header $extraheader\n";
@@ -5072,12 +4962,6 @@ sub DeliverModifiedBody {
     $svheader .= ':' unless $svheader =~ /:$/;
     $global::MS->{mta}->AppendHeader($this, $svheader, $this->{spamvirusreport}, ' ');
   }
-
-  # Add the MCP header if necessary
-  $global::MS->{mta}->AddMultipleHeader($this, 'mcpheader',
-					$this->{mcpreport}, ', ')
-    if $this->{ismcp} ||
-       Baruwa::Scanner::Config::Value('includemcpheader', $this);
 
   $global::MS->{mta}->AddMultipleHeader($this, 'spamheader',
 					$this->{spamreport}, ', ')
@@ -5264,45 +5148,6 @@ sub DeliverModifiedBody {
   }
 
 
-  # Modify the subject line for MCP
-  # if it's MCP AND they want to modify the subject line AND it's not
-  # already been modified by another of your Baruwas.
-  $starcount = int($this->{mcpsascore}) + 0;
-  $starcount = 0 if $this->{mcpwhitelisted}; # 0 stars if white-listed
-  $scorefmt = Baruwa::Scanner::Config::Value('scoreformat', $this);
-  $scorefmt = '%d' if $scorefmt eq '';
-  $scoretext = sprintf($scorefmt, $this->{mcpsascore}+0);
-  my $mcptag = Baruwa::Scanner::Config::Value('mcpsubjecttext', $this);
-  $mcptag =~ s/_SCORE_/$scoretext/;
-
-  if ($this->{ismcp} && !$this->{ishighmcp}) {
-    my $where = Baruwa::Scanner::Config::Value('mcpmodifysubject',$this);
-    if ($where =~ /end/ && !$global::MS->{mta}->TextEndsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->AppendHeader($this, 'Subject:', $mcptag, ' ');
-      $subjectchanged = 1;
-    } elsif ($where =~ /start|1/ && !$global::MS->{mta}->TextStartsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->PrependHeader($this, 'Subject:', $mcptag, ' ');
-      $subjectchanged = 1;
-    }
-  }
-
-
-  # If it is high-scoring MCP, then add a different bit of text
-  $mcptag = Baruwa::Scanner::Config::Value('highmcpsubjecttext', $this);
-  $mcptag =~ s/_SCORE_/$scoretext/;
-
-  if ($this->{ismcp} && $this->{ishighmcp}) {
-    my $where = Baruwa::Scanner::Config::Value('highmcpmodifysubject',$this);
-    if ($where =~ /end/ && !$global::MS->{mta}->TextEndsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->AppendHeader($this, 'Subject:', $mcptag, ' ');
-      $subjectchanged = 1;
-    } elsif ($where =~ /start|1/ && !$global::MS->{mta}->TextStartsHeader($this, 'Subject:', $mcptag)) {
-      $global::MS->{mta}->PrependHeader($this, 'Subject:', $mcptag, ' ');
-      $subjectchanged = 1;
-    }
-  }
-
-
   # Modify the subject line for scanning -- but only do it if the
   # subject hasn't already been modified by Baruwa for another reason.
   my $modifscan = Baruwa::Scanner::Config::Value('scannedmodifysubject', $this);
@@ -5324,10 +5169,9 @@ sub DeliverModifiedBody {
     $global::MS->{mta}->DeleteHeader($this, $remove);
   }
 
-  # Add the extra headers they want for MCP and spam messages
+  # Add the extra headers they want for spam messages
   my(@extraheaders, $extraheader);
   my($key, $value);
-  @extraheaders = @{$this->{extramcpheaders}} if $this->{extramcpheaders};
   push @extraheaders, @{$this->{extraspamheaders}} if $this->{extraspamheaders};
   foreach $extraheader (@extraheaders) {
     #print STDERR "Mod Adding extra header $extraheader\n";

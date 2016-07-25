@@ -46,9 +46,7 @@ use Baruwa::Scanner::MessageBatch;
 use Baruwa::Scanner::Quarantine;
 use Baruwa::Scanner::Queue;
 use Baruwa::Scanner::RBLs;
-use Baruwa::Scanner::MCPMessage;
 use Baruwa::Scanner::Message;
-use Baruwa::Scanner::MCP;
 use Baruwa::Scanner::SA;
 use Baruwa::Scanner::SweepContent;
 use Baruwa::Scanner::SweepOther;
@@ -897,7 +895,6 @@ sub WorkForHours {
 
     # Initialise class variables now we are the right user
     Baruwa::Scanner::MessageBatch::initialise();
-    Baruwa::Scanner::MCP::initialise();
     Baruwa::Scanner::Log::InfoLog("Bayes database rebuild is due") if $BayesRebuild;
     $Baruwa::Scanner::SA::Debug = $DebugSpamAssassin
       || Baruwa::Scanner::Config::Value('debugspamassassin');
@@ -930,11 +927,6 @@ sub WorkForHours {
     my ( $StartTime, $RestartTime );
     $StartTime   = time;
     $RestartTime = $StartTime + Baruwa::Scanner::Config::Value('restartevery');
-
-    my $FirstCheck = Baruwa::Scanner::Config::Value('firstcheck');
-    Baruwa::Scanner::Log::WarnLog("First Check must be set to MCP or spam")
-      unless $FirstCheck =~ /mcp|spam/i;
-    my $VirusBeforeSpamMCP = Baruwa::Scanner::Config::Value('virusbeforespammcp');
 
     while ( time >= $StartTime && time < $RestartTime && !$BayesRebuild ) {
         $workarea->Clear();
@@ -994,7 +986,7 @@ sub WorkForHours {
         $batch->DeliverUnscanned();
         $batch->RemoveDeletedMessages();
 
-        # Have to do this very early as it's needed for MCP and spam bouncing
+        # Have to do this very early as it's needed for spam bouncing
         $global::MS->{work}->BuildInDirs($batch);
 
         #
@@ -1041,53 +1033,13 @@ sub WorkForHours {
         $0 = 'Baruwa: processing silent viruses';
         $batch->DeliverOrDeleteSilentExceptSpamViruses();
 
-        #
-        ## 20090730 End of virus-scanning code moved to before spam-scanning
-        #
-
-        # Yes I know this isn't elegant, but it's very short so it will do :-)
-        my $UsingMCP = 0;
-        $UsingMCP = 1
-          unless Baruwa::Scanner::Config::IsSimpleValue('mcpchecks')
-          && !Baruwa::Scanner::Config::Value('mcpchecks');
-        if ( $FirstCheck =~ /mcp/i ) {
-            # Do the MCP checks
-            if ($UsingMCP) {
-                $0 = 'Baruwa: MCP checks';
-                $batch->StartTiming( 'mcp', 'MCP Checks' );
-                $batch->MCPChecks();
-                $batch->HandleMCP();
-                $batch->HandleNonMCP();
-                $batch->StopTiming( 'mcp', 'MCP Checks' );
-            }
-
-            # Do the spam checks
-            $0 = 'Baruwa: spam checks';
-            $batch->StartTiming( 'spam', 'Spam Checks' );
-            $batch->SpamChecks();
-            $batch->HandleSpam();
-            $batch->HandleHam();
-            $batch->StopTiming( 'spam', 'Spam Checks' );
-        }
-        else {
-            # Do the spam checks
-            $0 = 'Baruwa: spam checks';
-            $batch->StartTiming( 'spam', 'Spam Checks' );
-            $batch->SpamChecks();
-            $batch->HandleSpam();
-            $batch->HandleHam();
-            $batch->StopTiming( 'spam', 'Spam Checks' );
-
-            # Do the MCP checks
-            if ($UsingMCP) {
-                $0 = 'Baruwa: MCP checks';
-                $batch->StartTiming( 'mcp', 'MCP Checks' );
-                $batch->MCPChecks();
-                $batch->HandleMCP();
-                $batch->HandleNonMCP();
-                $batch->StopTiming( 'mcp', 'MCP Checks' );
-            }
-        }
+        # Do the spam checks
+        $0 = 'Baruwa: spam checks';
+        $batch->StartTiming( 'spam', 'Spam Checks' );
+        $batch->SpamChecks();
+        $batch->HandleSpam();
+        $batch->HandleHam();
+        $batch->StopTiming( 'spam', 'Spam Checks' );
 
         # Deliver all the messages we are not scanning at all,
         # and mark them for deletion.
@@ -1112,7 +1064,7 @@ sub WorkForHours {
         # Quarantine all the disarmed HTML and others
         $batch->QuarantineModifiedBody();
 
-        # Remove any infected spam from the spam+mcp archives
+        # Remove any infected spam from the spam archives
         $batch->RemoveInfectedSpam();
 
         # Clean all the infections out of the messages
