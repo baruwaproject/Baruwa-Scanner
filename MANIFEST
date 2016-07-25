@@ -16,8 +16,6 @@ etc/mail/baruwa/filename.rules.allowall.conf
 etc/mail/baruwa/filename.rules.conf
 etc/mail/baruwa/filetype.rules.allowall.conf
 etc/mail/baruwa/filetype.rules.conf
-etc/mail/baruwa/phishing.bad.sites.conf
-etc/mail/baruwa/phishing.safe.sites.conf
 etc/mail/baruwa/reports/af/deleted.content.message.txt
 etc/mail/baruwa/reports/af/deleted.filename.message.txt
 etc/mail/baruwa/reports/af/deleted.size.message.txt

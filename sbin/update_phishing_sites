@@ -22,11 +22,11 @@
 
 DOWNLOAD_URL=https://datafeeds.baruwa.com/phishing.safe.sites/phishing.safe.sites.conf.master
 
-if [ -d /etc/mail/baruwa ]; then
-    cd /etc/mail/baruwa
+if [ -d /var/lib/baruwa/phishingupdate ]; then
+    cd /var/lib/baruwa/phishingupdate
 else
-    logger -p mail.warn -t update.phishing.sites Cannot find Baruwa configuration directory, update failed.
-    echo Cannot find Baruwa configuration directory.
+    logger -p mail.warn -t update.phishing.sites Cannot find the target directory, update failed.
+    echo Cannot find Baruwa target directory.
     echo Auto-updates of phishing.safe.sites.conf will not happen.
     exit 1
 fi

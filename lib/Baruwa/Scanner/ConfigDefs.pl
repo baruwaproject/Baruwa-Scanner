@@ -275,8 +275,8 @@ lockfiledir		/var/lock/Baruwa
 
 # Check the first word of these for file existence
 [Simple,File]
-PhishingWhitelist	/etc/mail/baruwa/phishing.safe.sites.conf
-PhishingBlacklist	/etc/mail/baruwa/phishing.bad.sites.conf
+PhishingWhitelist	/var/lib/baruwa/phishingupdate/phishing.safe.sites.conf
+PhishingBlacklist	/var/lib/baruwa/phishingupdate/phishing.bad.sites.conf
 pidfile			/var/run/baruwa/scanner/Baruwa.pid
 SecondLevelList         /etc/mail/baruwa/country.domains.conf
 #spamassassinprefsfile	/etc/mail/baruwa/spam.assassin.prefs.conf

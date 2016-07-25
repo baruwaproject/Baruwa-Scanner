@@ -24,7 +24,6 @@ use strict;
 use Net::DNS::Resolver;
 use LWP::UserAgent;
 use DirHandle;
-use Baruwa::Scanner::Config;
 use File::Copy qw(copy move);
 use Fcntl qw(:flock);
 
@@ -33,17 +32,11 @@ my $lockfile = '/var/lock/Baruwa/phishing.bad.update.lock';
 &lock();
 
 my $base = '/var/lib/baruwa';
-if ( -f '/etc/mail/baruwa/baruwa.conf' ) {
-    $base = Baruwa::Scanner::Config::QuickPeek('/etc/mail/baruwa/baruwa.conf', '%spool-dir%');
-} else {
-    warn "Default configuration file /etc/mail/baruwa/baruwa.conf not found";
-}
-
 my $current = $base . '/phishingupdate/';
 my $cache   = $current . 'cache/';
 my $status  = $current . 'status';
 my $urlbase = "https://datafeeds.baruwa.com/phishing.bad.sites/";
-my $target  = "/etc/mail/baruwa/phishing.bad.sites.conf";
+my $target  = "/var/lib/baruwa/phishingupdate/phishing.bad.sites.conf";
 my $query   = "phishing.datafeed.baruwa.com";
 
 my $baseupdated = 0;
