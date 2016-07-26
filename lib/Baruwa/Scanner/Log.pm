@@ -26,11 +26,11 @@
 package Baruwa::Scanner::Log;
 
 use strict;
-use Sys::Syslog;
+use Sys::Syslog();
 use Carp;
-use vars qw($LogType $Banner $WarningsOnly);
 
 our $VERSION = '4.086000';
+our ($LogType, $Banner, $WarningsOnly);
 
 # Used to say 'syslog' but for the baruwa.conf syntax checking code I
 # need the default log output to be stderr, as I don't know enough to start

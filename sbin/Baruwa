@@ -1287,12 +1287,7 @@ sub ExitParent {
 sub StartLogging {
     my ($filename) = @_;
 
-    # Create the syslog process name from stripping the conf filename down
-    # to the basename without the extension.
-    my $procname = $filename;
-    $procname =~ s#^.*/##;
-    $procname =~ s#\.conf$##;
-
+    my $procname = 'Baruwa';
     my $logbanner =
         "Baruwa E-Mail Content Scanner version "
       . $Baruwa::Scanner::Config::BaruwaVersion
