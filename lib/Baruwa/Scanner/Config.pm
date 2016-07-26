@@ -2594,14 +2594,11 @@ sub ReadRuleset {
         );
         $result->code and Baruwa::Scanner::Log::WarnLog(
             "LDAP search for ruleset " .
-
-    #                  "%s returned error: %s", $rulesfilename, $result->error);
-              "%s returned error: %s", $keyword, $result->error
+            "%s returned error: %s", $keyword, $result->error
         );
 
         $number = 0;
         while ( defined( $entr = $result->entry($number) ) ) {
-
             #print STDERR "Fetched Entry $number\n";
             #print STDERR "DN: ", $entr->dn, "\n";
             foreach $attr ( sort $entr->attributes ) {
