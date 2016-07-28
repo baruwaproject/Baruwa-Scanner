@@ -503,16 +503,16 @@ DefaultRenamePattern		__FILENAME__.disarmed
 dirtyheader			Found to be infected
 DisarmSubjectText		{Disarmed}
 DisinfectedHeader		Disinfected
-EnvFromHeader			X-Baruwa-Envelope-From:
-EnvToHeader			X-Baruwa-Envelope-To:
+EnvFromHeader			X-Baruwa-BaruwaFW-Envelope-From:
+EnvToHeader			X-Baruwa-BaruwaFW-Envelope-To:
 HighSpamSubjectText		{Spam?}
 Hostname			the Baruwa
-IDHeader			X-Baruwa-ID:
+IDHeader			X-Baruwa-BaruwaFW-ID:
 InfoHeader
 InfoValue			Please contact the ISP for more information
 IPVerHeader
 LocalPostmaster			postmaster
-MailHeader			X-Baruwa:
+MailHeader			X-Baruwa-BaruwaFW:
 mshmac				Watermark-secret
 mshmacheader			Baruwa-NULL-Check:
 NameSubjectText			{Filename?}
@@ -522,11 +522,11 @@ PhishingSubjectTag		{Fraud?}
 ScannedSubjectText		{Scanned}
 ScoreFormat			%d
 Sendmail2			/usr/sbin/exim -C /etc/exim/exim_out.conf
-SpamHeader			X-Baruwa-SpamCheck:
+SpamHeader			X-Baruwa-BaruwaFW-SpamCheck:
 SpamList
-SpamVirusHeader			X-Baruwa-SpamVirus-Report:
+SpamVirusHeader			X-Baruwa-BaruwaFW-SpamVirus-Report:
 SpamSubjectText			{Spam?}
-SpamStarsHeader			X-Baruwa-SpamScore:
+SpamStarsHeader			X-Baruwa-BaruwaFW-SpamScore:
 UnscannedHeader			Not Post-SMTP Content scanned
 VirusSubjectText		{Virus?}
 WebBugURL			http://datafeeds.baruwa.com/1x1spacer.gif
