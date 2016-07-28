@@ -11,7 +11,7 @@ use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
 use Sys::Syslog qw(:DEFAULT setlogsock);
-use constant HAS_SPF => eval { local $SIG{'__DIE__'}; require Mail::SPF; };
+use constant HAS_SPF => eval {local $SIG{'__DIE__'}; require Mail::SPF;};
 
 sub dbg {
     my $scanner = shift;
@@ -19,14 +19,13 @@ sub dbg {
 }
 
 sub new {
-    my ( $class, $mailsa ) = @_;
+    my ($class, $mailsa) = @_;
     $class = ref($class) || $class;
     my $self = $class->SUPER::new($mailsa);
-    bless( $self, $class );
-    if ( $mailsa->{local_tests_only} || !HAS_SPF ) {
+    bless($self, $class);
+    if ($mailsa->{local_tests_only} || !HAS_SPF) {
         $self->{disabled} = 1;
-    }
-    else {
+    } else {
         $self->{disabled} = 0;
     }
 
@@ -36,20 +35,22 @@ sub new {
 }
 
 sub baruwa_check_spf {
-    my ( $self, $scanner ) = @_;
+    my ($self, $scanner) = @_;
 
     return if $self->{disabled};
 
     my $from = $scanner->get('From:addr');
-    if ( $from ne '' ) {
-        if ( $from =~ /(?:fnb\.co\.za|absa\.co\.za|standardbank\.co\.za|nedbank\.co\.za)/i ){
+    if ($from ne '') {
+        if ($from =~
+            /(?:fnb\.co\.za|absa\.co\.za|standardbank\.co\.za|nedbank\.co\.za)/i
+          ) {
             dbg("checking $from");
             $self->{spf_server} = Mail::SPF::Server->new(
                 hostname     => $scanner->get_tag('HOSTNAME'),
                 dns_resolver => $self->{main}->{resolver}
             );
             my $lasthop = $scanner->{relays_external}->[0];
-            if ( !defined $lasthop ) {
+            if (!defined $lasthop) {
                 dbg("skipping checks, no suitable relay for spf use found");
                 return;
             }
@@ -69,17 +70,18 @@ sub baruwa_check_spf {
                 dbg("skipping checks, cannot create Mail::SPF::Request");
                 return;
             };
-            my ( $result, $comment, $text, $err );
+            my ($result, $comment, $text, $err);
             my $timeout = $scanner->{conf}->{spf_timeout};
 
             my $timer = Mail::SpamAssassin::Timeout->new(
-                { secs => $timeout, deadline => $scanner->{master_deadline} } );
+                {secs => $timeout, deadline => $scanner->{master_deadline}});
             $err = $timer->run_and_catch(
                 sub {
                     my $query = $self->{spf_server}->process($request);
 
                     $result  = $query->code;
-                    $comment = $query->authority_explanation if $query->can("authority_explanation");
+                    $comment = $query->authority_explanation
+                      if $query->can("authority_explanation");
                     $text = $query->text;
                 }
             );
@@ -95,13 +97,13 @@ sub baruwa_check_spf {
             $comment =~ s/\s+/ /gs;
             $text ||= '';
             $text =~ s/\s+/ /gs;
-            dbg("query for $from/$ip: result: $result, comment: $comment, text: $text");
-            unless ( $result eq 'pass' || $result eq 'timeout') {
+            dbg("query for $from/$ip: result: $result, comment: $comment, text: $text"
+            );
+            unless ($result eq 'pass' || $result eq 'timeout') {
                 dbg('SA Bank phishing found');
                 return 1;
             }
-        }
-        else {
+        } else {
             dbg("skipping checks, $from not a South african bank domain");
         }
     } else {

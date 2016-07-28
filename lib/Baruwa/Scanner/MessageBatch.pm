@@ -45,13 +45,13 @@ my $initialised      = 0;
 
 #
 # Members:
-# $starttime			Set by new
-# $endtime			Set by EndBatch
-# $bytespersecond		Set by EndBatch
-# $totalmessages		Set by CreateBatch
-# $totalbytes			Set by CreateBatch
-# $dirtymessages		Set by CreateBatch
-# $dirtybytes			Set by CreateBatch
+# $starttime            Set by new
+# $endtime          Set by EndBatch
+# $bytespersecond       Set by EndBatch
+# $totalmessages        Set by CreateBatch
+# $totalbytes           Set by CreateBatch
+# $dirtymessages        Set by CreateBatch
+# $dirtybytes           Set by CreateBatch
 #
 
 # Constructor.
@@ -71,14 +71,13 @@ sub new {
         "Tried to create a MessageBatch without calling initglobals")
       unless $initialised;
 
-    if ( $lint eq 'lint' ) {
+    if ($lint eq 'lint') {
 
         # Fake a batch containing the Eicar message
         bless $this, $type;
         $this->CreateEicarBatch();
-    }
-    else {
-        $global::MS->{mta}->CreateBatch( $this, $OnlyID );
+    } else {
+        $global::MS->{mta}->CreateBatch($this, $OnlyID);
     }
 
     $this->{starttime} = time;
@@ -99,21 +98,21 @@ sub EndBatch {
     $this->{endtime}   = $now;
     $this->{totaltime} = $totaltime;
     $totaltime = 1 unless $totaltime > 0.001;    # Minimum of 1 m-second
-    $speed = ( $totalbytes * 1.0 ) / ( $totaltime * 1.0 ) if $totaltime > 0;
+    $speed = ($totalbytes * 1.0) / ($totaltime * 1.0) if $totaltime > 0;
     $this->{bytespersecond} = $speed;
     $speed = 0 if $speed > 1_000_000 || $speed < 0;
-    if ( Baruwa::Scanner::Config::Value('logspeed') ) {
+    if (Baruwa::Scanner::Config::Value('logspeed')) {
         Baruwa::Scanner::Log::InfoLog(
             "Batch completed at %d bytes per second (%d / %d)",
-            $speed, $totalbytes, $now - $this->{starttime} );
+            $speed, $totalbytes, $now - $this->{starttime});
 
         # Work out current size of batch.
         my $msgs     = $this->{messages};
-        my $msgcount = scalar( keys %$msgs );
+        my $msgcount = scalar(keys %$msgs);
 
         Baruwa::Scanner::Log::InfoLog(
             "Batch (%d message%s) processed in %.2f seconds",
-            $msgcount, ( $msgcount == 1 ? '' : 's' ), $totaltime );
+            $msgcount, ($msgcount == 1 ? '' : 's'), $totaltime);
     }
 }
 
@@ -122,39 +121,39 @@ sub EndBatch {
 # set up properties for the figures.
 sub StartTiming {
     my $this = shift;
-    my ( $varprefix, $usertext ) = @_;
-    $this->{ $varprefix . '_starttime' } = time;
+    my ($varprefix, $usertext) = @_;
+    $this->{$varprefix . '_starttime'} = time;
 }
 
 # Stop the timing for a section of the main code
 # Uses the xxx_starttime property created in StartTiming
 sub StopTiming {
     my $this = shift;
-    my ( $varprefix, $usertext ) = @_;
+    my ($varprefix, $usertext) = @_;
 
     my $now = time;
     my $totaltime;
     my $speed;
 
     # totaltime = now - starttime
-    $totaltime = $now - $this->{ $varprefix . '_starttime' };
+    $totaltime = $now - $this->{$varprefix . '_starttime'};
 
     # endtime = now
-    $this->{ $varprefix . '_endtime' } = $now;
+    $this->{$varprefix . '_endtime'} = $now;
 
     # totaltime = totaltime
-    $this->{ $varprefix . '_totaltime' } = $totaltime;
+    $this->{$varprefix . '_totaltime'} = $totaltime;
     $totaltime = 1 unless $totaltime > 0;    # Minimum of 1 second
                                              # speed = bytes / totaltime
-    $speed = ( $this->{totalbytes} * 1.0 ) / ( $totaltime * 1.0 )
+    $speed = ($this->{totalbytes} * 1.0) / ($totaltime * 1.0)
       if $totaltime > 0;
     $speed = 0 if $speed > 1_000_000 || $speed < 0;
 
     # bytespersecond = speed
-    $this->{ $varprefix . '_bytespersecond' } = $speed;
+    $this->{$varprefix . '_bytespersecond'} = $speed;
 
-    Baruwa::Scanner::Log::InfoLog( "%s completed at %d bytes per second",
-        $usertext, $speed )
+    Baruwa::Scanner::Log::InfoLog("%s completed at %d bytes per second",
+        $usertext, $speed)
       if Baruwa::Scanner::Config::Value('logspeed') && $speed > 0;
 }
 
@@ -169,23 +168,23 @@ sub initialise {
     $maxdirtymessages = Baruwa::Scanner::Config::Value('maxdirtymessages');
     $initialised      = 1;
 
-    #print STDERR "MessageBatch class has been initialised\n";
-    #print STDERR "Limits are $maxcleanbytes, $maxcleanmessages, $maxdirtybytes, $maxdirtymessages\n";
+#print STDERR "MessageBatch class has been initialised\n";
+#print STDERR "Limits are $maxcleanbytes, $maxcleanmessages, $maxdirtybytes, $maxdirtymessages\n";
 }
 
 # Return the max size of the batch
 sub BatchLimits {
-    return ( $maxcleanbytes, $maxcleanmessages,
-        $maxdirtybytes, $maxdirtymessages );
+    return ($maxcleanbytes, $maxcleanmessages,
+        $maxdirtybytes, $maxdirtymessages);
 }
 
 sub print {
     my $this = shift;
 
-    my ( $id, $msg );
+    my ($id, $msg);
     my $msgs = $this->{messages};
 
-    foreach $id ( keys %$msgs ) {
+    foreach $id (keys %$msgs) {
         $msg = $msgs->{$id};
         print STDERR "\n";
         $msg->print();
@@ -199,7 +198,7 @@ sub print {
 sub RemoveDeletedMessages {
     my $this = shift;
 
-    my ( $id, $message, @badentries, @deletedentries );
+    my ($id, $message, @badentries, @deletedentries);
 
     my $deleteifnotdelivering = 0;
     $deleteifnotdelivering = 1
@@ -209,18 +208,19 @@ sub RemoveDeletedMessages {
     #print STDERR "Deleteifnotdelivering = $deleteifnotdelivering\n";
 
     #print STDERR "About to remove deleted messages\n";
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
+
         #print STDERR "Looking at $id for deletion\n";
-        if ( !$message ) {
-            #Baruwa::Scanner::Log::WarnLog("RemoveDeletedMessages: Found bad message $id");
+        if (!$message) {
+
+ #Baruwa::Scanner::Log::WarnLog("RemoveDeletedMessages: Found bad message $id");
             push @badentries, $id;
             next;
         }
 
-        #print STDERR "Message->deleted = " . $message->{deleted} . "and dontdeliver = " . $message->{dontdeliver} . "\n";
-        if ( $message->{deleted}
-            || ( $message->{dontdeliver} && $deleteifnotdelivering ) )
-        {
+#print STDERR "Message->deleted = " . $message->{deleted} . "and dontdeliver = " . $message->{dontdeliver} . "\n";
+        if ($message->{deleted}
+            || ($message->{dontdeliver} && $deleteifnotdelivering)) {
             $message->DeleteMessage();
             push @deletedentries, $id;
         }
@@ -230,7 +230,7 @@ sub RemoveDeletedMessages {
     }
 
     # Add to the list of wiped messages
-    $this->{deleted} .= ' ' . join( ' ', @badentries, @deletedentries );
+    $this->{deleted} .= ' ' . join(' ', @badentries, @deletedentries);
 }
 
 # Do all the spam checks.
@@ -238,7 +238,7 @@ sub RemoveDeletedMessages {
 sub SpamChecks {
     my $this = shift;
 
-    my ( $id, $message );
+    my ($id, $message);
     my $counter = 0;
 
     #print STDERR "Starting spam checks\n";
@@ -249,33 +249,35 @@ sub SpamChecks {
     # If the cache contents have expired then clean it all up first
     Baruwa::Scanner::SA::CheckForCacheExpire();
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if !$message->{scanmail};
         next if $message->{deleted};
         next if $message->{scanvirusonly};    # Over-rides Spam Checks setting
-        next unless Baruwa::Scanner::Config::Value( 'spamchecks', $message ) =~ /1/;
+        next
+          unless Baruwa::Scanner::Config::Value('spamchecks', $message) =~ /1/;
 
         #print STDERR "Spam checks for $id\n";
 
         $counter += $message->IsSpam();
 
-        if ( !Baruwa::Scanner::Config::Value( 'spamdetail', $message ) ) {
+        if (!Baruwa::Scanner::Config::Value('spamdetail', $message)) {
             $message->{spamreport} =
-              Baruwa::Scanner::Config::LanguageValue( $message,
-                ( $message->{isspam} ? 'spam' : 'notspam' ) );
+              Baruwa::Scanner::Config::LanguageValue($message,
+                ($message->{isspam} ? 'spam' : 'notspam'));
         }
     }
-    Baruwa::Scanner::Log::NoticeLog("Spam Checks: Found $counter spam messages") if $counter > 0;
+    Baruwa::Scanner::Log::NoticeLog("Spam Checks: Found $counter spam messages")
+      if $counter > 0;
 }
 
 # Handle the spam results using the actions they have defined.
 # Can deliver, delete, store, and forward or any combination.
 sub HandleSpam {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
     #print STDERR "Starting to handle spam\n";
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next
           if $message->{deleted}
           || !$message->{isspam}
@@ -285,6 +287,7 @@ sub HandleSpam {
         #print STDERR "Spam checks for $id\n";
         $message->HandleHamAndSpam('spam');
     }
+
     #print STDERR "Finished handling spam\n\n";
 }
 
@@ -292,10 +295,11 @@ sub HandleSpam {
 # Can deliver, delete, store, and forward or any combination.
 sub HandleHam {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
     #print STDERR "Starting to handle ham\n";
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
+
         # Skip deleted and non-spam messages
         next
           if $message->{deleted}
@@ -305,6 +309,7 @@ sub HandleHam {
         #print STDERR "Ham checks for $id\n";
         $message->HandleHamAndSpam('nonspam');
     }
+
     #print STDERR "Finished handling ham\n\n";
 }
 
@@ -313,26 +318,29 @@ sub HandleHam {
 # 2009-12-04 Changed from an "All" to a "First" match rule. Much more useful.
 sub RejectMessages {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
+
         # Skip deleted and non-spam messages
         next if $message->{deleted};
+
         #print STDERR "May reject message $id\n";
-        $message->RejectMessage() if Baruwa::Scanner::Config::Value( 'rejectmessage', $message );
+        $message->RejectMessage()
+          if Baruwa::Scanner::Config::Value('rejectmessage', $message);
     }
 }
-
 
 # Return true if all the messages in the batch are deleted!
 # Return false otherwise.
 sub Empty {
     my $this = shift;
-    my ( $id, $message );
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
-        if ( !$message->{deleted} ) {
+    my ($id, $message);
+    while (($id, $message) = each %{$this->{messages}}) {
+        if (!$message->{deleted}) {
+
             # Do not remove the next line, it is vital to reset "each()"!
-            keys %{ $this->{messages} };
+            keys %{$this->{messages}};
             return 0;
         }
     }
@@ -344,13 +352,14 @@ sub Empty {
 # This does not add the clean sig or anything like that.
 sub DeliverUnscanned {
     my $this = shift;
-    my ( $OutQ, @messages, $id, $message );
+    my ($OutQ, @messages, $id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted} || $message->{dontdeliver};
+
         # This is for mail we don't want to touch at all
-        if ( !$message->{scanmail} ) {
-            $OutQ = Baruwa::Scanner::Config::Value( 'outqueuedir', $message );
+        if (!$message->{scanmail}) {
+            $OutQ = Baruwa::Scanner::Config::Value('outqueuedir', $message);
             $message->DeliverUntouched($OutQ);
             $message->{deleted} = 1;    # This marks it for purging from disk
             push @messages, $message;
@@ -360,19 +369,20 @@ sub DeliverUnscanned {
 
     # Note this passes a list now, not a ref to a list
     Baruwa::Scanner::Mail::TellAbout(@messages);
-    Baruwa::Scanner::Log::InfoLog( "Unscanned: Delivered %d messages", scalar(@messages) )
+    Baruwa::Scanner::Log::InfoLog("Unscanned: Delivered %d messages",
+        scalar(@messages))
       if @messages;
 }
 
 sub DeliverUnscanned2 {
     my $this = shift;
 
-    my ( $OutQ, @messages, $id, $message );
+    my ($OutQ, @messages, $id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted} || $message->{dontdeliver};
 
-        if ( !$message->{scanme} ) {
+        if (!$message->{scanme}) {
 
             #print STDERR "Delivering unscanned message $id\n";
             # Strip it if necessary
@@ -386,11 +396,10 @@ sub DeliverUnscanned2 {
 
             # The message might have been changed by the RFC822 encapsulation
             # or the HTML stripping.
-            if ( $message->{bodymodified} ) {
+            if ($message->{bodymodified}) {
                 $message->DeliverModifiedBody('unscannedheader');
-            }
-            else {
-                $OutQ = Baruwa::Scanner::Config::Value( 'outqueuedir', $message );
+            } else {
+                $OutQ = Baruwa::Scanner::Config::Value('outqueuedir', $message);
                 $message->DeliverUnscanned($OutQ);
             }
             $message->{deleted} = 1;    # This marks it for purging from disk
@@ -400,7 +409,8 @@ sub DeliverUnscanned2 {
 
     # Note this passes a list now, not a ref to a list
     Baruwa::Scanner::Mail::TellAbout(@messages);
-    Baruwa::Scanner::Log::InfoLog( "Unscanned: Delivered %d messages", scalar(@messages) )
+    Baruwa::Scanner::Log::InfoLog("Unscanned: Delivered %d messages",
+        scalar(@messages))
       if @messages;
 }
 
@@ -409,22 +419,23 @@ sub Explode {
     my $this = shift;
     my ($Debug) = @_;
 
-    my ( $key, $message );
+    my ($key, $message);
 
     unless ($Debug) {
-        1 until waitpid( -1, WNOHANG ) == -1;
+        1 until waitpid(-1, WNOHANG) == -1;
     }
 
     #print STDERR "About to explode messages\n";
     #print STDERR "Ignore errors about failing to find EOCD signature\n";
     umask $global::MS->{work}->{fileumask};
-    while ( ( $key, $message ) = each %{ $this->{messages} } ) {
+    while (($key, $message) = each %{$this->{messages}}) {
         next if $message->{deleted};
+
         #print STDERR "About to explode message $key $message\n";
         $message->Explode();
 
         unless ($Debug) {
-            1 until waitpid( -1, WNOHANG ) == -1;
+            1 until waitpid(-1, WNOHANG) == -1;
         }
     }
     umask 0077;
@@ -438,30 +449,33 @@ sub VirusScan {
     return if $this->Empty();
 
     #Baruwa::Scanner::Log::InfoLog("Other Checks: Starting");
-    my $others = Baruwa::Scanner::SweepOther::ScanBatch( $this, 'scan' );
-    Baruwa::Scanner::Log::NoticeLog( "Other Checks: Found %d problems",
-        $others + 0 )
+    my $others = Baruwa::Scanner::SweepOther::ScanBatch($this, 'scan');
+    Baruwa::Scanner::Log::NoticeLog("Other Checks: Found %d problems",
+        $others + 0)
       if defined $others && $others > 0;
 
     # Call them with the scanning settings
     Baruwa::Scanner::Log::InfoLog("Virus and Content Scanning: Starting");
-    my $viruses = Baruwa::Scanner::SweepViruses::ScanBatch( $this, 'scan' );
-    Baruwa::Scanner::Log::NoticeLog( "Virus Scanning: Found %d infections", $viruses + 0 )
+    my $viruses = Baruwa::Scanner::SweepViruses::ScanBatch($this, 'scan');
+    Baruwa::Scanner::Log::NoticeLog("Virus Scanning: Found %d infections",
+        $viruses + 0)
       if defined $viruses && $viruses > 0;
 
     #Baruwa::Scanner::Log::InfoLog("Content Checks: Starting");
-    my $content = Baruwa::Scanner::SweepContent::ScanBatch( $this, 'scan' );
-    Baruwa::Scanner::Log::NoticeLog( "Content Checks: Found %d problems", $content + 0 )
+    my $content = Baruwa::Scanner::SweepContent::ScanBatch($this, 'scan');
+    Baruwa::Scanner::Log::NoticeLog("Content Checks: Found %d problems",
+        $content + 0)
       if defined $content && $content > 0;
 }
 
 # Print the infection reports for all the messages
 sub PrintInfections {
     my $this = shift;
-    my ( $key, $message );
+    my ($key, $message);
 
     #print "In PrintInfections(), this = $this\n";
-    while ( ( $key, $message ) = each %{ $this->{messages} } ) {
+    while (($key, $message) = each %{$this->{messages}}) {
+
         #print STDERR "Key is $key and Message is $message\n";
         $message->PrintInfections() unless $message->{deleted};
     }
@@ -470,27 +484,28 @@ sub PrintInfections {
 # Convert errors that occurred in the extraction process into infection reports
 sub ReportBadMessages {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted};
-        if ( $message->{cantparse} ) {
+        if ($message->{cantparse}) {
             $message->{otherreports}{""} .=
-              Baruwa::Scanner::Config::LanguageValue( $message, 'cantanalyze' )
+              Baruwa::Scanner::Config::LanguageValue($message, 'cantanalyze')
               . "\n";
             $message->{othertypes}{""} .= 'e';
         }
-        if ( $message->{toomanyattach} ) {
+        if ($message->{toomanyattach}) {
             $message->{otherreports}{""} .=
-              Baruwa::Scanner::Config::LanguageValue( $message,
-                'toomanyattachments' )
+              Baruwa::Scanner::Config::LanguageValue($message,
+                'toomanyattachments')
               . "\n";
             $message->{othertypes}{""} .= 'e';
         }
-        if ( $message->{badtnef} ) {
-            $message->{entityreports}{ $this->{tnefentity} } .=
-              Baruwa::Scanner::Config::LanguageValue( $message, 'badtnef' ) . "\n";
-            $message->{entitytypes}{ $this->{tnefentity} } .= 'e';
+        if ($message->{badtnef}) {
+            $message->{entityreports}{$this->{tnefentity}} .=
+              Baruwa::Scanner::Config::LanguageValue($message, 'badtnef')
+              . "\n";
+            $message->{entitytypes}{$this->{tnefentity}} .= 'e';
         }
     }
 }
@@ -501,28 +516,28 @@ sub ReportBadMessages {
 sub RemoveInfectedSpam {
     my $this = shift;
 
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
 
         #print STDERR "Message is infected\n" if $message->{infected};
         next unless $message->{infected};
         next
-          unless Baruwa::Scanner::Config::Value( 'keepspamarchiveclean', $message )
-          =~ /1/;
+          unless Baruwa::Scanner::Config::Value('keepspamarchiveclean',
+            $message) =~ /1/;
 
         #print STDERR "Deleting " . join(',',@{$message->{spamarchive}}) . "\n";
-        unlink @{ $message->{spamarchive} };    # Wipe the spamarchive files
-        @{ $this->{spamarchive} } = ();         # Wipe the spamarchive array
+        unlink @{$message->{spamarchive}};    # Wipe the spamarchive files
+        @{$this->{spamarchive}} = ();         # Wipe the spamarchive array
     }
 }
 
 # Set up the entity2file and entity2parent hashes in every message
 sub CreateEntitiesHelpers {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         $message->CreateEntitiesHelpers() unless $message->{deleted};
     }
 }
@@ -530,10 +545,11 @@ sub CreateEntitiesHelpers {
 # Print out the number of parts in each message
 sub PrintNumParts {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted};
+
         #print "Message $id has " . $message->{numberparts} . " parts\n";
     }
 }
@@ -541,13 +557,15 @@ sub PrintNumParts {
 # Print out the filenames in each message
 sub PrintFilenames {
     my $this = shift;
-    my ( $id,     $message );
-    my ( $fnames, @filenames );
+    my ($id,     $message);
+    my ($fnames, @filenames);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
+
         #next if $message->{deleted};
         #print STDERR "Message $id has filenames ";
-        @filenames = keys %{ $message->{file2entity} };
+        @filenames = keys %{$message->{file2entity}};
+
         #print STDERR join(", ", @filenames) . "\n";
     }
 }
@@ -555,19 +573,19 @@ sub PrintFilenames {
 # Print out the infected sections of all messages
 sub PrintInfectedSections {
     my $this = shift;
-    my ( $id, $message );
-    my ( $parts, $file, $entity );
+    my ($id, $message);
+    my ($parts, $file, $entity);
 
     #print STDERR "\nInfected sections are:\n";
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted};
         $parts = $message->{virusreports};
-        foreach $file ( keys %$parts ) {
+        foreach $file (keys %$parts) {
             $entity = $message->{file2entity}{$file};
             $entity->dump_skeleton();
         }
         $parts = $message->{otherreports};
-        foreach $file ( keys %$parts ) {
+        foreach $file (keys %$parts) {
             $entity = $message->{file2entity}{$file};
             $entity->dump_skeleton();
         }
@@ -578,10 +596,11 @@ sub PrintInfectedSections {
 # Clean ==> remove the viruses, it doesn't imply macro-virus disinfection.
 sub Clean {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted} || $message->{dontdeliver};
+
         #print STDERR "\nCleaning message $id\n";
         $message->Clean();
     }
@@ -591,10 +610,11 @@ sub Clean {
 # mail servers.
 sub ZipAttachments {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted} || $message->{dontdeliver};
+
         #print STDERR "\nZipping attachments, message $id\n";
         $message->ZipAttachments();
     }
@@ -604,9 +624,9 @@ sub ZipAttachments {
 # Might change this to do it at source later.
 sub CombineReports {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         $message->CombineReports() unless $message->{deleted};
     }
 }
@@ -615,18 +635,19 @@ sub CombineReports {
 # Quarantine decision has to be done on a per-message basis.
 sub QuarantineInfections {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted};
         next unless $message->{infected};
         next
           if $message->{silent}
           && !$message->{noisy}
-          && Baruwa::Scanner::Config::Value( 'quarantinesilent', $message ) !~ /1/;
+          && Baruwa::Scanner::Config::Value('quarantinesilent', $message) !~
+          /1/;
         next
-          unless Baruwa::Scanner::Config::Value( 'quarantineinfections', $message )
-          =~ /1/;
+          unless Baruwa::Scanner::Config::Value('quarantineinfections',
+            $message) =~ /1/;
 
         #print STDERR "Quarantining infections for $id\n";
         $global::MS->{quar}->StoreInfections($message);
@@ -638,18 +659,18 @@ sub QuarantineInfections {
 # Quarantine decision has to be done on a per-message basis.
 sub QuarantineModifiedBody {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next unless $message->{bodymodified};
         next if $message->{quarantinedinfections};    # Optimisation
         next
-          if Baruwa::Scanner::Config::Value( 'quarantinemodifiedbody', $message )
+          if Baruwa::Scanner::Config::Value('quarantinemodifiedbody', $message)
           !~ /1/;
 
         $global::MS->{quar}->StoreInfections($message);
-        Baruwa::Scanner::Log::NoticeLog( "Quarantining modified message for %s",
-            $id );
+        Baruwa::Scanner::Log::NoticeLog("Quarantining modified message for %s",
+            $id);
     }
 }
 
@@ -657,13 +678,12 @@ sub QuarantineModifiedBody {
 # (ideally) that Baruwa is wonderful :-)
 sub SignUninfected {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted} || $message->{dontdeliver};
-        if ( Baruwa::Scanner::Config::Value( 'signcleanmessages', $message )
-            && !$message->{infected} )
-        {
+        if (Baruwa::Scanner::Config::Value('signcleanmessages', $message)
+            && !$message->{infected}) {
             $message->IsAReply();
             $message->SignUninfected();
         }
@@ -677,12 +697,14 @@ sub SignUninfected {
 # Also tag the message for future deletion.
 sub DeliverUninfected {
     my $this = shift;
-    my ( $id, $message, @messages );
+    my ($id, $message, @messages);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted} || $message->{dontdeliver};
+
         #print STDERR "Possibly delivering uninfected message $id\n";
         next if $message->{infected};
+
         #print STDERR "Delivering uninfected message $id\n";
         $message->DeliverUninfected();
         $message->{deleted} = 1;
@@ -690,7 +712,8 @@ sub DeliverUninfected {
     }
 
     Baruwa::Scanner::Mail::TellAbout(@messages);
-    Baruwa::Scanner::Log::InfoLog( "Uninfected: Delivered %d messages", scalar(@messages) )
+    Baruwa::Scanner::Log::InfoLog("Uninfected: Delivered %d messages",
+        scalar(@messages))
       if @messages;
 }
 
@@ -704,12 +727,12 @@ sub DeliverUninfected {
 # warnings, so this is only a "semi-deletion".
 sub DeleteUnwantedCleaned {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if !$message->{infected} || $message->{deleted};
         next
-          if Baruwa::Scanner::Config::Value( 'delivercleanedmessages', $message )
+          if Baruwa::Scanner::Config::Value('delivercleanedmessages', $message)
           =~ /1/;
 
         #print STDERR "Deleting unwanted cleaned message $id\n";
@@ -723,9 +746,9 @@ sub DeleteUnwantedCleaned {
 # Set the "silent" flag as appropriate.
 sub FindSilentAndNoisyInfections {
     my $this = shift;
-    my ( $id, $message );
+    my ($id, $message);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if !$message->{infected};
         next if $message->{deleted} && !$message->{stillwarn};
         next if $message->{spamvirusreport};    # Silent exclude Spam-Viruses
@@ -737,20 +760,21 @@ sub FindSilentAndNoisyInfections {
 # and mark them for deletion from the queue.
 sub DeliverOrDeleteSilentExceptSpamViruses {
     my $this = shift;
-    my ( $id, $message, @messages );
+    my ($id, $message, @messages);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next
           if !$message->{silent}
           || $message->{noisy}
           || $message->{deleted}
           || $message->{dontdeliver};
 
-        #Baruwa::Scanner::Log::WarnLog("Deliversilent for %s is %s", $message->{id},
+        # Baruwa::Scanner::Log::WarnLog("Deliversilent for %s is %s", $message->{id},
         #                Baruwa::Scanner::Config::Value('deliversilent', $message));
-        if ( Baruwa::Scanner::Config::Value( 'deliversilent', $message ) ) {
+        if (Baruwa::Scanner::Config::Value('deliversilent', $message)) {
             $message->DeliverCleaned();
-            #print STDERR "Deleting silent-infected message " . $message->{id} . "\n";
+
+            # print STDERR "Deleting silent-infected message " . $message->{id} . "\n";
             push @messages, $message;
         }
         $message->{deleted}   = 1;
@@ -759,8 +783,9 @@ sub DeliverOrDeleteSilentExceptSpamViruses {
 
     if (@messages) {
         Baruwa::Scanner::Mail::TellAbout(@messages);
-        Baruwa::Scanner::Log::NoticeLog("Silent: Delivered %d messages containing " . "silent viruses",
-            scalar(@messages) );
+        Baruwa::Scanner::Log::NoticeLog(
+            "Silent: Delivered %d messages containing " . "silent viruses",
+            scalar(@messages));
     }
 }
 
@@ -768,17 +793,19 @@ sub DeliverOrDeleteSilentExceptSpamViruses {
 # unwanted ones will have already been deleted.
 sub DeliverCleaned {
     my $this = shift;
-    my ( $id, $message, @messages );
+    my ($id, $message, @messages);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted} || $message->{dontdeliver};
         $message->DeliverCleaned();
+
         #print STDERR "Deleting cleaned message " . $message->{id} . "\n";
         push @messages, $message;
     }
 
     Baruwa::Scanner::Mail::TellAbout(@messages);
-    Baruwa::Scanner::Log::NoticeLog( "Cleaned: Delivered %d cleaned messages", scalar(@messages) )
+    Baruwa::Scanner::Log::NoticeLog("Cleaned: Delivered %d cleaned messages",
+        scalar(@messages))
       if @messages;
 }
 
@@ -786,40 +813,42 @@ sub DeliverCleaned {
 # didn't like them. Only do this if we've been told to!
 sub WarnSenders {
     my $this = shift;
-    my ( $id, $message, $counter, $reasons, $warnviruses );
+    my ($id, $message, $counter, $reasons, $warnviruses);
 
     $counter = 0;
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted} && !$message->{stillwarn};
         next if $message->{silent}  && !$message->{noisy};
 
-        #print STDERR "Looking to warn sender of $id\n";
+        # print STDERR "Looking to warn sender of $id\n";
         next unless $message->{infected};
 
-        #print STDERR "Warning sender of $id who is " .  $message->{from} . "\n";
-        next unless Baruwa::Scanner::Config::Value( 'warnsenders', $message ) =~ /1/;
+        # print STDERR "Warning sender of $id who is " .  $message->{from} . "\n";
+        next
+          unless Baruwa::Scanner::Config::Value('warnsenders', $message) =~ /1/;
 
-        #print STDERR "2Warning sender of $id who is " .  $message->{from} . "\n";
+        # print STDERR "2Warning sender of $id who is " .  $message->{from} . "\n";
 
         # Count up the number of reasons why we want to warn the sender.
         # If it's 0 then don't warn them.
         # However, let the "warnvirussenders" take priority over the other 2.
         # So if there is a virus and they don't want to warn virus senders
         # then don't send a warning regardless of the other traps.
-        $warnviruses = Baruwa::Scanner::Config::Value( 'warnvirussenders', $message );
+        $warnviruses =
+          Baruwa::Scanner::Config::Value('warnvirussenders', $message);
         next if $message->{virusinfected} && !$warnviruses;
 
         $reasons = 0;
         $reasons++ if $message->{virusinfected} && $warnviruses;
         $reasons++
           if $message->{nameinfected}
-          && Baruwa::Scanner::Config::Value( 'warnnamesenders', $message );
+          && Baruwa::Scanner::Config::Value('warnnamesenders', $message);
         $reasons++
           if $message->{sizeinfected}
-          && Baruwa::Scanner::Config::Value( 'warnsizesenders', $message );
+          && Baruwa::Scanner::Config::Value('warnsizesenders', $message);
         $reasons++
           if $message->{otherinfected}
-          && Baruwa::Scanner::Config::Value( 'warnothersenders', $message );
+          && Baruwa::Scanner::Config::Value('warnothersenders', $message);
 
         next if $reasons == 0;
 
@@ -827,8 +856,9 @@ sub WarnSenders {
         $counter++;
     }
 
-    Baruwa::Scanner::Log::NoticeLog("Sender Warnings: Delivered %d warnings to " . "virus senders",
-        $counter )
+    Baruwa::Scanner::Log::NoticeLog(
+        "Sender Warnings: Delivered %d warnings to " . "virus senders",
+        $counter)
       if $counter;
 }
 
@@ -840,26 +870,28 @@ sub WarnSenders {
 sub WarnLocalPostmaster {
     my $this = shift;
 
-    my ( $id, $message, $counter );
-    my ( %notices, $notice,  %headers, %signatures, $email );
-    my ( @posties, $posties, $postie, $sig, %reasons, $reasons, $thisreason );
+    my ($id,      $message, $counter);
+    my (%notices, $notice,  %headers, %signatures, $email);
+    my (@posties, $posties, $postie, $sig, %reasons, $reasons, $thisreason);
 
     # Create all the email messages
     $counter = 0;
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if !$message->{infected};
         next if $message->{deleted} && !$message->{stillwarn};
-        next unless Baruwa::Scanner::Config::Value( 'sendnotices', $message ) =~ /1/;
-        $posties = Baruwa::Scanner::Config::Value( 'noticerecipient', $message );
-        if ( $posties =~ /^\s*$/ ) {
-            keys %{ $this->{messages} };    # Necessary line to reset "each()"
-                                            # Return if no posties defined
+        next
+          unless Baruwa::Scanner::Config::Value('sendnotices', $message) =~ /1/;
+        $posties = Baruwa::Scanner::Config::Value('noticerecipient', $message);
+        if ($posties =~ /^\s*$/) {
+            keys %{$this->{messages}};    # Necessary line to reset "each()"
+                                          # Return if no posties defined
             return;
         }
-        @posties = split( " ", $posties );
+        @posties = split(" ", $posties);
         foreach $postie (@posties) {
             $headers{$postie} = $message->CreatePostmasterHeaders($postie)
               unless $headers{$postie};
+
             # Change the subject to include the problem types
             %reasons = ();
             $reasons = "";
@@ -869,36 +901,41 @@ sub WarnLocalPostmaster {
             $reasons{sizeinfected}     = 1 if $message->{sizeinfected};
 
             $reasons{passwordprotected} = 1 if $message->{passwordprotected};
-            $reasons{nonpasswordprotected} = 1 if $message->{nonpasswordprotected};
-            foreach $thisreason ( sort keys %reasons ) {
+            $reasons{nonpasswordprotected} = 1
+              if $message->{nonpasswordprotected};
+            foreach $thisreason (sort keys %reasons) {
                 $reasons .= " : " if $reasons ne "";
-                $reasons .= Baruwa::Scanner::Config::LanguageValue( $message,
-                    "notice" . $thisreason );
+                $reasons .= Baruwa::Scanner::Config::LanguageValue($message,
+                    "notice" . $thisreason);
             }
             $headers{$postie} =~ s/\nSubject:.*?\n/\nSubject: $reasons\n/si;
 
             $notices{$postie} .= $message->CreatePostmasterNotice();
-            unless ( $signatures{$postie} ) {
-                $sig = Baruwa::Scanner::Config::Value( 'noticesignature', $message );
+            unless ($signatures{$postie}) {
+                $sig =
+                  Baruwa::Scanner::Config::Value('noticesignature', $message);
                 $sig =~ s/\\n/\n/g;
                 $signatures{$postie} = $sig;
             }
         }
         $counter++;
     }
-    while ( ( $postie, $notice ) = each %notices ) {
-        $email = $headers{$postie} . "\n" .
-          Baruwa::Scanner::Config::LanguageValue( $message, 'noticeprefix' ) . ": "
+    while (($postie, $notice) = each %notices) {
+        $email =
+            $headers{$postie} . "\n"
+          . Baruwa::Scanner::Config::LanguageValue($message, 'noticeprefix')
+          . ": "
           . $reasons . "\n"
           . $notices{$postie} . "\n"
           . $signatures{$postie} . "\n";
 
-        $global::MS->{mta}->SendMessageString( undef, $email, $postie )
+        $global::MS->{mta}->SendMessageString(undef, $email, $postie)
           or Baruwa::Scanner::Log::WarnLog(
-            "Could not notify postmaster from $postie, %s", $! );
+            "Could not notify postmaster from $postie, %s", $!);
     }
 
-    Baruwa::Scanner::Log::NoticeLog( "Notices: Warned about %d messages", $counter )
+    Baruwa::Scanner::Log::NoticeLog("Notices: Warned about %d messages",
+        $counter)
       if $counter;
 }
 
@@ -909,25 +946,24 @@ sub WarnLocalPostmaster {
 # 2. the cleaned ones, which is what I want to work on.
 sub DisinfectAndDeliver {
     my $this = shift;
-    my ( $id, $message, @interesting );
+    my ($id, $message, @interesting);
 
     # Delete all the unparsable messages from disk,
     # and all the messages with "whole body" infections
     # such as DoS attacks.
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         if (   $message->{deleted}
             || $message->{dontdeliver}
             || $message->{cantparse}
             || $message->{badtnef}
             || $message->{nameinfected}
             || $message->{cantdisinfect}
-            || ( $message->{allreports} && $message->{allreports}{""} )
-            || !Baruwa::Scanner::Config::Value( 'deliverdisinfected', $message ) )
-        {
-            $message->DeleteMessage();
-        }
-        else {
-            if ( $message->{virusinfected} ) {
+            || ($message->{allreports} && $message->{allreports}{""})
+            || !Baruwa::Scanner::Config::Value('deliverdisinfected', $message))
+        {   $message->DeleteMessage();
+        } else {
+            if ($message->{virusinfected}) {
+
                 #print STDERR "Found message $id to be worth disinfecting\n";
                 push @interesting, $id;
             }
@@ -937,13 +973,15 @@ sub DisinfectAndDeliver {
     # Nothing to do?
     return unless @interesting;
 
-    Baruwa::Scanner::Log::NoticeLog("Disinfection: Attempting to disinfect %d " . "messages",
-        scalar(@interesting) );
+    Baruwa::Scanner::Log::NoticeLog(
+        "Disinfection: Attempting to disinfect %d " . "messages",
+        scalar(@interesting));
 
     # Save the infection reports, they will be needed to compare
     # with the post-disinfection reports.
     foreach $id (@interesting) {
         $message = $this->{messages}{$id};
+
         # Move its reports somewhere safe
         $message->{oldviruses} = $message->{virusreports};
         $message->{virusreports}  = {};    # I want a new hashref
@@ -955,7 +993,7 @@ sub DisinfectAndDeliver {
     # This should not produce any output reports at all.
     #print STDERR "Calling disinfection code for messages " .
     #             join(', ', @interesting) . "\n";
-    Baruwa::Scanner::SweepViruses::ScanBatch( $this, 'disinfect' );
+    Baruwa::Scanner::SweepViruses::ScanBatch($this, 'disinfect');
 
     # Throw away the disinfection reports if there are any
     foreach $id (@interesting) {
@@ -963,11 +1001,12 @@ sub DisinfectAndDeliver {
     }
 
     # Now re-scan the batch to find revised virus reports
-    my $viruses = Baruwa::Scanner::SweepViruses::ScanBatch( $this, 'rescan' );
+    my $viruses = Baruwa::Scanner::SweepViruses::ScanBatch($this, 'rescan');
 
     #print STDERR "Revised scanning found $viruses viruses\n";
-    Baruwa::Scanner::Log::NoticeLog( "Disinfection: Rescan found only %d viruses",
-        $viruses + 0 );
+    Baruwa::Scanner::Log::NoticeLog(
+        "Disinfection: Rescan found only %d viruses",
+        $viruses + 0);
 
     # Look through the original list of reports, finding reports that
     # were present in the old list that are not in the new list.
@@ -980,14 +1019,14 @@ sub DisinfectAndDeliver {
 sub ArchiveToFilesystem {
     my $this = shift;
 
-    my ( $id, $message, $DidAnything, $log );
+    my ($id, $message, $DidAnything, $log);
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted};
         $DidAnything = $message->ArchiveToFilesystem();
         $log .= " " . $id if $DidAnything;
     }
-    Baruwa::Scanner::Log::NoticeLog( "Saved archive copies of%s", $log ) if $log;
+    Baruwa::Scanner::Log::NoticeLog("Saved archive copies of%s", $log) if $log;
 }
 
 # Strip the HTML out of messages that need to be stripped,
@@ -995,8 +1034,8 @@ sub ArchiveToFilesystem {
 # or because striphtml was one of the spam actions.
 sub StripHTML {
     my $this = shift;
-    my ( $id, $message );
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    my ($id, $message);
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted} || $message->{dontdeliver};
         next unless $message->{needsstripping};
         $message->StripHTML();
@@ -1006,8 +1045,8 @@ sub StripHTML {
 # Disarm some of the HTML tags in messages.
 sub DisarmHTML {
     my $this = shift;
-    my ( $id, $message );
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    my ($id, $message);
+    while (($id, $message) = each %{$this->{messages}}) {
 
         #print STDERR "In MessageBatch, tags are " .
         #             $message->{tagstoconvert} . "\n";
@@ -1021,8 +1060,8 @@ sub DisarmHTML {
 # message, if this is one of their spam/ham actions.
 sub Encapsulate {
     my $this = shift;
-    my ( $id, $message );
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    my ($id, $message);
+    while (($id, $message) = each %{$this->{messages}}) {
         next if $message->{deleted} || $message->{dontdeliver};
         next unless $message->{needsencapsulating};
         $message->EncapsulateMessage();
@@ -1033,8 +1072,8 @@ sub Encapsulate {
 # so we know to keep the cache record for much longer.
 sub AddVirusInfoToCache {
     my $this = shift;
-    my ( $id, $message );
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    my ($id, $message);
+    while (($id, $message) = each %{$this->{messages}}) {
         Baruwa::Scanner::SA::AddVirusStats($message);
     }
 }
@@ -1044,19 +1083,18 @@ sub AddVirusInfoToCache {
 # that the lookup can be a Custom Function that has "side-effects" such
 # as logging data about the message.
 sub LastLookup {
-    my $this = shift;
+    my $this  = shift;
     my $start = time;
-    my ( $id, $message );
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
-        Baruwa::Scanner::Config::Value( 'lastlookup', $message );
+    my ($id, $message);
+    while (($id, $message) = each %{$this->{messages}}) {
+        Baruwa::Scanner::Config::Value('lastlookup', $message);
     }
 
-    unless ( Baruwa::Scanner::Config::IsSimpleValue('lastlookup')
-        && !Baruwa::Scanner::Config::Value('lastlookup') )
-    {
+    unless (Baruwa::Scanner::Config::IsSimpleValue('lastlookup')
+        && !Baruwa::Scanner::Config::Value('lastlookup')) {
         Baruwa::Scanner::Log::InfoLog(
             "\"Always Looked Up Last\" took %.2f seconds",
-            time - $start + 0.0 )
+            time - $start + 0.0)
           if Baruwa::Scanner::Config::Value('logspeed') =~ /1/;
     }
 
@@ -1064,7 +1102,7 @@ sub LastLookup {
     # Putting in $this is against the rules as it isn't a message,
     # but it doesn't actually cause any problems and gives MailWatch
     # a way of getting hold of the batch statistics.
-    Baruwa::Scanner::Config::Value( 'lastafterbatch', $this );
+    Baruwa::Scanner::Config::Value('lastafterbatch', $this);
 }
 
 sub CreateEicarBatch {
@@ -1081,24 +1119,23 @@ sub CreateEicarBatch {
     # Message number = 1
     # Path = irrelevant as we're not actually reading anything
     # It's a fake that we simulate ==> 1
-    my $MessageDir = tempdir( 'MSlintXXXXXX', TMPDIR => 1, CLEANUP => 1 );
-    my $newmessage = Baruwa::Scanner::Message->new( 1, $MessageDir, 0, 1 );
-    @{ $newmessage->{headers} }  = ();
-    @{ $newmessage->{to} }       = ();
-    @{ $newmessage->{touser} }   = ();
-    @{ $newmessage->{todomain} } = ();
+    my $MessageDir = tempdir('MSlintXXXXXX', TMPDIR => 1, CLEANUP => 1);
+    my $newmessage = Baruwa::Scanner::Message->new(1, $MessageDir, 0, 1);
+    @{$newmessage->{headers}}  = ();
+    @{$newmessage->{to}}       = ();
+    @{$newmessage->{touser}}   = ();
+    @{$newmessage->{todomain}} = ();
     $newmessage->{size}       = 200;
     $newmessage->{from}       = 'sender@example.com';
     $newmessage->{fromuser}   = 'sender';
     $newmessage->{fromdomain} = 'example.com';
-    push @{ $newmessage->{to} },       'recip@example.com';
-    push @{ $newmessage->{touser} },   'recip';
-    push @{ $newmessage->{todomain} }, 'example.com';
+    push @{$newmessage->{to}},       'recip@example.com';
+    push @{$newmessage->{touser}},   'recip';
+    push @{$newmessage->{todomain}}, 'example.com';
     $newmessage->{clientip} = '10.1.1.1';
     $newmessage->{subject}  = 'Virus Scanner Test Message';
-    push @{ $newmessage->{headers} },
-      (
-        'From: <sender@example.com>',
+    push @{$newmessage->{headers}},
+      ( 'From: <sender@example.com>',
         'To: <recip@example.com>',
         'Subject: Virus Scanner Test Message',
         'Mime-Version: 1.0',
@@ -1115,13 +1152,14 @@ sub CreateEicarBatch {
     $newmessage->WriteHeaderFile();
 
     # Create a file of the body
-    my ( $fh, $temporaryname );
-    ( $fh, $temporaryname ) = tempfile()
+    my ($fh, $temporaryname);
+    ($fh, $temporaryname) = tempfile()
       or die "Could not create temp file $temporaryname for test message, $!";
 
    # This is a Base64-encoded, then ROT13-encoded copy of the EICAR test string.
    # Had to ROT13 it, otherwise new clamd detects it and quarantines this file.
-    my $eicarstring = "JQICVINyDRSDJmEpHScLAGDbHS4cA0AQXGq9WRIWD0SFYIAHDH5RDIWRYHSBIRyJFIWIHl1HEIAH\nYHMWGRHuWRteFPb=\n";
+    my $eicarstring =
+      "JQICVINyDRSDJmEpHScLAGDbHS4cA0AQXGq9WRIWD0SFYIAHDH5RDIWRYHSBIRyJFIWIHl1HEIAH\nYHMWGRHuWRteFPb=\n";
     $eicarstring =~ tr[a-zA-Z][n-za-mN-ZA-M];    # Undo ROT13 encoding
     print $fh $eicarstring;
 
@@ -1152,33 +1190,38 @@ sub ClearOutProcessedDatabase {
     #ProcDBH->prepare("DELETE FROM processing WHERE (id=?)");
     Baruwa::Scanner::Log::DieLog(
         "Database complained about this: %s. I suggest you delete your %s file and let me re-create it for you",
-        $DBI::errstr, Baruwa::Scanner::Config::Value("procdbname")
+        $DBI::errstr,
+        Baruwa::Scanner::Config::Value("procdbname")
     ) unless $sth;
 
-    my ( $id, $message, $count, %gotridof );
+    my ($id, $message, $count, %gotridof);
     $count = 0;
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         next unless $message;
+
         # Skip this message if it succeeded or failed due to global failure,
         # e.g. disk space.
         next if $message->{abandoned};
+
         #print STDERR "Delete1: Rows = $rows\n";
         $gotridof{$id} = 1;
     }
 
-    foreach $id ( split " ", $this->{deleted} ) {
+    foreach $id (split " ", $this->{deleted}) {
         next unless $id;
+
         #print STDERR "Delete2: Rows = $rows\n";
         $gotridof{$id} = 1;
     }
 
-    foreach $id ( keys %gotridof ) {
+    foreach $id (keys %gotridof) {
         next unless $id;
         $sth->execute("$id");
     }
 
     $count = keys %gotridof;
-    Baruwa::Scanner::Log::InfoLog( "Deleted %d messages from processing-database", $count );
+    Baruwa::Scanner::Log::InfoLog(
+        "Deleted %d messages from processing-database", $count);
 }
 
 # If we are killed while processing a batch, then decrement the counter by 1
@@ -1190,22 +1233,24 @@ sub DecrementProcDB {
     return unless $this;
     return unless $Baruwa::Scanner::ProcDBH;
 
-    my ( $id, $message, @attempts );
+    my ($id, $message, @attempts);
 
     my $selectsth = $Baruwa::Scanner::SthSelectCount;
     my $deletesth = $Baruwa::Scanner::SthDeleteId;
     my $updatesth = $Baruwa::Scanner::SthDecrementId;
 
-    while ( ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (($id, $message) = each %{$this->{messages}}) {
         $selectsth->execute($id);
         @attempts = $selectsth->fetchrow_array();
         if (@attempts) {
+
             # There is a record, so delete it or decrement it
-            if ( $attempts[0] > 1 ) {
+            if ($attempts[0] > 1) {
+
                 # Decrement it
                 $updatesth->execute($id);
-            }
-            else {
+            } else {
+
                 # Delete it
                 $deletesth->execute($id);
             }
@@ -1213,8 +1258,9 @@ sub DecrementProcDB {
     }
 
     # Remove all the messages which have already been deleted from the batch.
-    foreach $id ( split " ", $this->{deleted} ) {
+    foreach $id (split " ", $this->{deleted}) {
         next unless $id;
+
         # Delete this $message->{id} from the database table
         $deletesth->execute($id);
     }
@@ -1228,11 +1274,13 @@ sub DropBatch {
 
     return unless $this;
 
-    while ( my ( $id, $message ) = each %{ $this->{messages} } ) {
+    while (my ($id, $message) = each %{$this->{messages}}) {
         $message->{deleted}      = 1;
         $message->{gonefromdisk} = 1;    # Don't try to delete the original
-        $message->{store}->Unlock();    # Unlock it so other processes can pick it up
+        $message->{store}->Unlock()
+          ;    # Unlock it so other processes can pick it up
     }
+
     # This is a very good place for a snooze.
     # If the entire batch has been abandoned, it will instantly loop all the
     # way around and try to pick up the same messages into a new batch.

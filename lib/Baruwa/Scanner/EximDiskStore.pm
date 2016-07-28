@@ -32,7 +32,6 @@ use File::Basename;
 use Baruwa::Scanner::Lock;
 use Baruwa::Scanner::Config;
 
-
 our $VERSION = '4.086000';
 
 # List of pending delete operations so we can clear up properly when killed
@@ -40,15 +39,15 @@ our @DeletesPending = ();
 
 # Attributes are
 #
-# $dir			set by new (incoming queue dir in case we use it)
-# $dname		set by new (filename component only)
-# $hname		set by new (filename component only)
-# $tname		set by new (filename component only)
-# $dpath		set by new (full path)
-# $hpath		set by new (full path)
-# $size			set by size
-# $inhhandle		set by lock
-# $indhandle		set by lock
+# $dir          set by new (incoming queue dir in case we use it)
+# $dname        set by new (filename component only)
+# $hname        set by new (filename component only)
+# $tname        set by new (filename component only)
+# $dpath        set by new (full path)
+# $hpath        set by new (full path)
+# $size         set by size
+# $inhhandle        set by lock
+# $indhandle        set by lock
 #
 #
 
@@ -56,7 +55,7 @@ our @DeletesPending = ();
 # Takes message id and directory name.
 sub new {
     my $type = shift;
-    my ( $id, $dir ) = @_;
+    my ($id, $dir) = @_;
     my $this = {};
     my $mta  = $global::MS->{mta};
     $this->{dir} = $dir;
@@ -101,9 +100,15 @@ sub Lock {
 
     #print STDERR "About to lock " . $this->{hpath} . " and " .
     #             $this->{dpath} . "\n";
-    Baruwa::Scanner::Lock::openlock($this->{indhandle}, '+<' . $this->{dpath}, 'w', 'quiet') or return 0;
+    Baruwa::Scanner::Lock::openlock($this->{indhandle}, '+<' . $this->{dpath},
+        'w', 'quiet')
+      or return 0;
+
     #print STDERR "Got dlock\n";
-    Baruwa::Scanner::Lock::openlock($this->{inhhandle}, '+<' . $this->{hpath},' w', 'quiet' ) or return 0;
+    Baruwa::Scanner::Lock::openlock($this->{inhhandle}, '+<' . $this->{hpath},
+        ' w', 'quiet')
+      or return 0;
+
     #print STDERR "Got hlock\n";
     return 0 unless $this->{inhhandle} && $this->{indhandle};
     return 1;
@@ -113,8 +118,8 @@ sub Lock {
 sub Unlock {
     my $this = shift;
 
-    Baruwa::Scanner::Lock::unlockclose( $this->{indhandle} );
-    Baruwa::Scanner::Lock::unlockclose( $this->{inhhandle} );
+    Baruwa::Scanner::Lock::unlockclose($this->{indhandle});
+    Baruwa::Scanner::Lock::unlockclose($this->{inhhandle});
 }
 
 # Delete a message (from incoming queue)
@@ -123,11 +128,11 @@ sub Delete {
 
     # Maintain a list of pending deletes so we can clear up properly
     # when killed
-    @DeletesPending = ( $this->{hpath}, $this->{dpath}, $this->{lpath} );
+    @DeletesPending = ($this->{hpath}, $this->{dpath}, $this->{lpath});
 
-    unlink( $this->{hpath} );
-    unlink( $this->{dpath} );
-    unlink( $this->{lpath} );
+    unlink($this->{hpath});
+    unlink($this->{dpath});
+    unlink($this->{lpath});
 
     # Clear list of pending deletes
     @DeletesPending = ();
@@ -146,23 +151,23 @@ sub DeleteUnlock {
 
     # Maintain a list of pending deletes so we can clear up properly
     # when killed
-    @DeletesPending = ( $this->{hpath}, $this->{dpath}, $this->{lpath} );
+    @DeletesPending = ($this->{hpath}, $this->{dpath}, $this->{lpath});
 
     # Once -H file is unlinked Exim won't start to try anything
     # with this message...
     # NB: unlinking *can* fail in some cases, even if we're root.
-    unlink( $this->{hpath} );
+    unlink($this->{hpath});
 
     #  or Baruwa::Scanner::Log::WarnLog("Unlinking %s failed: %s",
     #                               $this->{hpath}, $!);
-    Baruwa::Scanner::Lock::unlockclose( $this->{inhhandle} );
+    Baruwa::Scanner::Lock::unlockclose($this->{inhhandle});
 
     # Now lose the -D file...
-    unlink( $this->{dpath} );
+    unlink($this->{dpath});
 
     #  or Baruwa::Scanner::Log::WarnLog("Unlinking %s failed: %s",
     #                               $this->{dpath}, $!);
-    Baruwa::Scanner::Lock::unlockclose( $this->{indhandle} );
+    Baruwa::Scanner::Lock::unlockclose($this->{indhandle});
 
     # What happens if Exim opens -H file before we unlink it,
     # opens -D file before we unlink it, then gets pre-empted
@@ -171,7 +176,7 @@ sub DeleteUnlock {
     # What happens if we do the same?
 
     #print STDERR "Per-message log file is " . $this->{lpath} . "\n";
-    unlink( $this->{lpath} );
+    unlink($this->{lpath});
 
     # Clear list of pending deletes
     @DeletesPending = ();
@@ -190,10 +195,9 @@ sub DoPendingDeletes {
 sub OutQDir {
     my $name = shift;
 
-    if ( Baruwa::Scanner::Config::Value('spliteximspool') ) {
-        return '/' . substr( $name, -13, 1 ) . '/';
-    }
-    else {
+    if (Baruwa::Scanner::Config::Value('spliteximspool')) {
+        return '/' . substr($name, -13, 1) . '/';
+    } else {
         return '/';
     }
 }
@@ -209,32 +213,32 @@ sub LinkData {
     my $this = shift;
     my ($OutQ) = @_;
 
-    my ( $InDPath, $OutDPath );
+    my ($InDPath, $OutDPath);
 
     $InDPath = $this->{dpath};
 
     #$OutDPath = $OutQ . '/' . $this->{dname};
-    $OutDPath = OutQName( $OutQ, $this->{dname} );
+    $OutDPath = OutQName($OutQ, $this->{dname});
 
     #Baruwa::Scanner::Log::DebugLog("LinkData to $OutDPath");
 
     # If the link fails for some reason, then skip this message and
     # move on to the next one. This one will get delivered when
     # the previous one with the same name has been delivered.
-    unless ( link $InDPath, $OutDPath ) {
+    unless (link $InDPath, $OutDPath) {
+
         # The link failed, so get the inode numbers of the two files
-        my ( $ininode, $outinode );
-        $ininode  = ( stat $InDPath )[1];
-        $outinode = ( stat $OutDPath )[1];
+        my ($ininode, $outinode);
+        $ininode  = (stat $InDPath)[1];
+        $outinode = (stat $OutDPath)[1];
 
         # If the files are the same, then just quietly delete the incoming one
-        if ( $ininode == $outinode ) {
+        if ($ininode == $outinode) {
             $this->DeleteUnlock();
-        }
-        else {
+        } else {
             Baruwa::Scanner::Log::WarnLog(
                     "Failed to link message body between queues "
-                  . "($OutDPath --> $InDPath)" );
+                  . "($OutDPath --> $InDPath)");
         }
         return;
     }
@@ -245,43 +249,44 @@ sub LinkData {
 # Passed the parent message object we are working on, and the outqueue dir.
 sub WriteHeader {
     my $this = shift;
-    my ( $message, $Outq ) = @_;
+    my ($message, $Outq) = @_;
 
-    my ( $hfile, $tfile, $Tf );
+    my ($hfile, $tfile, $Tf);
 
     #print STDERR "Writing header for message " . $message->{id} . "\n";
     #$tfile = $Outq . '/' . $this->{tname};
     #$hfile = $Outq . '/' . $this->{hname};
-    $tfile = OutQName( $Outq, $this->{tname} );
-    $hfile = OutQName( $Outq, $this->{hname} );
+    $tfile = OutQName($Outq, $this->{tname});
+    $hfile = OutQName($Outq, $this->{hname});
 
     #print STDERR "tfile = $tfile and hfile = $hfile\n";
     #Baruwa::Scanner::Log::DebugLog("WriteHeader to $hfile");
 
     $Tf = new FileHandle;
-    Baruwa::Scanner::Lock::openlock( $Tf, ">$tfile", "w" )
-      or Baruwa::Scanner::Log::DieLog( "Cannot create + lock clean tempfile %s, %s",
-        $tfile, $! );
+    Baruwa::Scanner::Lock::openlock($Tf, ">$tfile", "w")
+      or
+      Baruwa::Scanner::Log::DieLog("Cannot create + lock clean tempfile %s, %s",
+        $tfile, $!);
 
-    $Tf->print( Baruwa::Scanner::Sendmail::CreateQf($message) )
+    $Tf->print(Baruwa::Scanner::Sendmail::CreateQf($message))
       or Baruwa::Scanner::Log::DieLog(
         "Failed to write headers for unscanned " . "message %s, %s",
-        $message->{id}, $! );
+        $message->{id}, $!);
     Baruwa::Scanner::Lock::unlockclose($Tf);
 
     # baruwa mods
     chmod 0640, "$tfile";
     rename "$tfile",
       "$hfile"
-      or Baruwa::Scanner::Log::DieLog( "Cannot rename clean %s to %s, %s",
-        $tfile, $hfile, $! );
+      or Baruwa::Scanner::Log::DieLog("Cannot rename clean %s to %s, %s",
+        $tfile, $hfile, $!);
 }
 
 # Return the size of the message
 sub size {
     my $this = shift;
 
-    my ( $size, $hpath, $dpath );
+    my ($size, $hpath, $dpath);
 
     # Return previous calculated value if it exists
     $size = $this->{size};
@@ -301,7 +306,7 @@ sub size {
 # LEOH 26/03/2003 We do not have dpath in other mailers
 sub dsize {
     my $this = shift;
-    return ( stat( $this->{dpath} ) )[7];
+    return (stat($this->{dpath}))[7];
 }
 
 # Read the message body into an array.
@@ -309,16 +314,16 @@ sub dsize {
 # Read up to at least "$max" bytes, if the 2nd parameter is non-zero.
 sub ReadBody {
     my $this = shift;
-    my ( $body, $max ) = @_;
+    my ($body, $max) = @_;
     my $dh = $this->{indhandle};
 
-    seek( $dh, 0, 0 );    # Rewind the file
+    seek($dh, 0, 0);    # Rewind the file
 
     my $line = <$dh>;
 
     # FIXME: check that id is correct here
 
-    my @configwords = split( " ", $max );
+    my @configwords = split(" ", $max);
     $max = $configwords[0];
     $max =~ s/_//g;
     $max =~ s/k$/000/ig;
@@ -330,13 +335,13 @@ sub ReadBody {
     # Only use $max if it was set non-zero
     if ($max) {
         my $size = 0;
-        while ( defined( $line = <$dh> ) && $size < $max ) {
+        while (defined($line = <$dh>) && $size < $max) {
             push @{$body}, $line;
             $size += length($line);
         }
-    }
-    else {
+    } else {
         while (<$dh>) {
+
             # End of line characters are already there, so don't add them
             #push @{$body}, $_ . "\n";
             push @{$body}, $_;
@@ -349,23 +354,23 @@ sub ReadBody {
 # and the outgoing queue directory.
 sub WriteMIMEBody {
     my $this = shift;
-    my ( $id, $entity, $outq ) = @_;
+    my ($id, $entity, $outq) = @_;
 
-    my ( $Df, $dfile );
+    my ($Df, $dfile);
 
     #$dfile = $outq . '/' . $this->{dname};
-    $dfile = OutQName( $outq, $this->{dname} );
+    $dfile = OutQName($outq, $this->{dname});
 
     #Baruwa::Scanner::Log::DebugLog("WriteMIMEBody $id to $dfile");
     #print STDERR "Writing MIME body of \"$id\" to $dfile\n";
 
     $Df = new FileHandle;
-    Baruwa::Scanner::Lock::openlock( $Df, ">$dfile", "w" )
-      or Baruwa::Scanner::Log::DieLog( "Cannot create + lock clean body %s, %s",
-        $dfile, $! );
+    Baruwa::Scanner::Lock::openlock($Df, ">$dfile", "w")
+      or Baruwa::Scanner::Log::DieLog("Cannot create + lock clean body %s, %s",
+        $dfile, $!);
 
     #print STDERR "File handle = $Df\n";
-    $Df->print( $global::MS->{mta}->DFileName($id) . "\n" );
+    $Df->print($global::MS->{mta}->DFileName($id) . "\n");
     $entity->print_body($Df);
     Baruwa::Scanner::Lock::unlockclose($Df);
 }
@@ -374,7 +379,7 @@ sub WriteMIMEBody {
 # This has to be done in a subprocess in order to avoid breaking POSIX locks.
 # XXX: maybe conditionalize fork on the lock type?
 sub CopyToDir {
-    my ( $this, $dir, $file, $uid, $gid, $changeowner ) = @_;
+    my ($this, $dir, $file, $uid, $gid, $changeowner) = @_;
     my $hpath = $this->{hpath};
     my $dpath = $this->{dpath};
     my $hfile = basename($hpath);
@@ -383,17 +388,17 @@ sub CopyToDir {
     Baruwa::Scanner::Log::DieLog("fork: $!") if not defined $pid;
     if ($pid) {
         waitpid $pid, 0;
-        return ( "$dir/$hfile", "$dir/$dfile" );
+        return ("$dir/$hfile", "$dir/$dfile");
     }
-    copy( $hpath, "$dir/$hfile" );
-    copy( $dpath, "$dir/$dfile" );
+    copy($hpath, "$dir/$hfile");
+    copy($dpath, "$dir/$dfile");
     chown $uid, $gid, "$dir/$hfile", "$dir/$dfile" if $changeowner;
     exit;
 }
 
 # Write a message to a filehandle
 sub WriteEntireMessage {
-    my ( $this, $message, $handle, $pipe ) = @_;
+    my ($this, $message, $handle, $pipe) = @_;
 
     # Do this in a subprocess in order to avoid breaking POSIX locks.
     # XXX: maybe conditionalize fork on the lock type & $pipe?
@@ -402,8 +407,7 @@ sub WriteEntireMessage {
     if ($pid) {
         if ($pipe) {
             $handle->reader();
-        }
-        else {
+        } else {
             waitpid $pid, 0;
         }
         return $pid;
@@ -411,7 +415,7 @@ sub WriteEntireMessage {
 
     $handle->writer() if $pipe;
 
-    copy( $message->{headerspath}, $handle );
+    copy($message->{headerspath}, $handle);
 
     my $body = new IO::File $this->{dpath}, "r";
 
@@ -420,9 +424,9 @@ sub WriteEntireMessage {
     # play nicely with stdio operations such as $body->getline. The
     # magic number 19 is from the length of NNNNNN-NNNNNN-NN-D\n.
     my $discard;
-    sysread( $body, $discard, 19 );
+    sysread($body, $discard, 19);
 
-    copy( $body, $handle );
+    copy($body, $handle);
 
     # Now we have to ensure there was a newline on the end of the $handle
     # or the $body. $body is an IO::File which makes it an IO::Seekable too!
@@ -431,8 +435,8 @@ sub WriteEntireMessage {
     my $lasteol = ' ';
 
     # UTF16 may bite here, beware...
-    $body->sysseek( -1, 2 );    # 2 = SEEK_END. -1 ==> just before last byte
-    if ( $body->sysread( $lasteol, 1 ) && $lasteol !~ /[\n\r]/s ) {
+    $body->sysseek(-1, 2);    # 2 = SEEK_END. -1 ==> just before last byte
+    if ($body->sysread($lasteol, 1) && $lasteol !~ /[\n\r]/s) {
         $lasteol = "\n";
         $body->syswrite($lasteol);
     }
@@ -446,17 +450,16 @@ sub WriteEntireMessage {
 # But it doesn't happen very often anyway.
 sub CopyEntireMessage {
     my $this = shift;
-    my ( $message, $targetdir, $targetfile, $uid, $gid, $changeowner ) = @_;
+    my ($message, $targetdir, $targetfile, $uid, $gid, $changeowner) = @_;
 
-    if ( Baruwa::Scanner::Config::Value('storeentireasdfqf') ) {
-        return $this->CopyToDir( $targetdir, $targetfile, $uid, $gid,
-            $changeowner );
-    }
-    else {
+    if (Baruwa::Scanner::Config::Value('storeentireasdfqf')) {
+        return $this->CopyToDir($targetdir, $targetfile, $uid, $gid,
+            $changeowner);
+    } else {
         my $target = new IO::File "$targetdir/$targetfile", "w";
         Baruwa::Scanner::Log::DieLog("writing to $targetdir/$targetfile: $!")
           if not defined $target;
-        $this->WriteEntireMessage( $message, $target );
+        $this->WriteEntireMessage($message, $target);
         return "$targetdir/$targetfile";
     }
 
@@ -468,54 +471,54 @@ sub CopyEntireMessage {
 # as it's not part of the DiskStore.
 sub ReadMessageHandle {
     my $this = shift;
-    my ( $message, $handle ) = @_;
+    my ($message, $handle) = @_;
 
     my $hhandle = $message->{headerspath};
     my $dhandle = $this->{dpath};
 
     # File::Copy does not close our handles
     # so locks are preserved
-    copy( $hhandle, $handle );
+    copy($hhandle, $handle);
 
     # We have to strip the message-ID off the beginning of the file
     # using sysread since that is what File::Copy uses and it doesn't
     # play nicely with stdio operations such as $body->getline. The
     # magic number 19 is from the length of NNNNNN-NNNNNN-NN-D\n.
-    my $from_h = \do { local *FH1 };
-    open( $from_h, "< $dhandle" );
+    my $from_h = \do {local *FH1};
+    open($from_h, "< $dhandle");
     binmode $from_h or die "($!,$^E)";
 
-    sysseek( $from_h, 19, 0 );
+    sysseek($from_h, 19, 0);
 
     my $size;
     my $buf     = "";
     my $lasteol = ' ';
     my $dlength = -s $dhandle;    # Catch case where -D file is 0 (ie 19) bytes
     $size = $dlength;
-    $size = 1024 if ( $size < 512 );
+    $size = 1024 if ($size < 512);
     $size = 1024 * 1024 * 2 if $size > 1024 * 1024 * 2;
     local ($\) = '';
     my $to_h = $handle;
 
-    for ( ; ; ) {
-        my ( $r, $w, $t );
-        $r = sysread( $from_h, $buf, $size );
+    for (;;) {
+        my ($r, $w, $t);
+        $r = sysread($from_h, $buf, $size);
         last unless $r;
-        $lasteol = substr( $buf, -1 );    # Copy last byte of string $buf
-        for ( $w = 0 ; $w < $r ; $w += $t ) {
-            $t = syswrite( $to_h, $buf, $r - $w, $w );
+        $lasteol = substr($buf, -1);    # Copy last byte of string $buf
+        for ($w = 0; $w < $r; $w += $t) {
+            $t = syswrite($to_h, $buf, $r - $w, $w);
         }
     }
 
     # Need to ensure the end of the file is and new-line character,
     # unless it's a 0 length file.
-    if ( $lasteol !~ /[\n\r]/s && $dlength > 19 ) {
+    if ($lasteol !~ /[\n\r]/s && $dlength > 19) {
         $lasteol = "\n";
-        syswrite( $to_h, $lasteol );
+        syswrite($to_h, $lasteol);
     }
 
     # rewind tmpfile to read it later
-    sysseek( $handle, 0, 0 );    # Rewind the file
+    sysseek($handle, 0, 0);    # Rewind the file
 
     return 1;
 }
@@ -535,13 +538,13 @@ sub ReadMessagePipe {
         $!
     ) unless defined $pipe;
 
-    my $pid = $this->WriteEntireMessage( $message, $pipe, 'pipe' );
+    my $pid = $this->WriteEntireMessage($message, $pipe, 'pipe');
 
     # We have to tell the caller what the child's pid is in order to
     # reap it. Although IO::Pipe does this for us when it is told to
     # fork and exec, it unfortunately doesn't have a neat hook for us
     # to tell it the pid when we do the fork. Bah.
-    return ( $pipe, $pid );
+    return ($pipe, $pid);
 
 }
 

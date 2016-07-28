@@ -33,10 +33,9 @@ our $VERSION = '4.086000';
 #my %spamlistfailures; # Number of consecutive failures for both lists
 
 # Queues of history of spam list responses so we can detect failures
-my %RBLsuccessqueue;    # values are lists of failure flags (1=failed)
-my %RBLsuccessqsum;     # current sum of failure flags
-my %RBLdead;            # has the RBL been killed
-
+my %RBLsuccessqueue;        # values are lists of failure flags (1=failed)
+my %RBLsuccessqsum;         # current sum of failure flags
+my %RBLdead;                # has the RBL been killed
 
 # Setup all the class variables
 sub initialise {
@@ -54,38 +53,40 @@ sub initialise {
 sub Checks {
     my $message = shift;
 
-    my ( $reverseip, $senderdomain, @slisttotry, @dlisttotry );
-    my ( @IPwords, $pipe );
-    my ( $maxfailures, $queuelength, $spamliststring );
-    my ( @HitList,     $Checked,     $HitOrMiss );
+    my ($reverseip, $senderdomain, @slisttotry, @dlisttotry);
+    my (@IPwords, $pipe);
+    my ($maxfailures, $queuelength, $spamliststring);
+    my (@HitList,     $Checked,     $HitOrMiss);
 
-    my $regex = '^(127\.\d{1,3}\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\.\d{1,3}\.\d{1,3})$';
+    my $regex =
+      '^(127\.\d{1,3}\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\.\d{1,3}\.\d{1,3})$';
     if (!($message->{clientip} =~ /$regex/)) {
-        @IPwords = ( split( /\./, $message->{clientip} ) );
-        $reverseip = join( '.', reverse @IPwords );
+        @IPwords = (split(/\./, $message->{clientip}));
+        $reverseip = join('.', reverse @IPwords);
     }
-    
+
     $senderdomain = $message->{fromdomain};
 
     # Build lists of spam lists and spam domain lists to test with this message
-    $spamliststring = Baruwa::Scanner::Config::Value( 'spamlist', $message );
+    $spamliststring = Baruwa::Scanner::Config::Value('spamlist', $message);
     if ($spamliststring) {
         $spamliststring =~ tr/,//d;    # Delete any stray commas
-        @slisttotry = split( " ", $spamliststring );
+        @slisttotry = split(" ", $spamliststring);
     }
 
-    $spamliststring = Baruwa::Scanner::Config::Value( 'spamdomainlist', $message );
+    $spamliststring =
+      Baruwa::Scanner::Config::Value('spamdomainlist', $message);
     if ($spamliststring) {
         $spamliststring =~ tr/,//d;    # Delete any stray commas
-        @dlisttotry = split( " ", $spamliststring );
+        @dlisttotry = split(" ", $spamliststring);
     }
 
     # Bail out if there is nothing to do
-    return ( 0, "" ) unless @slisttotry || @dlisttotry;
+    return (0, "") unless @slisttotry || @dlisttotry;
 
     $maxfailures =
-      Baruwa::Scanner::Config::Value( 'maxspamlisttimeouts', $message );
-    $queuelength = Baruwa::Scanner::Config::Value( 'rbltimeoutlen', $message );
+      Baruwa::Scanner::Config::Value('maxspamlisttimeouts', $message);
+    $queuelength = Baruwa::Scanner::Config::Value('rbltimeoutlen', $message);
 
     $pipe = new IO::Pipe
       or Baruwa::Scanner::Log::DieLog(
@@ -100,7 +101,7 @@ sub Checks {
     my $pid = fork();
     die "Can't fork: $!" unless defined($pid);
 
-    if ( $pid == 0 ) {
+    if ($pid == 0) {
 
         # In the child
         my $IsSpam = 0;
@@ -117,32 +118,35 @@ sub Checks {
         # Do the actual tests
         my ($SpamName);
         foreach $SpamName (@slisttotry) {
+
             # Look up $reverseip in each of the spam domains we have
             print $pipe $SpamName . "\n";
             $RBLRetval = undef;
-            if ( $RBLdead{$SpamName} ) {
+            if ($RBLdead{$SpamName}) {
                 print $pipe "Dead\n";
                 next;
             }
 
-            ($RBLName, $RBLRetval) = split('=', Baruwa::Scanner::Config::SpamLists($SpamName));
+            ($RBLName, $RBLRetval) =
+              split('=', Baruwa::Scanner::Config::SpamLists($SpamName));
             $RBLEntry = gethostbyname("$reverseip." . $RBLName);
             if ($RBLEntry) {
                 $RBLEntry = Socket::inet_ntoa($RBLEntry);
-                if (defined($RBLRetval) and ($RBLEntry eq $RBLRetval)){
+                if (defined($RBLRetval) and ($RBLEntry eq $RBLRetval)) {
+
                     # Got a hit!
                     $IsSpam = 1;
                     print $pipe "Hit\n";
-                }elsif (!defined($RBLRetval) and ($RBLEntry =~ /^127\.[01]\.[0-9]\.[123456789]\d*$/) ) {
+                } elsif (!defined($RBLRetval)
+                    and ($RBLEntry =~ /^127\.[01]\.[0-9]\.[123456789]\d*$/)) {
+
                     # Got a hit!
                     $IsSpam = 1;
                     print $pipe "Hit\n";
-                }
-                else {
+                } else {
                     print $pipe "Miss\n";
                 }
-            }
-            else {
+            } else {
                 print $pipe "Miss\n";
             }
         }
@@ -152,33 +156,35 @@ sub Checks {
             # Look up $SenderDomain in each of the named spam domains we have
             print $pipe $SpamName . "\n";
             $RBLRetval = undef;
-            if ( $RBLdead{$SpamName} ) {
+            if ($RBLdead{$SpamName}) {
                 print $pipe "Dead\n";
                 next;
             }
 
             # Fix for Steve Freegard.
             $RBLEntry = undef;
-            if ( Baruwa::Scanner::Config::SpamLists($SpamName) ) {
-                ($RBLName, $RBLRetval) = split('=', Baruwa::Scanner::Config::SpamLists($SpamName));
-                $RBLEntry = gethostbyname( "$senderdomain." . $RBLName);
+            if (Baruwa::Scanner::Config::SpamLists($SpamName)) {
+                ($RBLName, $RBLRetval) =
+                  split('=', Baruwa::Scanner::Config::SpamLists($SpamName));
+                $RBLEntry = gethostbyname("$senderdomain." . $RBLName);
             }
             if ($RBLEntry) {
                 $RBLEntry = Socket::inet_ntoa($RBLEntry);
-                if (defined($RBLRetval) and ($RBLEntry eq $RBLRetval)){
+                if (defined($RBLRetval) and ($RBLEntry eq $RBLRetval)) {
+
                     # Got a hit!
                     $IsSpam = 1;
                     print $pipe "Hit\n";
-                }elsif (!defined($RBLRetval) and ($RBLEntry =~ /^127\.[01]\.0\.[123456789]$/)) {
+                } elsif (!defined($RBLRetval)
+                    and ($RBLEntry =~ /^127\.[01]\.0\.[123456789]$/)) {
+
                     # Got a hit!
                     $IsSpam = 1;
                     print $pipe "Hit\n";
-                }
-                else {
+                } else {
                     print $pipe "Miss\n";
                 }
-            }
-            else {
+            } else {
                 print $pipe "Miss\n";
             }
         }
@@ -188,7 +194,7 @@ sub Checks {
 
     eval {
         $pipe->reader();
-        local $SIG{ALRM} = sub { die "Command Timed Out" };
+        local $SIG{ALRM} = sub {die "Command Timed Out"};
         alarm Baruwa::Scanner::Config::Value('spamlisttimeout');
 
         # Read the list of matching RBL's printed by the child
@@ -200,15 +206,15 @@ sub Checks {
             push @HitList, $Checked if $HitOrMiss eq 'Hit';
 
             # Did we get a response at all?
-            unless ( $HitOrMiss eq 'Dead' ) {
+            unless ($HitOrMiss eq 'Dead') {
 
                 # Got a response, store a success
-                push @{ $RBLsuccessqueue{$Checked} }, 0;
+                push @{$RBLsuccessqueue{$Checked}}, 0;
 
                 # Roll the queue along one
                 $RBLsuccessqsum{$Checked} +=
-                  ( shift @{ $RBLsuccessqueue{$Checked} } ) ? 1 : -1
-                  if @{ $RBLsuccessqueue{$Checked} } > $queuelength;
+                  (shift @{$RBLsuccessqueue{$Checked}}) ? 1 : -1
+                  if @{$RBLsuccessqueue{$Checked}} > $queuelength;
                 $RBLsuccessqsum{$Checked} = 0 if $RBLsuccessqsum{$Checked} < 0;
             }
         }
@@ -224,7 +230,7 @@ sub Checks {
     # it doesn't unblock the SIGALRM after handling it.
     eval {
         my $unblockset = POSIX::SigSet->new(SIGALRM);
-        sigprocmask( SIG_UNBLOCK, $unblockset )
+        sigprocmask(SIG_UNBLOCK, $unblockset)
           or die "Could not unblock alarm: $!\n";
     };
 
@@ -236,41 +242,41 @@ sub Checks {
 
     # In which case any failures must be the alarm
     #if ($@ or $pid>0) {
-    if ( $pid > 0 ) {
-        if ( $maxfailures > 0 ) {
+    if ($pid > 0) {
+        if ($maxfailures > 0) {
 
             # The lookup for RBL $Checked failed
-            push @{ $RBLsuccessqueue{$Checked} }, 1;
+            push @{$RBLsuccessqueue{$Checked}}, 1;
             $RBLsuccessqsum{$Checked}++;
 
             # Roll the queue along one
             $RBLsuccessqsum{$Checked} +=
-              ( shift @{ $RBLsuccessqueue{$Checked} } ) ? 1 : -1
-              if @{ $RBLsuccessqueue{$Checked} } > $queuelength;
+              (shift @{$RBLsuccessqueue{$Checked}}) ? 1 : -1
+              if @{$RBLsuccessqueue{$Checked}} > $queuelength;
             $RBLsuccessqsum{$Checked} = 0 if $RBLsuccessqsum{$Checked} < 0;
 
             # Mark the queue as dead if we have exceeded the limit
-            if ( $RBLsuccessqsum{$Checked} > $maxfailures
-                && @{ $RBLsuccessqueue{$Checked} } >= $queuelength )
-            {
+            if ($RBLsuccessqsum{$Checked} > $maxfailures
+                && @{$RBLsuccessqueue{$Checked}} >= $queuelength) {
                 $RBLdead{$Checked} = 1;
                 Baruwa::Scanner::Log::WarnLog(
                     "Disabled RBL %s as reached %d/%d " . "timeouts",
-                    $Checked, $maxfailures, $queuelength );
+                    $Checked, $maxfailures, $queuelength);
             }
-        }
-        else {
+        } else {
+
             # Not tracking RBL lookup failures at all
-            Baruwa::Scanner::Log::WarnLog("RBL Check $Checked timed out and was killed");
+            Baruwa::Scanner::Log::WarnLog(
+                "RBL Check $Checked timed out and was killed");
         }
 
         # Kill the running child process
         my ($i);
         kill -15, $pid;
-        for ( $i = 0 ; $i < 5 ; $i++ ) {
+        for ($i = 0; $i < 5; $i++) {
             sleep 1;
-            waitpid( $pid, &POSIX::WNOHANG );
-            ( $pid = 0 ), last unless kill( 0, $pid );
+            waitpid($pid, &POSIX::WNOHANG);
+            ($pid = 0), last unless kill(0, $pid);
             kill -15, $pid;
         }
 
@@ -284,15 +290,15 @@ sub Checks {
     #Baruwa::Scanner::Log::WarnLog("8 PID is $pid");
 
     # The return from the pipe is a measure of how spammy it was
-    Baruwa::Scanner::Log::NoticeLog( "RBL checks: %s found in %s",
-        $message->{id}, join( ', ', @HitList ) )
+    Baruwa::Scanner::Log::NoticeLog("RBL checks: %s found in %s",
+        $message->{id}, join(', ', @HitList))
       if @HitList && Baruwa::Scanner::Config::Value('logspam');
     Baruwa::Scanner::Log::DebugLog("RBL Checks: returned $PipeReturn");
 
     my $temp = @HitList;
     $temp = $temp + 0;
     $temp = 0 unless $HitList[0] =~ /[a-z]/i;
-    return ( $temp, join( ', ', @HitList ) );
+    return ($temp, join(', ', @HitList));
 }
 
 1;

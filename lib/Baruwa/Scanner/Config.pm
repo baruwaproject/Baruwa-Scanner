@@ -53,18 +53,19 @@ my ($LOCK_NB) = 4;
 my ($LOCK_UN) = 8;
 
 # This is global within this package to save passing them all over the place
-my ( %File, %LineNos, %ItoE, %EtoI );
-my ( %StaticScalars, %ScannerCmds, %SpamLists );
-my ( %KeywordCategory, %KeywordType );
-my ( %NFilenameRules,  %NFiletypeRules );
-my ( %AFilenameRules,  %AFiletypeRules );
-my ( %LanguageStrings, %YesNoItoE, %YesNoEtoI, %HardCodedDefaults );
-my ( %RuleScalars,     %Defaults, $DefaultAddressRegexp, $DefaultVirusRegexp );
-my ( %CustomFunctions, %CustomFunctionsParams );
+my (%File, %LineNos, %ItoE, %EtoI);
+my (%StaticScalars, %ScannerCmds, %SpamLists);
+my (%KeywordCategory, %KeywordType);
+my (%NFilenameRules,  %NFiletypeRules);
+my (%AFilenameRules,  %AFiletypeRules);
+my (%LanguageStrings, %YesNoItoE, %YesNoEtoI, %HardCodedDefaults);
+my (%RuleScalars,     %Defaults, $DefaultAddressRegexp, $DefaultVirusRegexp);
+my (%CustomFunctions, %CustomFunctionsParams);
 my (%PercentVars);    # For putting substituted variables in all settings
 my ($RequireLDAPDone);
 
-our ($PhishingWhitelist, $PhishingBlacklist, $LDAP, $LDAPserver, $LDAPbase, $LDAPsite);
+our ($PhishingWhitelist, $PhishingBlacklist, $LDAP, $LDAPserver, $LDAPbase,
+    $LDAPsite);
 
 $RequireLDAPDone = 0;    # Have we done the "require Net::LDAP"?
 
@@ -96,11 +97,10 @@ sub GetFileValue {
 }
 
 sub SetFileValue {
-    my ( $name, $value ) = @_;
-    if ( defined $value ) {
+    my ($name, $value) = @_;
+    if (defined $value) {
         $File{$name} = $value;
-    }
-    else {
+    } else {
         delete $File{$name};
     }
 }
@@ -114,11 +114,10 @@ sub GetEtoI {
 }
 
 sub SetCustomFunction {
-    my ( $func, $value ) = @_;
-    if ( defined $value ) {
+    my ($func, $value) = @_;
+    if (defined $value) {
         $CustomFunctions{$func} = $value;
-    }
-    else {
+    } else {
         delete $CustomFunctions{$func};
     }
 }
@@ -131,7 +130,7 @@ sub GetCustomFunction {
 # Tiny little accessor function to force a configuration variable to be a
 # value. The opposite of Value(). Useful in baruwa --lint.
 sub SetValue {
-    my ( $name, $value ) = @_;
+    my ($name, $value) = @_;
     $StaticScalars{$name} = $value;
 }
 
@@ -142,8 +141,8 @@ sub SetValue {
 # as most people will only use rulesets in a couple of places.
 #
 sub Value {
-    my ( $name, $msg ) = @_;
-    my ( $funcname, $result );
+    my ($name, $msg) = @_;
+    my ($funcname, $result);
 
     #$name = lc($name);
 
@@ -163,15 +162,14 @@ sub Value {
         my $param = "";
         $funcname = 'Baruwa::Scanner::CustomConfig::' . $funcname;
         no strict 'refs';
-        if ( $param = $CustomFunctionsParams{$name} ) {
+        if ($param = $CustomFunctionsParams{$name}) {
             $param =~ s/^\(//;    # Trim the brackets
             $param =~ s/\)$//;
             $param =~ s/\"//g;    # and quotes
-            my @params = split( /,/, $param );
+            my @params = split(/,/, $param);
             $result =
-              &$funcname( $msg, \@params );   # Call with a ref-->list of params
-        }
-        else {
+              &$funcname($msg, \@params);    # Call with a ref-->list of params
+        } else {
             $result = &$funcname($msg);
         }
         use strict 'refs';
@@ -196,8 +194,8 @@ sub Value {
 
     #print STDERR "*** 3 $name\n" if $name eq 'spamwhitelist';
 
-    my ( $category, $rulelist, $rule );
-    my ( $direction, $iporaddr, $regexp2, $value );
+    my ($category, $rulelist, $rule);
+    my ($direction, $iporaddr, $regexp2, $value);
     my (@addresses);
 
     $category = $KeywordCategory{$name};
@@ -218,26 +216,26 @@ sub Value {
 
     #print STDERR "*** 4 $name\n" if $name eq 'spamwhitelist';
 
-    if ( $StaticScalars{'usedefaultswithmanyrecips'} ) {
-        my ( %recipdomains, $recip );
+    if ($StaticScalars{'usedefaultswithmanyrecips'}) {
+        my (%recipdomains, $recip);
 
         # This only applies with multiple recipients
-        if ( scalar( @{ $msg->{to} } ) > 1 ) {
+        if (scalar(@{$msg->{to}}) > 1) {
 
             # Get a list of all the domains into keys(%recipdomains)
-            foreach $recip ( @{ $msg->{to} } ) {
-                $recipdomains{ lc($1) } = 1 if $recip =~ m/\@(.*)$/;
+            foreach $recip (@{$msg->{to}}) {
+                $recipdomains{lc($1)} = 1 if $recip =~ m/\@(.*)$/;
             }
-            if ( scalar(%recipdomains) =~ /^1\// ) {
+            if (scalar(%recipdomains) =~ /^1\//) {
 
                 # There was just 1 domain, so use *@domain.com
-                my $domain = ( keys %recipdomains )[0];
+                my $domain = (keys %recipdomains)[0];
 
                 # Protect domain name against evil SMTP clients
                 $domain =~ s/\s//g;
                 $tooverride = '*@' . $domain;
-            }
-            else {
+            } else {
+
                 # There were many domains, so look up *@* which would *normally*
                 # be the default value
                 $tooverride = '*@*';
@@ -247,9 +245,9 @@ sub Value {
 
     #print STDERR "*** 5 $name\n" if $name eq 'languagestrings';
 
-    #return '/etc/mail/baruwa/reports/cz/languages.conf' if $name eq 'languagestrings';
-    my ( $directiona, $iporaddra, $regexp2a, $valuea, @results );
-    if ( $category =~ /first/i ) {
+#return '/etc/mail/baruwa/reports/cz/languages.conf' if $name eq 'languagestrings';
+    my ($directiona, $iporaddra, $regexp2a, $valuea, @results);
+    if ($category =~ /first/i) {
 
         #  print STDERR "*** 6 First $name\n" if $name eq 'spamwhitelist';
 
@@ -259,42 +257,42 @@ sub Value {
 
         #print STDERR "$name first-match rule\n";
 
-        # If there is no ruleset either, then return the default
-        #print STDERR "There are rules for languagestrings\n" if $name eq 'languagestrings';
-        #return '/etc/mail/baruwa/reports/cz/languages.conf' if $name eq 'languagestrings';
+# If there is no ruleset either, then return the default
+#print STDERR "There are rules for languagestrings\n" if $name eq 'languagestrings';
+#return '/etc/mail/baruwa/reports/cz/languages.conf' if $name eq 'languagestrings';
         return $Defaults{$name} unless $RuleScalars{$name};
 
-        foreach $rule ( @{$rulelist} ) {
-            ( $direction, $iporaddr, $regexp2, $value ) =
-              split( /\0/, $rule, 4 );
-            if ( $value =~ /\0/ ) {
+        foreach $rule (@{$rulelist}) {
+            ($direction, $iporaddr, $regexp2, $value) =
+              split(/\0/, $rule, 4);
+            if ($value =~ /\0/) {
 
                 # The value is actually another "and" condition
                 # Let's only allow 1 "and" at the moment
-                ( $directiona, $iporaddra, $regexp2a, $valuea ) =
-                  split( /\0/, $value );
+                ($directiona, $iporaddra, $regexp2a, $valuea) =
+                  split(/\0/, $value);
 
                 # Do first condition and bail out if it failed
                 $result =
-                  FirstMatchValue( $direction, $iporaddr, $regexp2, $valuea,
-                    $name, $msg, $tooverride );
+                  FirstMatchValue($direction, $iporaddr, $regexp2, $valuea,
+                    $name, $msg, $tooverride);
 
                 #print STDERR "1st half result is $result\n";
                 next if $result eq "CoNfIgFoUnDnOtHiNg";
 
                 # Condition matched, so do 2nd half
-                $result = FirstMatchValue( $directiona, $iporaddra, $regexp2a,
-                    $valuea, $name, $msg, $tooverride );
+                $result = FirstMatchValue($directiona, $iporaddra, $regexp2a,
+                    $valuea, $name, $msg, $tooverride);
 
                 #print STDERR "2nd half result is $result\n";
                 return $result unless $result eq "CoNfIgFoUnDnOtHiNg";
-            }
-            else {
+            } else {
+
               # It's a simple rule with no "and" in it
               #print STDERR "Matching against $direction $iporaddr /$regexp/\n";
                 $result =
-                  FirstMatchValue( $direction, $iporaddr, $regexp2, $value,
-                    $name, $msg, $tooverride );
+                  FirstMatchValue($direction, $iporaddr, $regexp2, $value,
+                    $name, $msg, $tooverride);
                 return $result unless $result eq "CoNfIgFoUnDnOtHiNg";
             }
         }
@@ -303,8 +301,7 @@ sub Value {
         #print STDERR "Returning default as nothing matched.\n";
         return $Defaults{$name};
 
-    }
-    else {
+    } else {
 
         #
         # It's an all-matches rule
@@ -317,42 +314,42 @@ sub Value {
         #print STDERR "Default is " . $Defaults{$name} . "\n\n";
         return $Defaults{$name} unless $RuleScalars{$name};
 
-        foreach $rule ( @{$rulelist} ) {
-            ( $direction, $iporaddr, $regexp2, $value ) =
-              split( /\0/, $rule, 4 );
-            if ( $value =~ /\0/ ) {
+        foreach $rule (@{$rulelist}) {
+            ($direction, $iporaddr, $regexp2, $value) =
+              split(/\0/, $rule, 4);
+            if ($value =~ /\0/) {
 
                 # The value is actually another "and" condition
                 # Let's only allow 1 "and" at the moment
-                ( $directiona, $iporaddra, $regexp2a, $valuea ) =
-                  split( /\0/, $value );
+                ($directiona, $iporaddra, $regexp2a, $valuea) =
+                  split(/\0/, $value);
 
                 # Do first condition and bail out if it failed
                 $result =
-                  AllMatchesValue( $direction, $iporaddr, $regexp2, $valuea,
-                    $name, $msg, $tooverride );
+                  AllMatchesValue($direction, $iporaddr, $regexp2, $valuea,
+                    $name, $msg, $tooverride);
                 next if $result eq "CoNfIgFoUnDnOtHiNg";
 
                 # Condition matched, so do 2nd half
                 $result =
-                  AllMatchesValue( $directiona, $iporaddra, $regexp2a, $valuea,
-                    $name, $msg, $tooverride );
+                  AllMatchesValue($directiona, $iporaddra, $regexp2a, $valuea,
+                    $name, $msg, $tooverride);
                 next if $result eq "CoNfIgFoUnDnOtHiNg";
                 push @results, $result;
-            }
-            else {
-                # It's a simple rule with no "and" in it
-                #print STDERR "Matching against $direction $iporaddr /$regexp/\n";
+            } else {
+
+              # It's a simple rule with no "and" in it
+              #print STDERR "Matching against $direction $iporaddr /$regexp/\n";
                 $result =
-                  AllMatchesValue( $direction, $iporaddr, $regexp2, $value,
-                    $name, $msg, $tooverride );
+                  AllMatchesValue($direction, $iporaddr, $regexp2, $value,
+                    $name, $msg, $tooverride);
                 next if $result eq "CoNfIgFoUnDnOtHiNg";
                 push @results, $result;
             }
         }
 
         # Return the results if there were any, else the defaults
-        return join( " ", @results ) if @results;
+        return join(" ", @results) if @results;
         return $Defaults{$name};
     }
 }
@@ -362,26 +359,27 @@ sub Value {
 # spoofcheck = h ==> do anti-spoof checking.
 # spoofcheck = H ==> do no anti-spoof checking.
 sub GetClientHostname {
-    my ( $msg, $spoofcheck ) = @_;
+    my ($msg, $spoofcheck) = @_;
 
-    my ( $fromname, $claimed_hostname );
+    my ($fromname, $claimed_hostname);
 
-    if ( $spoofcheck eq 'h' ) {
+    if ($spoofcheck eq 'h') {
+
         # Have we cached the checked hostname?
         $fromname = $msg->{clienthostname};
         return $fromname if defined $fromname;
-    }
-    else {
+    } else {
+
         # Have we cached the unchecked hostname?
         $fromname = $msg->{clienthostnamenocheck};
         return $fromname if defined $fromname;
     }
 
     # Do forward and reverse DNS check to protect against spoofing
-    $claimed_hostname = gethostbyaddr( inet_aton( $msg->{clientip} ), AF_INET );
+    $claimed_hostname = gethostbyaddr(inet_aton($msg->{clientip}), AF_INET);
 
     # They may not want the anti-spoof protection!
-    if ( $spoofcheck eq 'H' ) {
+    if ($spoofcheck eq 'H') {
         $fromname = defined($claimed_hostname) ? $claimed_hostname : "";
         $msg->{clienthostnamenocheck} = $fromname;
         return $fromname;
@@ -394,15 +392,13 @@ sub GetClientHostname {
         my @name_lookup = gethostbyname($claimed_hostname);
         if (@name_lookup) {
             my @resolved_ips =
-              map { inet_ntoa($_) } @name_lookup[ 4 .. $#name_lookup ];
-            my $might_spoof = !grep { $msg->{clientip} eq $_ } @resolved_ips;
+              map {inet_ntoa($_)} @name_lookup[4 .. $#name_lookup];
+            my $might_spoof = !grep {$msg->{clientip} eq $_} @resolved_ips;
             $fromname = $might_spoof ? "_SPOOFED_" : lc($claimed_hostname);
-        }
-        else {
+        } else {
             $fromname = "";
         }
-    }
-    else {
+    } else {
         $fromname = "";
     }
     $msg->{clienthostname} = $fromname;    # Ensure cache is defined
@@ -410,97 +406,103 @@ sub GetClientHostname {
 }
 
 sub FirstMatchValue {
-    my ( $direction, $iporaddr, $regexp2, $value, $name, $msg, $tooverride ) =
-      @_;
+    my ($direction, $iporaddr, $regexp2, $value, $name, $msg, $tooverride) = @_;
 
-    #print STDERR "Params are: $direction, $iporaddr, $regexp2, $value, $name, $msg, $tooverride\n";
-    my ( $regexp, $misses, $to );
+#print STDERR "Params are: $direction, $iporaddr, $regexp2, $value, $name, $msg, $tooverride\n";
+    my ($regexp, $misses, $to);
 
     # Pre-compile $regexp2 and include case-insensitivity flag
     $regexp = qr/$regexp2/i;
 
-    if ( $iporaddr eq 't' ) {
+    if ($iporaddr eq 't') {
+
         # It is a virus name matching rule.
-        if ( $direction =~ /v/ ) {
+        if ($direction =~ /v/) {
+
             # Look through the reports and match substrings.
             # This is for first-matching rules only.
             # Don't return anything unless we find a match.
-            my ( $file, $text );
-            while ( ( $file, $text ) = each %{ $msg->{allreports} } ) {
+            my ($file, $text);
+            while (($file, $text) = each %{$msg->{allreports}}) {
                 return $value if $text =~ /$regexp/;
             }
-        }
-        elsif ( $direction =~ /b/ ) {
+        } elsif ($direction =~ /b/) {
+
             # It's a text address-based rule
             # Match against all the To addresses and the From address
             $misses = 0;
             $misses++ unless $msg->{from} =~ /$regexp/;
-            if ( defined $tooverride ) {
+            if (defined $tooverride) {
                 $misses++ unless $tooverride =~ /$regexp/;
-            }
-            else {
-                foreach $to ( @{ $msg->{to} } ) {
+            } else {
+                foreach $to (@{$msg->{to}}) {
                     $misses++, last unless $to =~ /$regexp/;
                 }
             }
 
             return $value if $misses == 0;
-        }
-        else {
+        } else {
+
             # Match against any of From and/or To addresses
-            if ( $direction =~ /f/ ) {
+            if ($direction =~ /f/) {
+
                 # Match against the From address
                 #print STDERR "From " . $msg->{from} . " against $regexp\n";
                 return $value if $msg->{from} =~ /$regexp/;
+
                 #print STDERR "Miss\n";
             }
-            if ( $direction =~ /t/ ) {
+            if ($direction =~ /t/) {
+
                 # Match against every To address
-                if ( defined $tooverride ) {
+                if (defined $tooverride) {
                     return $value if $tooverride =~ /$regexp/;
-                }
-                else {
-                    foreach $to ( @{ $msg->{to} } ) {
+                } else {
+                    foreach $to (@{$msg->{to}}) {
+
                         #print STDERR "To " . $to . " against $regexp\n";
                         #print STDERR "Resulting value would be $value\n";
                         return $value if $to =~ /$regexp/;
+
                         #print STDERR "Miss\n";
                     }
                 }
             }
         }
-    }
-    elsif ( $iporaddr eq 'd' ) {
+    } elsif ($iporaddr eq 'd') {
         #
         # It is an all-digits rule
         #
         # It is a virus name matching rule.
-        if ( $direction =~ /v/ ) {
+        if ($direction =~ /v/) {
+
             # Look through the reports and match substrings.
             # This is for first-matching rules only.
             # Don't return anything unless we find a match.
-            my ( $file, $text );
-            while ( ( $file, $text ) = each %{ $msg->{allreports} } ) {
+            my ($file, $text);
+            while (($file, $text) = each %{$msg->{allreports}}) {
                 return $value if $text =~ /$regexp/;
             }
-        }
-        elsif ( $direction =~ /f/ ) {
-            # It's a numeric ip-number-based rule
-            # Can only check these with From:, not To: addresses
-            # Match against the SMTP Client IP address
-            #print STDERR "Matching IP " . $msg->{clientip} . " against $regexp\n";
-            if ( $regexp =~ /\d+\\\.\d+\\\.\d+\\\.\d+\)*$/ ) {
-               # It's a complete IPv4 address so it's a total string match, not a re
-               #print STDERR "Got a match\n";
+        } elsif ($direction =~ /f/) {
+
+         # It's a numeric ip-number-based rule
+         # Can only check these with From:, not To: addresses
+         # Match against the SMTP Client IP address
+         #print STDERR "Matching IP " . $msg->{clientip} . " against $regexp\n";
+            if ($regexp =~ /\d+\\\.\d+\\\.\d+\\\.\d+\)*$/) {
+
+           # It's a complete IPv4 address so it's a total string match, not a re
+           #print STDERR "Got a match\n";
                 return $value if $msg->{clientip} =~ /^$regexp$/;
-            }
-            else {
+            } else {
+
                 # It's not a complete IPv4 address so substring match it
                 #print STDERR "Got no match\n";
                 return $value if $msg->{clientip} =~ /$regexp/;
             }
         }
-        if ( $direction =~ /[tb]/ ) {
+        if ($direction =~ /[tb]/) {
+
             # Don't know the target IP address
             Baruwa::Scanner::Log::WarnLog(
                 "Config Error: Cannot match against "
@@ -509,11 +511,11 @@ sub FirstMatchValue {
                 $name
             );
         }
-    }
-    elsif ( $iporaddr eq 'h' || $iporaddr eq 'H' ) {
+    } elsif ($iporaddr eq 'h' || $iporaddr eq 'H') {
+
         # 'h' ==> hostname, 'H' ==> hostname without spoof protection
         # It's a hostname or domain name
-        if ( $direction =~ /v/ ) {
+        if ($direction =~ /v/) {
             Baruwa::Scanner::Log::WarnLog(
                 "Config Error: Given a virus name match "
                   . "with a hostname or domain name \"%s\"",
@@ -522,7 +524,8 @@ sub FirstMatchValue {
             return
               "CoNfIgFoUnDnOtHiNg"; # Caller will work out the default value now
         }
-        if ( $direction =~ /[tb]/ ) {
+        if ($direction =~ /[tb]/) {
+
             # Don't know the target IP address
             Baruwa::Scanner::Log::WarnLog(
                 "Config Error: Cannot match against "
@@ -537,33 +540,35 @@ sub FirstMatchValue {
         # It's a hostname or domain name and it's a "From:" match on {clientip}.
         # Convert $msg->{clientip} into a hostname
         #print STDERR "Clientip = " . $msg->{clientip} . " and hostname = ";
-        my $fromname = GetClientHostname( $msg, $iporaddr );
+        my $fromname = GetClientHostname($msg, $iporaddr);
         $fromname = '.' . $fromname if $fromname && $fromname ne "_SPOOFED_";
-        return $value if $fromname =~ /$regexp/;  
-        while ( $fromname ne '' && $fromname ne '_SPOOFED_' ) {
+        return $value if $fromname =~ /$regexp/;
+        while ($fromname ne '' && $fromname ne '_SPOOFED_') {
             return $value if $fromname =~ /$regexp/i;
             $fromname =~ s/^\.[^.]+//;    # Knock off next word, could be last
         }
         return "CoNfIgFoUnDnOtHiNg";
-    }
-    else {
+    } else {
         #
         # It is a CIDR (network/netmask) rule
         #
         # It is a virus name matching rule.
-        if ( $direction =~ /v/ ) {
+        if ($direction =~ /v/) {
+
             # Look through the reports and match substrings.
             # This is for first-matching rules only.
             # Don't return anything unless we find a match.
-            my ( $file, $text );
-            while ( ( $file, $text ) = each %{ $msg->{allreports} } ) {
+            my ($file, $text);
+            while (($file, $text) = each %{$msg->{allreports}}) {
                 return $value if $text =~ /$regexp/;
             }
-        }
-        elsif ( $direction =~ /f/ ) {
+        } elsif ($direction =~ /f/) {
+
             # Can only check these with From:, not To: addresses
             # Match against the SMTP Client IP address
-            if(Net::CIDR::cidrvalidate($msg->{clientip}) and Net::CIDR::cidrvalidate($regexp2)){
+            if (    Net::CIDR::cidrvalidate($msg->{clientip})
+                and Net::CIDR::cidrvalidate($regexp2)) {
+
                 #print STDERR "Matching IP " . $msg->{clientip} .
                 #             " against " . $regexp2 . "\n";
                 my ($check1, $check2);
@@ -571,11 +576,13 @@ sub FirstMatchValue {
                 $check2 = new NetAddr::IP($regexp2);
                 if ($check1->version() == $check2->version()) {
                     my (@cidr) = split(',', $regexp2);
-                    return $value if (Net::CIDR::cidrlookup($msg->{clientip}, @cidr));
+                    return $value
+                      if (Net::CIDR::cidrlookup($msg->{clientip}, @cidr));
                 }
             }
         }
-        if ( $direction =~ /[tb]/ ) {
+        if ($direction =~ /[tb]/) {
+
             # Don't know the target IP address
             Baruwa::Scanner::Log::WarnLog(
                 "Config Error: Cannot match against "
@@ -589,88 +596,90 @@ sub FirstMatchValue {
 }
 
 sub AllMatchesValue {
-    my ( $direction, $iporaddr, $regexp2, $value, $name, $msg, $tooverride ) =
-      @_;
+    my ($direction, $iporaddr, $regexp2, $value, $name, $msg, $tooverride) = @_;
 
-    my ( $regexp, $misses, $to, @matches );
+    my ($regexp, $misses, $to, @matches);
+
     # Pre-compile $regexp2 and include case-insensitivity flag
     $regexp = qr/$regexp2/i;
 
-    if ( $iporaddr eq 't' ) {
+    if ($iporaddr eq 't') {
+
         # We may be over-riding the "to" addresses we are looking up with
         # an over-riding address if there are multiple recipients.
-        if ( $direction =~ /v/ ) {
+        if ($direction =~ /v/) {
+
             # It is a virus name matching rule.
             # Look through the reports and match substrings.
             # This is for first-matching rules only.
             # Don't return anything unless we find a match.
-            my ( $file, $text );
-            while ( ( $file, $text ) = each %{ $msg->{allreports} } ) {
+            my ($file, $text);
+            while (($file, $text) = each %{$msg->{allreports}}) {
+
                 #print STDERR "File is $file and text is $text\n";
-                push @matches, split( " ", $value ) if $text =~ /$regexp/;
+                push @matches, split(" ", $value) if $text =~ /$regexp/;
             }
-        }
-        elsif ( $direction =~ /b/ ) {
+        } elsif ($direction =~ /b/) {
+
             # It's a text address-based rule
             # Match against the From and every To
             $misses = 0;
             $misses++ unless $msg->{from} =~ /$regexp/;
-            if ( defined $tooverride ) {
+            if (defined $tooverride) {
                 $misses++ unless $tooverride =~ /$regexp/;
-            }
-            else {
-                foreach $to ( @{ $msg->{to} } ) {
+            } else {
+                foreach $to (@{$msg->{to}}) {
                     $misses++, last unless $to =~ /$regexp/;
                 }
             }
-            push @matches, split( " ", $value ) if $misses == 0;
-        }
-        else {
-            if ( $direction =~ /f/ ) {
+            push @matches, split(" ", $value) if $misses == 0;
+        } else {
+            if ($direction =~ /f/) {
+
                 # Match against the From address
-                push @matches, split( " ", $value )
+                push @matches, split(" ", $value)
                   if $msg->{from} =~ /$regexp/;
             }
-            if ( $direction =~ /t/ ) {
+            if ($direction =~ /t/) {
+
                 # Match against every To address
-                if ( defined $tooverride ) {
-                    push @matches, split( " ", $value )
+                if (defined $tooverride) {
+                    push @matches, split(" ", $value)
                       if $tooverride =~ /$regexp/;
-                }
-                else {
-                    foreach $to ( @{ $msg->{to} } ) {
-                        push @matches, split( " ", $value ) if $to =~ /$regexp/;
+                } else {
+                    foreach $to (@{$msg->{to}}) {
+                        push @matches, split(" ", $value) if $to =~ /$regexp/;
                     }
                 }
             }
         }
-    }
-    elsif ( $iporaddr eq 'd' ) {
-        if ( $direction eq 'v' ) {
+    } elsif ($iporaddr eq 'd') {
+        if ($direction eq 'v') {
+
             # It is a virus name matching rule.
             # Look through the reports and match substrings.
             # This is for first-matching rules only.
             # Don't return anything unless we find a match.
-            my ( $file, $text );
-            while ( ( $file, $text ) = each %{ $msg->{allreports} } ) {
-                push @matches, split( " ", $value ) if $text =~ /$regexp/;
+            my ($file, $text);
+            while (($file, $text) = each %{$msg->{allreports}}) {
+                push @matches, split(" ", $value) if $text =~ /$regexp/;
             }
-        }
-        elsif ( $direction eq 'f' ) {
+        } elsif ($direction eq 'f') {
+
             # It's a numeric ip-number-based rule
             # Can only check these with From:, not To: addresses
             # Match against the SMTP Client IP address
-            if ( $regexp =~ /\d+\\\.\d+\\\.\d+\\\.\d+\)*$/ ) {
-                push @matches, split( " ", $value )
+            if ($regexp =~ /\d+\\\.\d+\\\.\d+\\\.\d+\)*$/) {
+                push @matches, split(" ", $value)
                   if $msg->{clientip} =~ /^$regexp$/;
-            }
-            else {
+            } else {
+
                 # It's not a complete IPv4 address so substring match it
-                push @matches, split( " ", $value )
+                push @matches, split(" ", $value)
                   if $msg->{clientip} =~ /$regexp/;
             }
-        }
-        else {
+        } else {
+
             # Don't know the target IP address
             Baruwa::Scanner::Log::WarnLog(
                 "Cannot match against destination "
@@ -678,17 +687,17 @@ sub AllMatchesValue {
                 $name
             );
         }
-    }
-    elsif ( $iporaddr eq 'h' || $iporaddr eq 'H' ) {
+    } elsif ($iporaddr eq 'h' || $iporaddr eq 'H') {
+
         # It's a hostname or domain name
-        if ( $direction =~ /v/ ) {
+        if ($direction =~ /v/) {
             Baruwa::Scanner::Log::WarnLog(
                 "Config Error: Given a virus name match "
                   . "with a hostname or domain name \"%s\"",
                 $name
             );
-        }
-        elsif ( $direction =~ /[tb]/ ) {
+        } elsif ($direction =~ /[tb]/) {
+
             # Don't know the target IP address
             Baruwa::Scanner::Log::WarnLog(
                 "Config Error: Cannot match against "
@@ -696,56 +705,60 @@ sub AllMatchesValue {
                   . "option \"%s\"",
                 $name
             );
-        }
-        else {
-            # It's a hostname or domain name and it's a "From:" match on {clientip}.
-            # Convert $msg->{clientip} into a hostname
-            #print STDERR "Clientip = " . $msg->{clientip} . " and hostname = ";
-            my $fromname = GetClientHostname( $msg, $iporaddr );
-            $fromname = '.' . $fromname if $fromname && $fromname ne "_SPOOFED_";
-            if ( $fromname =~ /$regexp/ ) {
-                push @matches, split( " ", $value );
-            }
-            else {
-                while ( $fromname ne '' && $fromname ne '_SPOOFED_' ) {
-                    push @matches, split( " ", $value )
+        } else {
+
+        # It's a hostname or domain name and it's a "From:" match on {clientip}.
+        # Convert $msg->{clientip} into a hostname
+        #print STDERR "Clientip = " . $msg->{clientip} . " and hostname = ";
+            my $fromname = GetClientHostname($msg, $iporaddr);
+            $fromname = '.' . $fromname
+              if $fromname && $fromname ne "_SPOOFED_";
+            if ($fromname =~ /$regexp/) {
+                push @matches, split(" ", $value);
+            } else {
+                while ($fromname ne '' && $fromname ne '_SPOOFED_') {
+                    push @matches, split(" ", $value)
                       if $fromname =~ /$regexp/i;
                     $fromname =~
                       s/^\.[^.]+//;    # Knock off next word, could be last
                 }
             }
         }
-    }
-    else {
+    } else {
         #
         # It is a CIDR (network/netmask) rule
         #
-        if ( $direction eq 'v' ) {
+        if ($direction eq 'v') {
+
             # It is a virus name matching rule.
             # Look through the reports and match substrings.
             # This is for first-matching rules only.
             # Don't return anything unless we find a match.
-            my ( $file, $text );
-            while ( ( $file, $text ) = each %{ $msg->{allreports} } ) {
-                push @matches, split( " ", $value ) if $text =~ /$regexp/;
+            my ($file, $text);
+            while (($file, $text) = each %{$msg->{allreports}}) {
+                push @matches, split(" ", $value) if $text =~ /$regexp/;
             }
-        }
-        elsif ( $direction =~ /f/ ) {
+        } elsif ($direction =~ /f/) {
+
             # Can only check these with From:, not To: addresses
             # Match against the SMTP Client IP address
-            if(Net::CIDR::cidrvalidate($msg->{clientip}) and Net::CIDR::cidrvalidate($regexp2)){
+            if (    Net::CIDR::cidrvalidate($msg->{clientip})
+                and Net::CIDR::cidrvalidate($regexp2)) {
+
                 #print STDERR "Matching IP " . $msg->{clientip} .
                 #             " against " . $regexp2 . "\n";
                 my ($check1, $check2);
                 $check1 = new NetAddr::IP($msg->{clientip});
                 $check2 = new NetAddr::IP($regexp2);
                 if ($check1->version() == $check2->version()) {
-                    my (@cidr) = split( ',', $regexp2 );
-                    push @matches, split(" ", $value) if Net::CIDR::cidrlookup($msg->{clientip}, @cidr);
+                    my (@cidr) = split(',', $regexp2);
+                    push @matches, split(" ", $value)
+                      if Net::CIDR::cidrlookup($msg->{clientip}, @cidr);
                 }
             }
         }
-        if ( $direction =~ /[tb]/ ) {
+        if ($direction =~ /[tb]/) {
+
             # Don't know the target IP address
             Baruwa::Scanner::Log::WarnLog(
                 "Config Error: Cannot match against "
@@ -759,7 +772,8 @@ sub AllMatchesValue {
 
     # Return the concatenation of all the matching rules
     my ($results);
-    $results = join( " ", @matches );
+    $results = join(" ", @matches);
+
     #print STDERR "Result is \"$results\"\n";
     return $results if @matches;
     return "CoNfIgFoUnDnOtHiNg";
@@ -791,22 +805,23 @@ sub DoPercentVars {
 sub initialise {
     my ($dir) = @_;
 
-    my ( $dirh, $filename, $fullfile );
+    my ($dirh, $filename, $fullfile);
 
     $dirh = new DirHandle;
-    unless ( $dirh->open($dir) ) {
+    unless ($dirh->open($dir)) {
         Baruwa::Scanner::Log::WarnLog(
-            "Could not read Custom Functions directory %s", $dir );
+            "Could not read Custom Functions directory %s", $dir);
         return;
     }
 
-    while ( defined( $filename = $dirh->read ) ) {
+    while (defined($filename = $dirh->read)) {
+
         # Only process files ending with .pm or .pl
         # Skip all dot files and rpmnew files
         next
           if $filename =~ /^\./
           || $filename =~ /\.(rpmnew|dpkg-dist|dpkg-new|dpkg-old)$/i;
-        unless ( $filename =~ /\.p[lm]$/i ) {
+        unless ($filename =~ /\.p[lm]$/i) {
             Baruwa::Scanner::Log::NoticeLog(
                 "Skipping Custom Function file %s as its name does not end in .pm or .pl",
                 $filename
@@ -817,7 +832,7 @@ sub initialise {
         $fullfile =~ /^(.*)$/;    # Simple untaint
         $fullfile = $1;
         next unless -f $fullfile and -s $fullfile;
-        eval { require $fullfile; };
+        eval {require $fullfile;};
         if ($@) {
             Baruwa::Scanner::Log::WarnLog(
                 "Could not use Custom Function code %s, "
@@ -834,7 +849,7 @@ sub initialise {
 # Set one of the %percentvars%.
 #
 sub SetPercent {
-    my ( $percent, $value ) = @_;
+    my ($percent, $value) = @_;
     $PercentVars{$percent} = $value;
 }
 
@@ -845,17 +860,17 @@ sub SetPercent {
 my %QPConfFilesSeen = ();
 
 sub QuickPeek {
-    my ( $filename, $target, $notifldap ) = @_;
+    my ($filename, $target, $notifldap) = @_;
     %QPConfFilesSeen = ();
-    return QuickPeek2( $filename, $target, $notifldap );
+    return QuickPeek2($filename, $target, $notifldap);
 }
 
 # This is the one that actually does the work now!
 sub QuickPeek2 {
-    my ( $filename, $target, $notifldap ) = @_;
+    my ($filename, $target, $notifldap) = @_;
 
-    my ( $fh, $key, $value, $targetfound, $targetvalue, $savedline );
-    my ( $ldapserver, $ldapsite, $ldapbase );
+    my ($fh, $key, $value, $targetfound, $targetvalue, $savedline);
+    my ($ldapserver, $ldapsite, $ldapbase);
 
     $target = lc($target);
     my ($dbtarget) = $target;
@@ -863,7 +878,7 @@ sub QuickPeek2 {
 
     $fh = new FileHandle;
     $fh->open("<$filename") or die "Cannot open config file $filename, $!";
-    flock( $fh, $LOCK_SH );
+    flock($fh, $LOCK_SH);
 
     while (<$fh>) {
         chomp;
@@ -874,24 +889,28 @@ sub QuickPeek2 {
         $savedline = $_;
 
         # Implement "include" files
-        if ( $savedline =~ /^include\s+([^=]*)$/i ) {
+        if ($savedline =~ /^include\s+([^=]*)$/i) {
             my $wildcard = $1;
-            my @newfiles = map { m/(.*)/ } glob($wildcard);
+            my @newfiles = map {m/(.*)/} glob($wildcard);
             if (@newfiles) {
+
                 # Go through each of the @newfiles reading conf from them.
-                for my $newfile ( sort @newfiles ) {
+                for my $newfile (sort @newfiles) {
+
                     # Have we seen it before?
                     #print STDERR "Checking $newfile\n";
-                    unless ( $QPConfFilesSeen{$newfile} ) {
+                    unless ($QPConfFilesSeen{$newfile}) {
+
                         # No, so read it.
-                        my $ret = QuickPeek2( $newfile, $target, $notifldap );
-                        if ( defined $ret ) {
+                        my $ret = QuickPeek2($newfile, $target, $notifldap);
+                        if (defined $ret) {
                             $targetfound = 1;
                             $targetvalue = $ret;
                         }
                     }
                 }
             }
+
             # And don't do any more processing on the "include" line.
             next;
         }
@@ -900,48 +919,53 @@ sub QuickPeek2 {
         $key   = undef;        # Don't carry over values from previous iteration
         $value = undef;
         /^(.*?)\s*=\s*(.*)$/;
-        ( $key, $value ) = ( $1, $2 );
+        ($key, $value) = ($1, $2);
+
         # Allow %var% = value lines with $VAR in value
         $value =~ s/\%([^%]+)\%/$PercentVars{lc($1)}/g;
         $value =~ s/\$\{?(\w+)\}?/$ENV{$1}/g;
         $value =~ s/\\n/\n/g;
-        if ( $key =~ /^\%([^%]+)\%$/ ) {
+        if ($key =~ /^\%([^%]+)\%$/) {
+
             # 20090826 Always use the most recent value of %variable%
             #$PercentVars{lc($1)} = $value unless exists $PercentVars{lc($1)};
-            $PercentVars{ lc($1) } = $value;
+            $PercentVars{lc($1)} = $value;
+
             #next; -- Store the percentvars in the key{value} hash as well.
         }
 
         $key = lc($key);
-        $key =~ s/[^%a-z0-9]//g;    # Leave numbers and letters only -- leave % vars
+        $key =~
+          s/[^%a-z0-9]//g;    # Leave numbers and letters only -- leave % vars
         $ldapserver = $value if $key =~ /ldapserver/i;
         $ldapsite   = $value if $key =~ /ldapsite/i;
         $ldapbase   = $value if $key =~ /ldapbase/i;
-        if ( $key =~ /^$target$/i ) {
+        if ($key =~ /^$target$/i) {
             $targetfound = 1;
             $targetvalue = $value;
         }
+
         # Allow %% on left hand side
     }
 
     # Unlock and close
-    flock( $fh, $LOCK_UN );
+    flock($fh, $LOCK_UN);
     $fh->close();
 
     #
     # Try and override the value with settings from DBI
     #
-    if ( $dbtarget !~ /sqlquickpeek/ ) {
+    if ($dbtarget !~ /sqlquickpeek/) {
         my ($db_result) =
-          Baruwa::Scanner::ConfigSQL::QuickPeek( $filename, $dbtarget );
-        if ( defined($db_result) && $db_result ) {
+          Baruwa::Scanner::ConfigSQL::QuickPeek($filename, $dbtarget);
+        if (defined($db_result) && $db_result) {
             $targetfound = 1;
             $targetvalue = $db_result;
         }
     }
 
     # Now do the stuff if $noldap is set, so we don't actually
-    if ( $ldapserver && $notifldap ) {
+    if ($ldapserver && $notifldap) {
         return undef;
     }
 
@@ -951,15 +975,15 @@ sub QuickPeek2 {
 
     #print STDERR "About to QuickPeek into LDAP for $target\n";
     if ($ldapserver) {
-        my ( $connection, $binding );
-        my ( $result, $searchfor, $number, $entr, $attr, $attr2 );
+        my ($connection, $binding);
+        my ($result, $searchfor, $number, $entr, $attr, $attr2);
 
         # Load all the LDAP code
         require 'Net/LDAP.pm' unless $RequireLDAPDone;
         $RequireLDAPDone = 1;
 
         # Connect and bind
-        $connection = Net::LDAP->new( $ldapserver, onerror => 'warn' )
+        $connection = Net::LDAP->new($ldapserver, onerror => 'warn')
           or print STDERR "Making LDAP connection error: $@\n";
 
         # Change for JPK $binding = $connection->bind($ldapbase, anonymous=>1);
@@ -981,18 +1005,21 @@ sub QuickPeek2 {
           . "$target returned error: "
           . $result->error . "\n";
         $number = 0;
-        while ( defined( $entr = $result->entry($number) ) ) {
-            foreach $attr ( sort $entr->attributes ) {
+        while (defined($entr = $result->entry($number))) {
+
+            foreach $attr (sort $entr->attributes) {
                 next if $attr =~ /;binary$/;
                 $attr2 = lc($attr);
-                if ( $attr2 =~ /^$target$/i ) {
+                if ($attr2 =~ /^$target$/i) {
                     $targetfound = 1;
-                    $targetvalue = join( ' ', @{ $entr->get_value( $attr, asref => 1 ) } );
+                    $targetvalue =
+                      join(' ', @{$entr->get_value($attr, asref => 1)});
                     last;
                 }
             }
             $number++;
         }
+
         # Disconnect LDAP server again
         $connection->unbind();
     }
@@ -1002,8 +1029,7 @@ sub QuickPeek2 {
     #
     if ($targetfound) {
         return $targetvalue;
-    }
-    else {
+    } else {
         return undef;
     }
 }
@@ -1013,8 +1039,9 @@ sub QuickPeek2 {
 # if they are currently ""
 #
 sub Default {
-    my ( $keyword, $value ) = @_;
-    if ( Value($keyword) eq "" ) {
+    my ($keyword, $value) = @_;
+    if (Value($keyword) eq "") {
+
         # Remove whitespace if it is a mail header
         $value =~ s/\s+/-/g if $keyword =~ /header$/i && $value =~ /:$/;
         $StaticScalars{$keyword} = $value;
@@ -1026,17 +1053,17 @@ sub Default {
 #
 sub ItoE {
     my ($val) = @_;
-    lc( $ItoE{$val} ) or lc($val);
+    lc($ItoE{$val}) or lc($val);
 }
 
 sub EtoI {
     my ($val) = @_;
-    lc( $EtoI{$val} ) or lc($val);
+    lc($EtoI{$val}) or lc($val);
 }
 
 # Process and setup the configuration
 sub Read {
-    my ( $filename, $WantLintOnly ) = @_;
+    my ($filename, $WantLintOnly) = @_;
 
     # Save the configuration filename and directory for later potential use
     # in Custom Functions.
@@ -1047,15 +1074,15 @@ sub Read {
 
     # Read the main data, without the $nodefaults flag set.
     # Sorry the logic is upside down.
-    ReadData( $filename, 0 );
+    ReadData($filename, 0);
 
     # Read all the filename rules. The "Value" of filenamerules is a list
     # of filenames, each of which contains a list of allow/deny rules.
     # We will have to construct a list of allow/deny rules from the list of
     # matching filenames. We need to build a hash mapping filename to a list
     # of rules.
-    ReadFilenameRules( 'filenamerules',  \%NFilenameRules );
-    ReadFilenameRules( 'afilenamerules', \%AFilenameRules );
+    ReadFilenameRules('filenamerules',  \%NFilenameRules);
+    ReadFilenameRules('afilenamerules', \%AFilenameRules);
 
     #print STDERR "Finished reading filename rules files\n";
 
@@ -1064,8 +1091,8 @@ sub Read {
     # We will have to construct a list of allow/deny rules from the list of
     # matching filenames. We need to build a hash mapping filename to a list
     # of rules.
-    ReadFiletypeRules( 'filetyperules',  \%NFiletypeRules );
-    ReadFiletypeRules( 'afiletyperules', \%AFiletypeRules );
+    ReadFiletypeRules('filetyperules',  \%NFiletypeRules);
+    ReadFiletypeRules('afiletyperules', \%AFiletypeRules);
 
     #print STDERR "Finished reading filename rules files\n";
 
@@ -1086,25 +1113,26 @@ sub Read {
 
     # Read all the virus scanner definitions.
     # These map a scanner name onto a filename.
-    %ScannerCmds = ReadDefinitions( Value('virusscannerdefinitions') );
+    %ScannerCmds = ReadDefinitions(Value('virusscannerdefinitions'));
 
     # Read all the spam list definitions.
     # These map a spam list name onto a DNS domain
-    %SpamLists = ReadDefinitions( Value('spamlistdefinitions') );
+    %SpamLists = ReadDefinitions(Value('spamlistdefinitions'));
 
     # Read in the Phishing Net whitelist.
     # This lists all the hostnames of places to ignore when phishing.
-    $PhishingWhitelist = ReadPhishingWhitelist( Value('phishingwhitelist') );
-    $PhishingBlacklist = ReadPhishingBlacklist( Value('phishingblacklist') );
+    $PhishingWhitelist = ReadPhishingWhitelist(Value('phishingwhitelist'));
+    $PhishingBlacklist = ReadPhishingBlacklist(Value('phishingblacklist'));
 
     # Call all the user's custom initialisation functions
-    my ( $key, $param, $custom, $fn );
-    foreach $key ( keys %CustomFunctions ) {
+    my ($key, $param, $custom, $fn);
+    foreach $key (keys %CustomFunctions) {
         $custom = $CustomFunctions{$key};
         next unless $custom;
         $param = $CustomFunctionsParams{$key};
-        Baruwa::Scanner::Log::InfoLog( "Config: calling custom init function %s%s",
-            $custom, $param );
+        Baruwa::Scanner::Log::InfoLog(
+            "Config: calling custom init function %s%s",
+            $custom, $param);
         $fn =
             'Baruwa::Scanner::CustomConfig::Init'
           . $custom
@@ -1129,7 +1157,7 @@ sub Read {
 
     # Read the list of second-level country domain codes that exist
     %Baruwa::Scanner::Config::SecondLevelDomainExists = ();
-    ReadCountryDomainList( Baruwa::Scanner::Config::Value('secondlevellist') )
+    ReadCountryDomainList(Baruwa::Scanner::Config::Value('secondlevellist'))
       unless Baruwa::Scanner::Config::IsSimpleValue('strictphishing')
       && Baruwa::Scanner::Config::Value('strictphishing');
 
@@ -1168,7 +1196,8 @@ sub OverrideInQueueDirs {
 # so the white and black names are reversed from what would seem logical.
 sub ReadPhishingBlacklist {
     my ($filename) = @_;
-    return unless(-f $filename);
+    return unless (-f $filename);
+
     # Skip this if they have findphishing = no
     return
       if Baruwa::Scanner::Config::IsSimpleValue('findphishing')
@@ -1182,7 +1211,8 @@ sub ReadPhishingBlacklist {
 # Pass in the filename. Return the hash.
 sub ReadPhishingWhitelist {
     my ($filename) = @_;
-    return unless(-f $filename);
+    return unless (-f $filename);
+
     # Skip this if they have findphishing = no
     return
       if Baruwa::Scanner::Config::IsSimpleValue('findphishing')
@@ -1194,13 +1224,14 @@ sub ReadPhishingWhitelist {
 # Give all the user's custom functions a chance to clear up
 # and neatly shutdown, log totals, close databases, etc.
 sub EndCustomFunctions {
-    my ( $custom, $key, $param, $fn );
-    foreach $key ( keys %CustomFunctions ) {
+    my ($custom, $key, $param, $fn);
+    foreach $key (keys %CustomFunctions) {
         $custom = $CustomFunctions{$key};
         next unless $custom;
         $param = $CustomFunctionsParams{$key};
-        Baruwa::Scanner::Log::InfoLog( "Config: calling custom end function %s%s",
-            $custom, $param );
+        Baruwa::Scanner::Log::InfoLog(
+            "Config: calling custom end function %s%s",
+            $custom, $param);
         $fn = 'Baruwa::Scanner::CustomConfig::End' . $custom . $param;
         no strict 'refs';
         eval($fn);
@@ -1216,7 +1247,7 @@ sub ReadCountryDomainList {
     %Baruwa::Scanner::Config::SecondLevelDomainExists = ();
 
     my $fh = new FileHandle;
-    unless ( $fh->open("< $filename") ) {
+    unless ($fh->open("< $filename")) {
         Baruwa::Scanner::Log::WarnLog(
             "Could not read list of country code second-level domain names from %s, \"Use Stricter Phishing Net = no\" will not work properly",
             $filename
@@ -1234,6 +1265,7 @@ sub ReadCountryDomainList {
 
         # Only allow 2 dots at most
         if (/\..*\..*\./) {
+
             # There were at least 3 dots
             Baruwa::Scanner::Log::WarnLog(
                 "Domain name \"%s\" in %s  is deeper than third-level, ignoring it",
@@ -1252,32 +1284,33 @@ sub ReadCountryDomainList {
 # rules themselves.
 sub NFilenameRulesValue {
     my ($message) = @_;
-    return FilenameRulesValue( $message, \%NFilenameRules, 'filenamerules' );
+    return FilenameRulesValue($message, \%NFilenameRules, 'filenamerules');
 }
 
 sub AFilenameRulesValue {
     my ($message) = @_;
-    return FilenameRulesValue( $message, \%AFilenameRules, 'afilenamerules' );
+    return FilenameRulesValue($message, \%AFilenameRules, 'afilenamerules');
 }
 
 sub FilenameRulesValue {
-    my ( $message, $Rules, $keyword ) = @_;
+    my ($message, $Rules, $keyword) = @_;
 
-    my ( $list, @filenamelist, $file, $listref, @totallist );
+    my ($list, @filenamelist, $file, $listref, @totallist);
 
     # Get the list of filenames and split it
-    $list = Value( $keyword, $message );
-    @filenamelist = split( " ", $list );
+    $list = Value($keyword, $message);
+    @filenamelist = split(" ", $list);
     return undef unless @filenamelist;
 
     # Now construct a list containing the concatenation of all the allow-deny
     # rules
     #print STDERR "Filename rulesets are " . join(', ', @filenamelist) . "\n";
     foreach $file (@filenamelist) {
-        if ( !exists( $Rules->{$file} ) ) {
-            #print STDERR "Could not find filenamerules $file, forcing a re-read.\n";
-            # This filename has not been seen before, so compile it now.
-            # Skip the file if it didn't exist, error already generated.
+        if (!exists($Rules->{$file})) {
+
+       #print STDERR "Could not find filenamerules $file, forcing a re-read.\n";
+       # This filename has not been seen before, so compile it now.
+       # Skip the file if it didn't exist, error already generated.
             next unless $Rules->{$file} = ReadOneFilenameRulesFile($file);
         }
         $listref = $Rules->{$file};
@@ -1298,29 +1331,30 @@ sub FilenameRulesValue {
 # rules themselves.
 sub NFiletypeRulesValue {
     my ($message) = @_;
-    return FiletypeRulesValue( $message, \%NFiletypeRules, 'filetyperules' );
+    return FiletypeRulesValue($message, \%NFiletypeRules, 'filetyperules');
 }
 
 sub AFiletypeRulesValue {
     my ($message) = @_;
-    return FiletypeRulesValue( $message, \%AFiletypeRules, 'afiletyperules' );
+    return FiletypeRulesValue($message, \%AFiletypeRules, 'afiletyperules');
 }
 
 sub FiletypeRulesValue {
-    my ( $message, $Rules, $keyword ) = @_;
+    my ($message, $Rules, $keyword) = @_;
 
-    my ( $list, @filetypelist, $file, $listref, @totallist );
+    my ($list, @filetypelist, $file, $listref, @totallist);
 
     # Get the list of filenames and split it
-    $list = Value( $keyword, $message );
-    @filetypelist = split( " ", $list );
+    $list = Value($keyword, $message);
+    @filetypelist = split(" ", $list);
     return undef unless @filetypelist;
 
     # Now construct a list containing the concatenation of all the allow-deny
     # rules
     #print STDERR "Filetype rulesets are " . join(', ', @filenamelist) . "\n";
     foreach $file (@filetypelist) {
-        if ( !exists( $Rules->{$file} ) ) {
+        if (!exists($Rules->{$file})) {
+
             # This filename has not been seen before, so compile it now.
             # Skip the file if it didn't exist, error already generated.
             next unless $Rules->{$file} = ReadOneFilenameRulesFile($file);
@@ -1339,16 +1373,15 @@ sub FiletypeRulesValue {
 # Return a string which is the input string translated into the correct
 # language for this particular message.
 sub LanguageValue {
-    my ( $message, $string ) = @_;
+    my ($message, $string) = @_;
 
-    my $filename = Value( 'languagestrings', $message );
+    my $filename = Value('languagestrings', $message);
 
     #print STDERR "Looking up $string in $filename\n";
     #print STDERR "Answer is " . $LanguageStrings{$filename}{$string} . "\n";
-    if ( exists $LanguageStrings{$filename}{$string} ) {
+    if (exists $LanguageStrings{$filename}{$string}) {
         return $LanguageStrings{$filename}{$string};
-    }
-    else {
+    } else {
         Baruwa::Scanner::Log::WarnLog(
             'Looked up unknown string %s in language ' . 'translation file %s',
             $string, $filename
@@ -1363,10 +1396,9 @@ sub LanguageValue {
 # Read all the possible filename-rules files.
 # Store them each in a hash of list of \0-separated fields.
 sub ReadFilenameRules {
-    my ( $keyword, $Rules ) = @_;
+    my ($keyword, $Rules) = @_;
 
-    my (
-        $rule,   $ruleset,  $direction, $iporaddr,
+    my ($rule,   $ruleset,  $direction, $iporaddr,
         $regexp, $filename, $namelist,  %donefile
     );
 
@@ -1375,24 +1407,26 @@ sub ReadFilenameRules {
     # Do the static filename list if there is one
     $namelist = $StaticScalars{$keyword};
 
-    #print STDERR "Filename-rules: keyword is $keyword, filename is $namelist\n";
+   #print STDERR "Filename-rules: keyword is $keyword, filename is $namelist\n";
     if (defined($namelist)) {
-        foreach $filename ( split( " ", $namelist ) ) {
+        foreach $filename (split(" ", $namelist)) {
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-            #print STDERR "Storing: $filename is " . $FilenameRules{$filename} . "\n";
+
+      #print STDERR "Storing: $filename is " . $FilenameRules{$filename} . "\n";
         }
     }
 
     # Do the default filename list if there is one
     $namelist = $Defaults{$keyword};
 
-    #print STDERR "Filename-rules: default keyword is $keyword, filename is $namelist\n";
-    if ( defined $namelist ) {
-        foreach $filename ( split( " ", $namelist ) ) {
+#print STDERR "Filename-rules: default keyword is $keyword, filename is $namelist\n";
+    if (defined $namelist) {
+        foreach $filename (split(" ", $namelist)) {
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-            #print STDERR "Storing: $filename is " . $FilenameRules{$filename} . "\n";
+
+      #print STDERR "Storing: $filename is " . $FilenameRules{$filename} . "\n";
         }
     }
 
@@ -1401,18 +1435,20 @@ sub ReadFilenameRules {
 
     #print STDERR "ruleset is $ruleset\n";
     #foreach $rule (split(" ", @{$ruleset})) {
-    foreach $rule ( @{$ruleset} ) {
-        ( $direction, $iporaddr, $regexp, $namelist ) = split( /\0/, $rule, 4 );
+    foreach $rule (@{$ruleset}) {
+        ($direction, $iporaddr, $regexp, $namelist) = split(/\0/, $rule, 4);
+
         # Handle rules with an "and" in them
-        if ( $namelist =~ /\0/ ) {
-            ( $direction, $iporaddr, $regexp, $namelist ) =
-              split( /\0/, $namelist, 4 );
+        if ($namelist =~ /\0/) {
+            ($direction, $iporaddr, $regexp, $namelist) =
+              split(/\0/, $namelist, 4);
         }
 
-        #print STDERR "Filename rules are $direction $iporaddr $regexp $namelist\n";
+    #print STDERR "Filename rules are $direction $iporaddr $regexp $namelist\n";
 
         # Each value in the list can itself be a list of filename-rules files
-        foreach $filename ( split( " ", $namelist ) ) {
+        foreach $filename (split(" ", $namelist)) {
+
             # Skip this allow/deny filename if we've read it already
             next if $donefile{"$filename"};
             $donefile{"$filename"} = 1;
@@ -1420,7 +1456,7 @@ sub ReadFilenameRules {
             # This builds a hash of filename-->ref-to-list-of-rules
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
 
-            #print STDERR "Storing: $filename is " . $FilenameRules{$filename} . "\n";
+      #print STDERR "Storing: $filename is " . $FilenameRules{$filename} . "\n";
         }
     }
 }
@@ -1428,10 +1464,9 @@ sub ReadFilenameRules {
 # Read all the possible filetype-rules files.
 # Store them each in a hash of list of \0-separated fields.
 sub ReadFiletypeRules {
-    my ( $keyword, $Rules ) = @_;
+    my ($keyword, $Rules) = @_;
 
-    my (
-        $rule,   $ruleset,  $direction, $iporaddr,
+    my ($rule,   $ruleset,  $direction, $iporaddr,
         $regexp, $filename, $namelist,  %donefile
     );
 
@@ -1440,24 +1475,26 @@ sub ReadFiletypeRules {
     # Do the static filename list if there is one
     $namelist = $StaticScalars{$keyword};
 
-    #print STDERR "Filetype-rules: keyword is $keyword, filename is $namelist\n";
+   #print STDERR "Filetype-rules: keyword is $keyword, filename is $namelist\n";
     if (defined($namelist)) {
-        foreach $filename ( split( " ", $namelist ) ) {
+        foreach $filename (split(" ", $namelist)) {
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-            #print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
+
+      #print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
         }
     }
 
     # Do the default filename list if there is one
     $namelist = $Defaults{$keyword};
 
-    #print STDERR "Filetype-rules: default keyword is $keyword, filename is $namelist\n";
-    if ( defined $namelist ) {
-        foreach $filename ( split( " ", $namelist ) ) {
+#print STDERR "Filetype-rules: default keyword is $keyword, filename is $namelist\n";
+    if (defined $namelist) {
+        foreach $filename (split(" ", $namelist)) {
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-            #print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
+
+      #print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
         }
     }
 
@@ -1466,24 +1503,28 @@ sub ReadFiletypeRules {
 
     #print STDERR "ruleset is $ruleset\n";
     #foreach $rule (split(" ", @{$ruleset})) {
-    foreach $rule ( @{$ruleset} ) {
-        ( $direction, $iporaddr, $regexp, $namelist ) = split( /\0/, $rule, 4 );
+    foreach $rule (@{$ruleset}) {
+        ($direction, $iporaddr, $regexp, $namelist) = split(/\0/, $rule, 4);
+
         # Handle rules with an "and" in them
-        if ( $namelist =~ /\0/ ) {
-            ( $direction, $iporaddr, $regexp, $namelist ) =
-              split( /\0/, $namelist, 4 );
+        if ($namelist =~ /\0/) {
+            ($direction, $iporaddr, $regexp, $namelist) =
+              split(/\0/, $namelist, 4);
         }
 
-        #print STDERR "Filename rules are $direction $iporaddr $regexp $namelist\n";
+    #print STDERR "Filename rules are $direction $iporaddr $regexp $namelist\n";
 
         # Each value in the list can itself be a list of filename-rules files
-        foreach $filename ( split( " ", $namelist ) ) {
+        foreach $filename (split(" ", $namelist)) {
+
             # Skip this allow/deny filename if we've read it already
             next if $donefile{"$filename"};
             $donefile{"$filename"} = 1;
+
             # This builds a hash of filename-->ref-to-list-of-rules
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-            #print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
+
+      #print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
         }
     }
 }
@@ -1492,8 +1533,7 @@ sub ReadFiletypeRules {
 # Store them each in a hash of a hash of key/value pairs.
 sub ReadLanguageStrings {
     my ($keyword) = @_;
-    my (
-        $rule,   $ruleset,  $direction, $iporaddr,
+    my ($rule,   $ruleset,  $direction, $iporaddr,
         $regexp, $filename, $namelist,  %donefile
     );
 
@@ -1502,10 +1542,11 @@ sub ReadLanguageStrings {
     # Do the static filename list if there is one
     $namelist = $StaticScalars{$keyword};
     if (defined($namelist)) {
-        foreach $filename ( split( " ", $namelist ) ) {
+        foreach $filename (split(" ", $namelist)) {
             $donefile{"$filename"} = 1;
             $LanguageStrings{$filename} = ReadOneLanguageStringsFile($filename);
-            #print STDERR "Storing: $filename is " . $LanguageStrings{$filename} . "\n";
+
+    #print STDERR "Storing: $filename is " . $LanguageStrings{$filename} . "\n";
         }
     }
 
@@ -1513,17 +1554,18 @@ sub ReadLanguageStrings {
     $ruleset = $RuleScalars{$keyword};
 
     #print STDERR "ruleset is $ruleset\n";
-    foreach $rule ( @{$ruleset} ) {
-        ( $direction, $iporaddr, $regexp, $namelist ) = split( /\0/, $rule, 4 );
+    foreach $rule (@{$ruleset}) {
+        ($direction, $iporaddr, $regexp, $namelist) = split(/\0/, $rule, 4);
 
         # Handle rules with an "and" in them
-        if ( $namelist =~ /\0/ ) {
-            ( $direction, $iporaddr, $regexp, $namelist ) =
-              split( /\0/, $namelist, 4 );
+        if ($namelist =~ /\0/) {
+            ($direction, $iporaddr, $regexp, $namelist) =
+              split(/\0/, $namelist, 4);
         }
 
         # Each value in the list can itself be a list of language-strings files
-        foreach $filename ( split( " ", $namelist ) ) {
+        foreach $filename (split(" ", $namelist)) {
+
             # Skip this allow/deny filename if we've read it already
             next if $donefile{"$filename"};
             $donefile{"$filename"} = 1;
@@ -1532,16 +1574,18 @@ sub ReadLanguageStrings {
             #print STDERR "Reading Language Strings file $filename\n";
             $LanguageStrings{$filename} = ReadOneLanguageStringsFile($filename);
 
-            #print STDERR "Storing: $filename is " . $LanguageStrings{$filename} .
-            #             "\n";
+          #print STDERR "Storing: $filename is " . $LanguageStrings{$filename} .
+          #             "\n";
         }
     }
 
     $namelist = $Defaults{$keyword};
     if ($namelist) {
+
         #print STDERR "Namelist is $namelist\n";
         # Each value in the list can itself be a list of language-strings files
-        foreach $filename ( split( " ", $namelist ) ) {
+        foreach $filename (split(" ", $namelist)) {
+
             # Skip this allow/deny filename if we've read it already
             next if $donefile{"$filename"};
             $donefile{"$filename"} = 1;
@@ -1550,8 +1594,8 @@ sub ReadLanguageStrings {
             #print STDERR "Reading Language Strings file $filename\n";
             $LanguageStrings{$filename} = ReadOneLanguageStringsFile($filename);
 
-            #print STDERR "Storing: $filename is " . $LanguageStrings{$filename} .
-            #             "\n";
+          #print STDERR "Storing: $filename is " . $LanguageStrings{$filename} .
+          #             "\n";
         }
     }
 }
@@ -1560,15 +1604,14 @@ sub ReadLanguageStrings {
 # Now locks the filename rules file.
 sub ReadOneFilenameRulesFile {
     my ($filename) = @_;
-    my ( @AllowDenyList, $result );
+    my (@AllowDenyList, $result);
 
     # If the rulesfilename ends in ".FileRule" and doesn't contain any '/'
     # characters, then it's an LDAP ruleset.
-    if ( $LDAP && $filename !~ /\// && $filename =~ /\.FileRule$/ ) {
-        my ( $searchfor, $linecounter, $default, $error, $errors );
-        my ( $number, $entr, $attr, $attr2 );
-        my ( $rulenum, $ruleaction, $rulematch, $rulelog, $rulereport,
-            @ruleset );
+    if ($LDAP && $filename !~ /\// && $filename =~ /\.FileRule$/) {
+        my ($searchfor, $linecounter, $default, $error, $errors);
+        my ($number, $entr, $attr, $attr2);
+        my ($rulenum, $ruleaction, $rulematch, $rulelog, $rulereport, @ruleset);
 
         $searchfor = "(objectClass=baruwafileruleObject)";
         $searchfor = "(&$searchfor(baruwaFileRuleName=$filename))";
@@ -1587,11 +1630,12 @@ sub ReadOneFilenameRulesFile {
         $result->code
           and Baruwa::Scanner::Log::WarnLog(
             "LDAP search for ruleset " . "%s returned error: %s",
-            $filename, $result->error );
+            $filename, $result->error);
 
         $number = 0;
-        while ( defined( $entr = $result->entry($number) ) ) {
-            foreach $attr ( sort $entr->attributes ) {
+        while (defined($entr = $result->entry($number))) {
+            foreach $attr (sort $entr->attributes) {
+
                 #print STDERR "Filename/type attribute is $attr\n";
                 next if $attr =~ /;binary$/;
                 $attr       = lc($attr);
@@ -1602,18 +1646,16 @@ sub ReadOneFilenameRulesFile {
                 $rulereport = $entr->get_value($attr) if $attr =~ /rulereport/i;
             }
             $ruleset[$rulenum] = Store1FilenameRule(
-                join(
-                    "\t", $ruleaction, $rulematch, '', $rulelog, $rulereport
-                ),
-                $number,
-                $filename
+                join("\t", $ruleaction, $rulematch, '', $rulelog, $rulereport),
+                $number, $filename
             );
+
             #print STDERR "Filename/type rule is " . $ruleset[$rulenum] . "\n";
             $number++;
         }
 
         #print STDERR "Filename/type rule set is 0.." . $#ruleset . "\n";
-        foreach $rulenum ( 0 .. $#ruleset ) {
+        foreach $rulenum (0 .. $#ruleset) {
             push @AllowDenyList, $ruleset[$rulenum] if $ruleset[$rulenum] ne "";
         }
         return \@AllowDenyList;
@@ -1622,17 +1664,17 @@ sub ReadOneFilenameRulesFile {
     #
     # It's not an LDAP rule, so must be a normal file based rule
     #
-    my ( $fileh, $linenum );
+    my ($fileh, $linenum);
 
     # Open and lock the filename rules to ensure they can't be updated
     # and read simultaneously
     $fileh = new FileHandle;
-    unless ( $fileh->open("<$filename") ) {
+    unless ($fileh->open("<$filename")) {
         Baruwa::Scanner::Log::WarnLog(
-            "Cannot open filename-rules file %s, skipping", $filename );
+            "Cannot open filename-rules file %s, skipping", $filename);
         return undef;
     }
-    flock( $fileh, $LOCK_SH );
+    flock($fileh, $LOCK_SH);
 
     $linenum = 0;
     while (<$fileh>) {
@@ -1642,35 +1684,36 @@ sub ReadOneFilenameRulesFile {
         s/\s*$//g;
         $linenum++;
         next if /^$/;
-        $result = Store1FilenameRule( $_, $linenum, $filename );
+        $result = Store1FilenameRule($_, $linenum, $filename);
         push @AllowDenyList, $result if $result ne "";
     }
 
     # Unlock and close
-    flock( $fileh, $LOCK_UN );
+    flock($fileh, $LOCK_UN);
     $fileh->close();
 
     return \@AllowDenyList;
 }
 
 sub Store1FilenameRule {
-    my ( $line, $linenum, $filename ) = @_;
-    my ( $allow, $regexp, $iregexp, $logtext, $usertext );
+    my ($line, $linenum, $filename) = @_;
+    my ($allow, $regexp, $iregexp, $logtext, $usertext);
 
-    ( $allow, $regexp, $iregexp, $logtext, $usertext ) =
-      split( /\t+/, $line, 5 );
-    if (!defined($usertext) || $usertext eq "" ) {
+    ($allow, $regexp, $iregexp, $logtext, $usertext) =
+      split(/\t+/, $line, 5);
+    if (!defined($usertext) || $usertext eq "") {
+
         # They didn't specify the iregexp so set it to "-"
         # and push the rest along by 1.
         $usertext = $logtext;
         $logtext  = $iregexp;
         $iregexp  = '-';
     }
-    unless ( $allow && $regexp && $iregexp && $logtext && $usertext ) {
-        Baruwa::Scanner::Log::WarnLog( "Possible syntax error on line %d of %s",
-            $linenum, $filename );
+    unless ($allow && $regexp && $iregexp && $logtext && $usertext) {
+        Baruwa::Scanner::Log::WarnLog("Possible syntax error on line %d of %s",
+            $linenum, $filename);
         Baruwa::Scanner::Log::WarnLog(
-            "Remember to separate fields with tab " . "characters!" );
+            "Remember to separate fields with tab " . "characters!");
         return "";
     }
 
@@ -1679,30 +1722,26 @@ sub Store1FilenameRule {
     $allow = lc($allow);
     $allow =~ s/^[ ,]*//g;
     $allow =~ s/[ ,]*$//g;
-    if ( $allow eq 'allow' || $allow eq 'rename' ) {
+    if ($allow eq 'allow' || $allow eq 'rename') {
+
         # Simple 'allow' or 'rename' to the default rename pattern
         ;
-    }
-    elsif ( $allow =~ /^rename / ) {
+    } elsif ($allow =~ /^rename /) {
         $origallow =~ s/^rename (to )?/rename /i;
         $allow = $origallow;
-    }
-    elsif ( $allow =~ /^deny[^@]*$/ ) {
-        if ( $allow =~ /delete/ ) {
+    } elsif ($allow =~ /^deny[^@]*$/) {
+        if ($allow =~ /delete/) {
             $allow = 'denydelete';
-        }
-        else {
+        } else {
             $allow = 'deny';
         }
-    }
-    elsif ( $allow =~ /@/ ) {
-        my @allowlist = split( /[, ]+/, lc($allow) );
-        $allow = join( ',', @allowlist );
-    }
-    else {
+    } elsif ($allow =~ /@/) {
+        my @allowlist = split(/[, ]+/, lc($allow));
+        $allow = join(',', @allowlist);
+    } else {
         Baruwa::Scanner::Log::WarnLog(
             "Possible syntax error in first keyword " . "on line %d of %s",
-            $linenum, $filename );
+            $linenum, $filename);
     }
 
     $regexp =~ s/^\/(.*)\/$/$1/;
@@ -1714,25 +1753,25 @@ sub Store1FilenameRule {
     # If we have *any* iregexps then we must run the "file -i" command.
     $Baruwa::Scanner::Config::UsingFileICommand = 1 if $iregexp ne "";
 
-    return join( "\0", $allow, $regexp, $iregexp, $logtext, $usertext );
+    return join("\0", $allow, $regexp, $iregexp, $logtext, $usertext);
 }
 
 # Read one of the lists of language strings.
 # Now locks the language strings file.
 sub ReadOneLanguageStringsFile {
     my ($filename) = @_;
-    my ( $fileh, $key, $value, $linenum );
+    my ($fileh, $key, $value, $linenum);
     my (%Store);
 
     # Open and lock the filename rules to ensure they can't be updated
     # and read simultaneously
     $fileh = new FileHandle;
-    unless ( $fileh->open("<$filename") ) {
+    unless ($fileh->open("<$filename")) {
         Baruwa::Scanner::Log::WarnLog(
-            "Cannot open language-strings file %s, skipping", $filename );
+            "Cannot open language-strings file %s, skipping", $filename);
         return undef;
     }
-    flock( $fileh, $LOCK_SH );
+    flock($fileh, $LOCK_SH);
 
     $linenum = 0;
     while (<$fileh>) {
@@ -1742,24 +1781,27 @@ sub ReadOneLanguageStringsFile {
         s/\s*$//g;
         $linenum++;
         next if /^$/;
-        ( $key, $value ) = split( /\s*=\s*/, $_, 2 );
+        ($key, $value) = split(/\s*=\s*/, $_, 2);
         $value =~ s/\%([^%]+)\%/$PercentVars{lc($1)}/g;
         $value =~ s/\$\{?(\w+)\}?/$ENV{$1}/g;
         $value =~ s/\\n/\n/g;
 
         #unless ($key && $value) {
         unless (/=/) {
-            Baruwa::Scanner::Log::WarnLog( "Possible syntax error on line %d of %s",
-                $linenum, $filename );
             Baruwa::Scanner::Log::WarnLog(
-                "Remember to separate fields with an = " . "sign!" );
+                "Possible syntax error on line %d of %s",
+                $linenum, $filename);
+            Baruwa::Scanner::Log::WarnLog(
+                "Remember to separate fields with an = " . "sign!");
             next;
         }
+
         #print STDERR "Storing $value in $key\n";
-        $Store{ lc($key) } = $value;
+        $Store{lc($key)} = $value;
     }
+
     # Unlock and close
-    flock( $fileh, $LOCK_UN );
+    flock($fileh, $LOCK_UN);
     $fileh->close();
 
     return \%Store;
@@ -1771,7 +1813,7 @@ sub ReadOneLanguageStringsFile {
 #                 3. name of file containing directory names
 sub ReadInQueueDirs {
     my ($taintedname) = @_;
-    my ( @list, $listh, $dir, $name );
+    my (@list, $listh, $dir, $name);
 
     # We trust the admin to only put sensible names in
     # config file, so untaint it:
@@ -1780,20 +1822,24 @@ sub ReadInQueueDirs {
     $name =~ s/\%([^%]+)\%/$PercentVars{lc($1)}/g;
     $name =~ s/\$\{?(\w+)\}?/$ENV{$1}/g;
 
-    if ( $name =~ /[\?\*]/ ) {
+    if ($name =~ /[\?\*]/) {
+
         # It's a glob so contains directory names
-        @list = map { m/(.*)/ } glob($name);
+        @list = map {m/(.*)/} glob($name);
+
         #print STDERR "Adding list of inq's " . join(', ', @list) . "\n";
-        push @{ $StaticScalars{inqueuedir} }, @list;
+        push @{$StaticScalars{inqueuedir}}, @list;
         return;
     }
-    if ( -d $name ) {
+    if (-d $name) {
+
         # It's a simple directory name
         #print STDERR "Adding simple dir name $name\n";
-        push @{ $StaticScalars{inqueuedir} }, $name;
+        push @{$StaticScalars{inqueuedir}}, $name;
         return;
     }
-    if ( -l $name ) {
+    if (-l $name) {
+
         # It's a soft link to somewhere
         Baruwa::Scanner::Log::WarnLog(
             "For the incoming queue directory %s, please "
@@ -1801,8 +1847,8 @@ sub ReadInQueueDirs {
             $name
         );
         Baruwa::Scanner::Log::WarnLog(
-            "I am assuming that %s points to a directory", $name );
-        push @{ $StaticScalars{inqueuedir} }, $name;
+            "I am assuming that %s points to a directory", $name);
+        push @{$StaticScalars{inqueuedir}}, $name;
         return;
     }
 
@@ -1814,7 +1860,7 @@ sub ReadInQueueDirs {
         $name
       ),
       return;
-    flock( $listh, $LOCK_SH );
+    flock($listh, $LOCK_SH);
 
     while (<$listh>) {
         chomp;
@@ -1829,13 +1875,14 @@ sub ReadInQueueDirs {
         $dir = $1;
         $dir =~ s/\%([^%]+)\%/$PercentVars{lc($1)}/g;
         $dir =~ s/\$\{?(\w+)\}?/$ENV{$1}/g;
-        if ( $dir =~ /[\?\*]/ ) {
+        if ($dir =~ /[\?\*]/) {
+
             # It's a glob so contains directory names
-            @list = map { m/(.*)/ } glob($dir);
-            push @{ $StaticScalars{inqueuedir} }, @list;
+            @list = map {m/(.*)/} glob($dir);
+            push @{$StaticScalars{inqueuedir}}, @list;
             next;
         }
-        unless ( -d $dir ) {
+        unless (-d $dir) {
             Baruwa::Scanner::Log::WarnLog(
                 "Incoming queue dir %s does not exist "
                   . "(listed in directory list file %s)",
@@ -1845,11 +1892,11 @@ sub ReadInQueueDirs {
         }
 
         #print STDERR "Adding dir $dir to list of incoming queues\n";
-        push @{ $StaticScalars{inqueuedir} }, $dir;
+        push @{$StaticScalars{inqueuedir}}, $dir;
     }
 
     # Unlock and close
-    flock( $listh, $LOCK_UN );
+    flock($listh, $LOCK_UN);
     $listh->close();
 }
 
@@ -1861,13 +1908,13 @@ sub ReadDefinitions {
 
     #print STDERR "Reading virus scanner definitions from $filename\n";
 
-    my ( $fileh, $linenum, $key, $value, %hash );
+    my ($fileh, $linenum, $key, $value, %hash);
 
     $fileh = new FileHandle;
     $fileh->open("<$filename")
-      or Baruwa::Scanner::Log::DieLog( "Cannot read definitions from %s, %s",
-        $filename, $! );
-    flock( $fileh, $LOCK_SH );
+      or Baruwa::Scanner::Log::DieLog("Cannot read definitions from %s, %s",
+        $filename, $!);
+    flock($fileh, $LOCK_SH);
 
     $linenum = 0;
     while (<$fileh>) {
@@ -1881,27 +1928,26 @@ sub ReadDefinitions {
         $key   = "";
         $value = "";
         if (/^(\S+)\s+(\S+)\s+(.+)$/) {
+
             # There are 3 words, so separate last 2 with commas
             $key   = lc($1);
             $value = $2 . ',' . $3;
-        }
-        else {
+        } else {
             /^(\S+)\s+(.+)$/;
             $key   = lc($1);
             $value = $2;
         }
 
-        if ( $key && $value ) {
+        if ($key && $value) {
             $hash{"$key"} = "$value";
-        }
-        else {
-            Baruwa::Scanner::Log::DieLog( "Syntax error in definitions file %s",
-                $filename );
+        } else {
+            Baruwa::Scanner::Log::DieLog("Syntax error in definitions file %s",
+                $filename);
         }
     }
 
     # Unlock and close
-    flock( $fileh, $LOCK_UN );
+    flock($fileh, $LOCK_UN);
     $fileh->close();
 
     #print STDERR "Finished reading definitions\n";
@@ -1932,7 +1978,7 @@ sub ScannerCmds {
 # Return the value of an RBL list
 sub SpamLists {
     my ($key) = @_;
-    return $SpamLists{ lc($key) };
+    return $SpamLists{lc($key)};
 }
 
 #
@@ -1942,8 +1988,8 @@ sub SpamLists {
 #$base = "o=fsl";
 #$sitename = "default";
 sub ReadConfBasicLDAP {
-    my ( $LDAP, $LDAPbase, $LDAPsite ) = @_;
-    my ( $result, $searchfor, $number, $entr, $attr, $attr2 );
+    my ($LDAP, $LDAPbase, $LDAPsite) = @_;
+    my ($result, $searchfor, $number, $entr, $attr, $attr2);
 
     # Build the search string 1 bit at a time. Gets syntax right that way.
     $searchfor = "(objectClass=baruwaconfmain)";
@@ -1958,13 +2004,14 @@ sub ReadConfBasicLDAP {
     $result->code
       and Baruwa::Scanner::Log::WarnLog(
         "LDAP search for basic " . "configuration returned error: %s",
-        $result->error );
+        $result->error);
 
     $number = 0;
-    while ( defined( $entr = $result->entry($number) ) ) {
+    while (defined($entr = $result->entry($number))) {
+
         #print STDERR "Fetched Entry $number\n";
         #print STDERR "DN: ", $entr->dn, "\n";
-        foreach $attr ( sort $entr->attributes ) {
+        foreach $attr (sort $entr->attributes) {
             next if $attr =~ /;binary$/;
             $attr2 = lc($attr);
             next if $attr2 eq 'confserialnumber';
@@ -1973,11 +2020,13 @@ sub ReadConfBasicLDAP {
             next if $attr2 eq 'baruwasite';
             next if $attr2 eq 'mschildren';
             next if $attr2 eq 'objectclass';
-            $File{$attr2} = join( ' ', @{ $entr->get_value( $attr, asref => 1 ) } );
+            $File{$attr2} = join(' ', @{$entr->get_value($attr, asref => 1)});
+
             #print STDERR "$attr2 : " . $File{$attr2} . "\n";
         }
         $number++;
     }
+
     # SF - Read the rest of the LDAP config
     Baruwa::Scanner::Config::LDAPUpdated();
 }
@@ -1993,19 +2042,20 @@ sub ReadConfFile {
 
     # Slurp the whole file into a big hash.
     # Complain if we see the same keyword more than once.
-    my ( $fileh, $linecounter, $origkey, $key, $value, $ErrorsSeen,
-        $ErrorReport );
-    my ( $savedline, $baruwatmpvalue );
+    my ($fileh, $linecounter, $origkey, $key, $value, $ErrorsSeen,
+        $ErrorReport);
+    my ($savedline, $baruwatmpvalue);
 
     # We have seen this config file!
     $ConfFilesSeen{$filename} = 1;
-    Baruwa::Scanner::Log::InfoLog( "Reading configuration file %s", $filename );
+    Baruwa::Scanner::Log::InfoLog("Reading configuration file %s", $filename);
 
     $fileh = new FileHandle;
     $fileh->open("<$filename")
-      or Baruwa::Scanner::Log::DieLog( "Could not read configuration file %s, %s",
-        $filename, $! );
-    flock( $fileh, $LOCK_SH );
+      or
+      Baruwa::Scanner::Log::DieLog("Could not read configuration file %s, %s",
+        $filename, $!);
+    flock($fileh, $LOCK_SH);
 
     $linecounter = 0;
     $ErrorsSeen  = 0;
@@ -2018,33 +2068,34 @@ sub ReadConfFile {
         next if /^$/;
         $savedline = $_;
 
-        if ( $savedline =~ /^include\s+([^=]*)$/i ) {
+        if ($savedline =~ /^include\s+([^=]*)$/i) {
+
             #print STDERR "Saved line is $savedline\n";
             my $wildcard = $1;
 
             #print STDERR "Wildcard is \"$wildcard\"\n";
-            my @newfiles = map { m/(.*)/ } glob($wildcard);
+            my @newfiles = map {m/(.*)/} glob($wildcard);
 
             #print STDERR "Glob is " . join(', ', @newfiles) . "\n";
             if (@newfiles) {
+
                 # Go through each of the @newfiles reading conf from them.
-                for my $newfile ( sort @newfiles ) {
+                for my $newfile (sort @newfiles) {
 
                     # Have we seen it before?
                     #print STDERR "Checking $newfile\n";
-                    if ( !-r $newfile ) {
+                    if (!-r $newfile) {
                         Baruwa::Scanner::Log::WarnLog(
                             "Configuration: Could not read configuration file %s, skipping.",
                             $newfile
                         );
-                    }
-                    elsif ( $ConfFilesSeen{$newfile} ) {
+                    } elsif ($ConfFilesSeen{$newfile}) {
                         Baruwa::Scanner::Log::WarnLog(
                             "Configuration: Seen configuration file %s before, skipping.",
                             $newfile
                         );
-                    }
-                    else {
+                    } else {
+
                         # No, so read it.
                         #print STDERR "Reading $newfile\n";
                         my $errors = ReadConfFile($newfile);
@@ -2054,13 +2105,13 @@ sub ReadConfFile {
                         ) if $errors;
                     }
                 }
-            }
-            else {
+            } else {
                 Baruwa::Scanner::Log::WarnLog(
                     "Configuration: Failed to find any configuration files like %s, skipping them.",
                     $wildcard
                 );
             }
+
             # And don't do any more processing on the "include" line.
             next;
         }
@@ -2070,7 +2121,7 @@ sub ReadConfFile {
         undef $key;
         undef $value;
         /^(.*?)\s*=\s*(.*)$/;
-        ( $origkey, $value ) = ( $1, $2 );
+        ($origkey, $value) = ($1, $2);
 
         $baruwatmpvalue = $value;
 
@@ -2078,8 +2129,8 @@ sub ReadConfFile {
         $value =~ s/\%([^%]+)\%/$PercentVars{lc($1)}/g;
         $value =~ s/\$\{?(\w+)\}?/$ENV{$1}/g;
         $value =~ s/\\n/\n/g;
-        if ( $origkey =~ /^\%([^%]+)\%$/ ) {
-            $PercentVars{ lc($1) } = $value;
+        if ($origkey =~ /^\%([^%]+)\%$/) {
+            $PercentVars{lc($1)} = $value;
             next;
         }
 
@@ -2089,24 +2140,26 @@ sub ReadConfFile {
         # Translate the value to the internal (shorter) version of it
         $key = EtoI($key);
 
-        if ( $key eq "" ) {
+        if ($key eq "") {
+
             # Invalid line
             $ErrorReport .= "Error in line $linecounter of $filename, "
               . "line does not make sense. ";
             $ErrorsSeen = 1;
-        }
-        else {
+        } else {
             $File{$key} = $value;
+
             #print STDERR "Defining $key = $value\n";
             # Save where the value was stored
             $LineNos{$key} = "$linecounter of $filename";
+
             # Baruwa customization
-            if ( $baruwatmpvalue =~ /\%([^%]+)\%/ ) {
+            if ($baruwatmpvalue =~ /\%([^%]+)\%/) {
                 $BaruwaCustomVars{$key} = $baruwatmpvalue;
             }
         }
     }
-    flock( $fileh, $LOCK_UN );
+    flock($fileh, $LOCK_UN);
     $fileh->close();
 
     # If we have seen any errors, we can't trust the line numbers in
@@ -2118,15 +2171,16 @@ sub ReadConfFile {
     if ($ErrorsSeen) {
         $ErrorReport .= "Can't continue processing configuration file "
           . "until these errors have been corrected.";
-        Baruwa::Scanner::Log::WarnLog( "%s", $ErrorReport );
-        Baruwa::Scanner::Log::DieLog( "Failed to read configuration file %s",
-            $filename );
+        Baruwa::Scanner::Log::WarnLog("%s", $ErrorReport);
+        Baruwa::Scanner::Log::DieLog("Failed to read configuration file %s",
+            $filename);
     }
     return $ErrorsSeen;
 }
 
 sub ReadData {
-    my ( $filename, $nodefaults ) = @_;
+    my ($filename, $nodefaults) = @_;
+
     # Fetch all the configuration setup.
     require 'Baruwa/Scanner/ConfigDefs.pl'
       or die "Could not read ConfigDefs.pl, $!";
@@ -2134,11 +2188,12 @@ sub ReadData {
     #print STDERR "In ReadData\n";
     # Now go through the different types of config variable,
     # reading them from *DATA.
-    my ( $category, $type, $keyword, %values, $line, $ConfigFileRead );
+    my ($category, $type, $keyword, %values, $line, $ConfigFileRead);
     $ConfigFileRead = 0;
-    seek( DATA, 0, 0 );
+    seek(DATA, 0, 0);
     while (<DATA>) {
         chomp;
+
         #print STDERR "In ReadData, data is '$_'\n";
         s/#.*$//;
         s/^\s+//;
@@ -2149,22 +2204,25 @@ sub ReadData {
 
         # Handle section headings
         #print STDERR "In processing of $category, $type\n";
-        if ( $line =~ s/^\[(.*)\]$/$1/ ) {
+        if ($line =~ s/^\[(.*)\]$/$1/) {
             $line = lc($line);
-            ( $category, $type ) = split( /\s*,\s*/, $line, 2 );
+            ($category, $type) = split(/\s*,\s*/, $line, 2);
+
             #print STDERR "About to process $category, $type\n";
             next;
         }
 
         # Ignore any lines above the top heading
         next unless $category && $type;
+
         # Store the internal<-->external name translation tables
-        if ( $category =~ /translation/i ) {
+        if ($category =~ /translation/i) {
             $line = lc($line);
-            my ( $int, $ext );
-            ( $int, $ext ) = split( /\s*=\s*/, $line, 2 );
+            my ($int, $ext);
+            ($int, $ext) = split(/\s*=\s*/, $line, 2);
             $ItoE{$int} = $ext;
             $EtoI{$ext} = $int;
+
             #print STDERR "Translation from e $ext to i $int\n";
             next;
         }
@@ -2172,29 +2230,30 @@ sub ReadData {
         # At this point, the translation table has been read.
         # So now go and read their baruwa.conf file!
         unless ($ConfigFileRead) {
+
             #print STDERR "Reading ConfFile\n";
             %ConfFilesSeen = (); # Reset the list of config files seen and read.
             ReadConfFile($filename);
 
             unless ($nodefaults) {
+
                 # Override with values from SQL
-                Baruwa::Scanner::ConfigSQL::ReadConfBasic( $filename, \%File,
-                    \%BaruwaCustomVars );
-                my ( $k, $v );
+                Baruwa::Scanner::ConfigSQL::ReadConfBasic($filename, \%File,
+                    \%BaruwaCustomVars);
+                my ($k, $v);
 
                 # Override existing %vars% with ones from SQL
-                while ( ( $k, $v ) = each %Baruwa::Scanner::ConfigSQL::PercentVars )
-                {
-                    $PercentVars{$k} = $v;
+                while (($k, $v) = each %Baruwa::Scanner::ConfigSQL::PercentVars)
+                {   $PercentVars{$k} = $v;
                 }
 
                 # %PercentVars = %Baruwa::Scanner::ConfigSQL::PercentVars;
 
                 # Setup LDAP Connection
-                ( $LDAP, $LDAPserver, $LDAPbase, $LDAPsite ) = ConnectLDAP();
+                ($LDAP, $LDAPserver, $LDAPbase, $LDAPsite) = ConnectLDAP();
 
-                #print STDERR "Made LDAP connection to $LDAP, $LDAPbase, $LDAPsite\n";
-                ReadConfBasicLDAP( $LDAP, $LDAPbase, $LDAPsite ) if $LDAP;
+          #print STDERR "Made LDAP connection to $LDAP, $LDAPbase, $LDAPsite\n";
+                ReadConfBasicLDAP($LDAP, $LDAPbase, $LDAPsite) if $LDAP;
             }
 
             $ConfigFileRead = 1;
@@ -2204,24 +2263,20 @@ sub ReadData {
         # Read in all the possible configuration values
         #
         #print STDERR "$category, $type\n";
-        if ( $type =~ /yesno/i ) {
-            ProcessYesNo( $line, $category, $nodefaults );
-        }
-        elsif ( $type =~ /file/i ) {
-            ProcessFile( $line, $category, $nodefaults );
-        }
-        elsif ( $type =~ /command/i ) {
-            ProcessCommand( $line, $category, $nodefaults );
-        }
-        elsif ( $type =~ /dir/i ) {
-            ProcessDir( $line, $category, $nodefaults );
-        }
-        elsif ( $type =~ /number/i ) {
-            ProcessNumber( $line, $category, $nodefaults );
-        }
-        else {
+        if ($type =~ /yesno/i) {
+            ProcessYesNo($line, $category, $nodefaults);
+        } elsif ($type =~ /file/i) {
+            ProcessFile($line, $category, $nodefaults);
+        } elsif ($type =~ /command/i) {
+            ProcessCommand($line, $category, $nodefaults);
+        } elsif ($type =~ /dir/i) {
+            ProcessDir($line, $category, $nodefaults);
+        } elsif ($type =~ /number/i) {
+            ProcessNumber($line, $category, $nodefaults);
+        } else {
+
          #print STDERR "line is $line category $category\n" if $line =~ /tnef/i;
-            ProcessOther( $line, $category, $nodefaults );
+            ProcessOther($line, $category, $nodefaults);
         }
 
     }
@@ -2229,38 +2284,42 @@ sub ReadData {
     # We have now processed all the valid keywords, so anything left
     # in %File is a syntax error.
     delete $File{""};    # Just in case!
-    my ( @leftovers, $leftover );
+    my (@leftovers, $leftover);
     @leftovers = keys %File;
     if (@leftovers) {
         Baruwa::Scanner::Log::WarnLog("Syntax error(s) in configuration file:");
+
         #print STDERR "Syntax error(s) in configuration file:\n";
-        foreach $leftover ( sort @leftovers ) {
-            Baruwa::Scanner::Log::WarnLog( "Unrecognised keyword \"%s\" at line %d",
-                ItoE($leftover), $LineNos{$leftover} );
+        foreach $leftover (sort @leftovers) {
+            Baruwa::Scanner::Log::WarnLog(
+                "Unrecognised keyword \"%s\" at line %d",
+                ItoE($leftover), $LineNos{$leftover});
+
             #print STDERR "Unrecognised keyword \"" . ItoE($leftover) .
             #             "\" at line " . $LineNos{$leftover} . "\n";
         }
-        Baruwa::Scanner::Log::WarnLog( "Warning: syntax errors in %s.", $filename );
+        Baruwa::Scanner::Log::WarnLog("Warning: syntax errors in %s.",
+            $filename);
     }
 }
 
 # Connect to the LDAP server
 sub ConnectLDAP {
-    my ( $ldapserver, $connection, $binding, $site, $dns );
+    my ($ldapserver, $connection, $binding, $site, $dns);
 
     $ldapserver = $File{'ldapserver'};
     return unless $ldapserver;
     $site = $File{'ldapsite'};
     $dns  = $File{'ldapbase'};
 
-    Baruwa::Scanner::Log::InfoLog( "Using LDAP server %s", $ldapserver );
-    $connection = Net::LDAP->new( $ldapserver, onerror => 'warn' )
-      or Baruwa::Scanner::Log::WarnLog( "Making LDAP connection error: %s", $@ );
-    $binding = $connection->bind( $dns, anonymous => 1 );
+    Baruwa::Scanner::Log::InfoLog("Using LDAP server %s", $ldapserver);
+    $connection = Net::LDAP->new($ldapserver, onerror => 'warn')
+      or Baruwa::Scanner::Log::WarnLog("Making LDAP connection error: %s", $@);
+    $binding = $connection->bind($dns, anonymous => 1);
     $binding->code
-      and Baruwa::Scanner::Log::WarnLog( "LDAP binding error: %s", $@ );
+      and Baruwa::Scanner::Log::WarnLog("LDAP binding error: %s", $@);
 
-    return ( $connection, $ldapserver, $dns, $site );
+    return ($connection, $ldapserver, $dns, $site);
 }
 
 # Disconnect from the LDAP server
@@ -2306,14 +2365,16 @@ sub KeywordDone {
 #     h => hostname, ie. hostname or domain name
 #
 sub RuleToRegexp {
-    my ( $rule, $type, $nestinglevel ) = @_;
+    my ($rule, $type, $nestinglevel) = @_;
+
     # If the rule starts with / but doesn't end in / then it is a filename
     # which contains a list of regexps (which could in turn include more
     # filenames.
-    if ( $rule =~ m#^/.*[^/]$# ) {
+    if ($rule =~ m#^/.*[^/]$#) {
+
         # $rule is a filename.
-        my ( $file, $line, @result );
-        if ( $nestinglevel > 4 ) {
+        my ($file, $line, @result);
+        if ($nestinglevel > 4) {
             Baruwa::Scanner::Log::WarnLog(
                 "You have nested address pattern list "
                   . "files to a depth of at least 4, which probably is not what you "
@@ -2327,49 +2388,49 @@ sub RuleToRegexp {
         $file->open("<$rule")
           or Baruwa::Scanner::Log::WarnLog(
             "Could not open ruleset's address pattern list file %s, %s",
-            $rule, $! ),
+            $rule, $!),
           return;
-        flock( $file, $LOCK_SH );
+        flock($file, $LOCK_SH);
 
         Baruwa::Scanner::Log::DebugLog(
-            "Reading ruleset's address pattern list file %s", $rule );
+            "Reading ruleset's address pattern list file %s", $rule);
 
-        while ( defined( $line = <$file> ) ) {
+        while (defined($line = <$file>)) {
             chomp $line;
             $line =~ s/#.*$//;
             $line =~ s/^\s+//;
             $line =~ s/\s+$//;
             next if $line =~ /^$/;
-            push @result, RuleToRegexp( $line, $type, $nestinglevel + 1 );
+            push @result, RuleToRegexp($line, $type, $nestinglevel + 1);
         }
 
         # Unlock and close rules file
-        flock( $file, $LOCK_UN );
+        flock($file, $LOCK_UN);
         $file->close();
         return (@result);
     }
 
     # Setup variables for handling errors and reproducing
     # their rule expression and not the compiled regexp.
-    my ( $theirrule, $evalok, $compiledre );
+    my ($theirrule, $evalok, $compiledre);
     $theirrule = $rule;
 
     # Treat rules starting with host: as hostnames or domain names
     # Can have * in them as wildcard, or /regexp/ syntax.
     my $rulecopy = $rule;
-    if ( $rule =~ /^host(-nocheck)?:(.*)$/i ) {
+    if ($rule =~ /^host(-nocheck)?:(.*)$/i) {
         $rule = $2;
         my $nocheck = 0;
         $nocheck = 1 if $rulecopy =~ /^host-nocheck:/i;
 
         # Look for regexps
-        if ( $rule =~ /^\/(.*)\/$/ ) {
-            return ( ( $nocheck ? 'H' : 'h' ), $1 );
+        if ($rule =~ /^\/(.*)\/$/) {
+            return (($nocheck ? 'H' : 'h'), $1);
         }
 
         # Look for empty matches (that match against there being no hostname)
-        if ( $rule eq '' ) {
-            return ( ( $nocheck ? 'H' : 'h' ), '^$' );
+        if ($rule eq '') {
+            return (($nocheck ? 'H' : 'h'), '^$');
         }
 
         # Replace . with \.
@@ -2386,7 +2447,7 @@ sub RuleToRegexp {
 
         #print STDERR "Compiled rule is \"$rule\"\n";
         # Test their rule
-        eval { $compiledre = qr/$rule/i; };
+        eval {$compiledre = qr/$rule/i;};
         if ($@) {
             Baruwa::Scanner::Log::WarnLog(
                 "Invalid expression in rule \"%s\". " . "Compiler said \"%s\"",
@@ -2396,11 +2457,12 @@ sub RuleToRegexp {
         }
 
         #print STDERR "Compiled rule is \"$rule\"\n";
-        return ( ( $nocheck ? 'H' : 'h' ), $rule );
+        return (($nocheck ? 'H' : 'h'), $rule);
     }
 
     # Handle entirely numeric strings as netblocks (and allow IPv6 addresses!)
-    if ( $rule =~ /^[.:\dabcdef]+$/ ) {
+    if ($rule =~ /^[.:\dabcdef]+$/) {
+
         # Replace . with \.
         $rule =~ s/\./\\./g;
 
@@ -2408,7 +2470,7 @@ sub RuleToRegexp {
         $rule = '^' . $rule;
 
         # Test their rule
-        eval { $compiledre = qr/$rule/i; };
+        eval {$compiledre = qr/$rule/i;};
         if ($@) {
             Baruwa::Scanner::Log::WarnLog(
                 "Invalid expression in rule \"%s\". " . "Compiler said \"%s\"",
@@ -2416,14 +2478,15 @@ sub RuleToRegexp {
             );
             $rule = '/^$/';    # This should never match anything
         }
-        return ( 'd', $rule );
+        return ('d', $rule);
     }
 
     # Handle non-alphabetic regexps as IP number tests.
     # These must not contain any letters.
-    if ( $rule ne '/^$/' && $rule =~ s#^/([^a-z]+)/$#$1# ) {
+    if ($rule ne '/^$/' && $rule =~ s#^/([^a-z]+)/$#$1#) {
+
         # Test their rule
-        eval { $compiledre = qr/$rule/i; };
+        eval {$compiledre = qr/$rule/i;};
         if ($@) {
             Baruwa::Scanner::Log::WarnLog(
                 "Invalid expression in rule \"%s\". " . "Compiler said \"%s\"",
@@ -2431,35 +2494,35 @@ sub RuleToRegexp {
             );
             $rule = '/^$/';    # This should never match anything
         }
-        return ( 'd', $rule );
+        return ('d', $rule);
     }
 
     # Could be a CIDR or network range or network/netmask pair
-    if ( $rule =~ /^([.:\da-f]+)\s*\/\s*([.:\da-f]+)$/ ) {
+    if ($rule =~ /^([.:\da-f]+)\s*\/\s*([.:\da-f]+)$/) {
+
         # It's a CIDR, e.g. 152.78/16
-        my ( $network, $bits, $count, @num_octats );
-        ( $network, $bits ) = ( $1, $2 );
-        @num_octats = split( /\./, $network );
+        my ($network, $bits, $count, @num_octats);
+        ($network, $bits) = ($1, $2);
+        @num_octats = split(/\./, $network);
         $count = @num_octats;
-        $network .= '.0' x ( 4 - $count );
-        return ( 'c', "$network/$bits" );
+        $network .= '.0' x (4 - $count);
+        return ('c', "$network/$bits");
     }
-    if ( $rule =~ /^[.:\da-f]+\s*-\s*[.:\da-f]+$/ ) {
+    if ($rule =~ /^[.:\da-f]+\s*-\s*[.:\da-f]+$/) {
+
         # It's a network range, e.g. 152.78.0.0-152.78.255.255
         my (@cidr);
         $rule =~ s/\s*//g;    # Remove whitespace
-        eval {
-            @cidr = Net::CIDR::range2cidr($rule);
-        };
+        eval {@cidr = Net::CIDR::range2cidr($rule);};
         if ($@) {
             Baruwa::Scanner::Log::WarnLog(
                 "Invalid expression in rule \"%s\". " . "Compiler said \"%s\"",
                 $theirrule, $@
             );
             $rule = '/^$/';
-            return ( 't', $rule );
+            return ('t', $rule);
         } else {
-            return ( 'c', join( ',', @cidr ) );
+            return ('c', join(',', @cidr));
         }
     }
 
@@ -2467,9 +2530,10 @@ sub RuleToRegexp {
     $rule = lc($rule);
 
     # If it is surrounded with '/', then it is an arbitrary regexp
-    if ( $rule =~ s#^/(.*)/$#$1# ) {
+    if ($rule =~ s#^/(.*)/$#$1#) {
+
         # Test their rule
-        eval { $compiledre = qr/$rule/i; };
+        eval {$compiledre = qr/$rule/i;};
         if ($@) {
             Baruwa::Scanner::Log::WarnLog(
                 "Invalid expression in rule \"%s\". " . "Compiler said \"%s\"",
@@ -2477,22 +2541,24 @@ sub RuleToRegexp {
             );
             $rule = '/^$/';    # This should never match anything
         }
-        return ( 't', $rule );
+        return ('t', $rule);
     }
 
-    if ( $type =~ /[fbt]/i ) {
+    if ($type =~ /[fbt]/i) {
+
         # If it is "default" or "*", then make it *@*
-        if ( $rule eq 'default' || $rule eq '*' ) {
+        if ($rule eq 'default' || $rule eq '*') {
             $rule = '*@*';
         }
 
         # If it doesn't contain @
-        if ( $rule !~ /@/ ) {
-            if ( $rule =~ /^\*/ ) {
+        if ($rule !~ /@/) {
+            if ($rule =~ /^\*/) {
+
                 # If it starts with *, then make it *@*.domain.com
                 $rule = '*@' . $rule;
-            }
-            else {
+            } else {
+
                 # If it doesn't contain a *, then make it *@domain.com
                 $rule = '*@' . $rule;
             }
@@ -2500,6 +2566,7 @@ sub RuleToRegexp {
 
         # Prepend * if leading @
         $rule = '*' . $rule if $rule =~ /^\@/;
+
         # Append  * if traiing @
         $rule = $rule . '*' if $rule =~ /\@$/;
 
@@ -2512,11 +2579,12 @@ sub RuleToRegexp {
 
         # and tack on the optional "." at the end
         $rule .= '\.?';
+
         # and tack on the start+end anchors
         $rule = '^' . $rule . '$';
 
         # Test their rule
-        eval { $compiledre = qr/$rule/i; };
+        eval {$compiledre = qr/$rule/i;};
         if ($@) {
             Baruwa::Scanner::Log::WarnLog(
                 "Invalid expression in rule \"%s\". " . "Compiler said \"%s\"",
@@ -2524,14 +2592,13 @@ sub RuleToRegexp {
             );
             $rule = '/^$/';    # This should never match anything
         }
-        return ( 't', $rule );
-    }
-    elsif ( $type =~ /v/ ) {
+        return ('t', $rule);
+    } elsif ($type =~ /v/) {
 
         #print STDERR "Compiling $type $rule\n";
         # It is a virus pattern
         # If it is "default" or "*", then make it *@*
-        if ( $rule eq 'default' ) {
+        if ($rule eq 'default') {
             $rule = '*';
         }
         $rule =~ s#\/#\\/#g;
@@ -2541,7 +2608,7 @@ sub RuleToRegexp {
 
         #$rule = '^' . $rule . '$';
         # Test their rule
-        eval { $compiledre = qr/$rule/i; };
+        eval {$compiledre = qr/$rule/i;};
         if ($@) {
             Baruwa::Scanner::Log::WarnLog(
                 "Invalid expression in rule \"%s\". " . "Compiler said \"%s\"",
@@ -2549,13 +2616,13 @@ sub RuleToRegexp {
             );
             $rule = '/^$/';    # This should never match anything
         }
-        return ( 't', $rule );
-    }
-    else {
+        return ('t', $rule);
+    } else {
+
         # Error
-        Baruwa::Scanner::Log::WarnLog( "Invalid rule of type %s, rule is \"%s\"",
-            $type, $theirrule );
-        return ( 't', '/^$/' );
+        Baruwa::Scanner::Log::WarnLog("Invalid rule of type %s, rule is \"%s\"",
+            $type, $theirrule);
+        return ('t', '/^$/');
     }
 }
 
@@ -2568,17 +2635,17 @@ sub RuleToRegexp {
 # $ScalarRules{$keyword}[] = join("\0", FromTo, Type, Regexp, Value).
 #
 sub ReadRuleset {
-    my ( $keyword, $rulesfilename, $rulesettype, $nodefaults, %values ) = @_;
+    my ($keyword, $rulesfilename, $rulesettype, $nodefaults, %values) = @_;
 
     #print STDERR "Keyword is $keyword, filename is $rulesfilename\n";
 
     # If the rulesfilename ends in ".RuleSet" and doesn't contain any '/'
     # characters, then it's an LDAP ruleset.
     #if ($LDAP && $rulesfilename !~ /\// && $rulesfilename =~ /\.RuleSet$/) {
-    if ( $LDAP && $rulesfilename =~ /customi[sz]e/ ) {
-        my ( $searchfor, $linecounter, $default,  $error,      $errors );
-        my ( $number,    $entr,        $attr,     $attr2,      $result );
-        my ( $rulenum,   $ruledir,     $ruleaddr, $ruleresult, @ruleset );
+    if ($LDAP && $rulesfilename =~ /customi[sz]e/) {
+        my ($searchfor, $linecounter, $default,  $error,      $errors);
+        my ($number,    $entr,        $attr,     $attr2,      $result);
+        my ($rulenum,   $ruledir,     $ruleaddr, $ruleresult, @ruleset);
 
         $searchfor = "(objectClass=baruwaRuleSetObject)";
         $searchfor = "(&$searchfor(baruwaRuleSetName=$keyword))";
@@ -2592,16 +2659,17 @@ sub ReadRuleset {
                 'baruwaRuleSetMatch', 'baruwaRuleSetResult'
             ]
         );
-        $result->code and Baruwa::Scanner::Log::WarnLog(
-            "LDAP search for ruleset " .
-            "%s returned error: %s", $keyword, $result->error
-        );
+        $result->code
+          and Baruwa::Scanner::Log::WarnLog(
+            "LDAP search for ruleset " . "%s returned error: %s",
+            $keyword, $result->error);
 
         $number = 0;
-        while ( defined( $entr = $result->entry($number) ) ) {
+        while (defined($entr = $result->entry($number))) {
+
             #print STDERR "Fetched Entry $number\n";
             #print STDERR "DN: ", $entr->dn, "\n";
-            foreach $attr ( sort $entr->attributes ) {
+            foreach $attr (sort $entr->attributes) {
                 next if $attr =~ /;binary$/;
                 $attr    = lc($attr);
                 $rulenum = $entr->get_value($attr) if $attr =~ /rulesetnum/i;
@@ -2611,16 +2679,17 @@ sub ReadRuleset {
                 $ruleresult = $entr->get_value($attr)
                   if $attr =~ /rulesetresult/i;
             }
-            $ruleset[$rulenum] = join( "\t", $ruledir, $ruleaddr, $ruleresult );
+            $ruleset[$rulenum] = join("\t", $ruledir, $ruleaddr, $ruleresult);
             $number++;
         }
 
         $RuleScalars{$keyword} = [];    # Delete any old inherited rulesets
-        foreach $rulenum ( 0 .. $#ruleset ) {
+        foreach $rulenum (0 .. $#ruleset) {
+
             #($error, $default) = Store1Rule($ruleset[$rulenum], $rulesfilename,
-            ( $error, $default ) =
-              Store1Rule( $ruleset[$rulenum], $keyword, $rulenum, $rulesettype,
-                $RuleScalars{$keyword}, %values );
+            ($error, $default) =
+              Store1Rule($ruleset[$rulenum], $keyword, $rulenum, $rulesettype,
+                $RuleScalars{$keyword}, %values);
             if ($default) {
                 $default =~ s/\s+/-/g
                   if $keyword =~ /header$/i && $default =~ /:$/;
@@ -2633,33 +2702,33 @@ sub ReadRuleset {
         # then that single rule must be defining the default value,
         # so it can actually be treated as a simple scalar value and
         # not a ruleset at all.
-        if ( $#ruleset == 0 && defined($default) ) {
+        if ($#ruleset == 0 && defined($default)) {
             $default =~ s/\s+/-/g if $keyword =~ /header$/i && $default =~ /:$/;
             $StaticScalars{$keyword} = $default unless $nodefaults;
         }
 
-        Baruwa::Scanner::Log::WarnLog( "Found syntax errors in %s.", $keyword )
+        Baruwa::Scanner::Log::WarnLog("Found syntax errors in %s.", $keyword)
           if $errors;
         return;
     }
 
     # Get the ruleset from the database
-    if ( ( ( my $rulesetname ) = $rulesfilename =~ /(.+)\.customi[sz]e/ ) ) {
-        Baruwa::Scanner::Log::InfoLog( 'Reading ruleset %s for keyword %s',
-            $rulesetname, $keyword );
+    if (((my $rulesetname) = $rulesfilename =~ /(.+)\.customi[sz]e/)) {
+        Baruwa::Scanner::Log::InfoLog('Reading ruleset %s for keyword %s',
+            $rulesetname, $keyword);
 
         # Read rows from the database
         my ($rows)  = Baruwa::Scanner::ConfigSQL::ReadRuleset($rulesetname);
         my ($count) = scalar(@$rows);
-        my ( $error, $errors, $default );
+        my ($error, $errors, $default);
         $RuleScalars{$keyword} = [];    # Delete any old inherited rulesets
 
-        while ( my $row = ( shift @$rows ) ) {
+        while (my $row = (shift @$rows)) {
             if ($Baruwa::Scanner::ConfigSQL::debug) {
                 eval {
                     Baruwa::Scanner::Log::InfoLog(
                         "Read rule %s (%s) from database for keyword %s",
-                        $row->{'num'}, $row->{'rule'}, $keyword );
+                        $row->{'num'}, $row->{'rule'}, $keyword);
                 };
                 if ($@) {
                     print STDERR "Read rule "
@@ -2669,16 +2738,16 @@ sub ReadRuleset {
                       . $keyword . "\n";
                 }
             }
-            ( $error, $default ) =
-              Store1Rule( $row->{'rule'}, $keyword, $row->{'num'},
-                $rulesettype, $RuleScalars{$keyword}, %values );
+            ($error, $default) =
+              Store1Rule($row->{'rule'}, $keyword, $row->{'num'},
+                $rulesettype, $RuleScalars{$keyword}, %values);
             $Defaults{$keyword} = $default if defined($default);
             $errors += $error;
             if ($error) {
                 eval {
                     Baruwa::Scanner::Log::InfoLog(
                         "Syntax error in database ruleset %s (num=%s rule=%s)",
-                        $keyword, $row->{'num'}, $row->{'rule'} );
+                        $keyword, $row->{'num'}, $row->{'rule'});
                 };
                 if ($@) {
                     print STDERR
@@ -2703,7 +2772,7 @@ sub ReadRuleset {
         if ($errors) {
             eval {
                 Baruwa::Scanner::Log::WarnLog(
-                    "Found syntax errors in database ruleset %s", $keyword );
+                    "Found syntax errors in database ruleset %s", $keyword);
             };
             if ($@) {
                 print STDERR "Found syntax errors in database ruleset "
@@ -2716,24 +2785,25 @@ sub ReadRuleset {
     #
     # It is a normal filename ruleset.
     #
-    my ( $rulesfh, $errors, $linecounter, $default, $error );
+    my ($rulesfh, $errors, $linecounter, $default, $error);
 
     $rulesfh = new FileHandle;
     $rulesfh->open("<$rulesfilename")
-      or Baruwa::Scanner::Log::WarnLog( 'Cannot open ruleset file %s, %s',
-        $rulesfilename, $! ),
+      or Baruwa::Scanner::Log::WarnLog('Cannot open ruleset file %s, %s',
+        $rulesfilename, $!),
       return;
-    flock( $rulesfh, $LOCK_SH );
+    flock($rulesfh, $LOCK_SH);
 
     $RuleScalars{$keyword} = [];    # Set up empty ruleset
     $linecounter           = 0;
     $errors                = 0;
     while (<$rulesfh>) {
         $linecounter++;
-        ( $error, $default ) = Store1Rule( $_, $rulesfilename, $linecounter,
-            $rulesettype, $RuleScalars{$keyword}, %values );
+        ($error, $default) = Store1Rule($_, $rulesfilename, $linecounter,
+            $rulesettype, $RuleScalars{$keyword}, %values);
+
         #print STDERR "Store1Rule returned $error, $default\n";
-        if ( defined($default) ) {
+        if (defined($default)) {
             $default =~ s/\s+/-/g if $keyword =~ /header$/i && $default =~ /:$/;
             $Defaults{$keyword} = $default;
         }
@@ -2741,19 +2811,19 @@ sub ReadRuleset {
     }
 
     # Unlock and close rules file
-    flock( $rulesfh, $LOCK_UN );
+    flock($rulesfh, $LOCK_UN);
     $rulesfh->close();
 
-    Baruwa::Scanner::Log::WarnLog( "Found syntax errors in %s.", $rulesfilename )
+    Baruwa::Scanner::Log::WarnLog("Found syntax errors in %s.", $rulesfilename)
       if $errors;
 }
 
 sub Store1Rule {
     $_ = shift;
-    my ( $filename, $linecounter, $settype, $StoreIn, %values ) = @_;
+    my ($filename, $linecounter, $settype, $StoreIn, %values) = @_;
 
-    my ( $line, $fromto, $rule, $value, $errors, $firstword );
-    my ( $ruletype, $regexp, $direction, $DefaultValue );
+    my ($line, $fromto, $rule, $value, $errors, $firstword);
+    my ($ruletype, $regexp, $direction, $DefaultValue);
 
     chomp;
     s/#.*$//;
@@ -2766,13 +2836,14 @@ sub Store1Rule {
     $value  = undef;
 
     if (/^(\S+)\s+(\S+)(\s+(.*))?$/) {
-        ( $direction, $rule, $value ) = ( $1, $2, $4 );
+        ($direction, $rule, $value) = ($1, $2, $4);
+
         #print STDERR "Dir = $direction, Rule = $rule, Value = $value\n";
-    }
-    else {
+    } else {
+
         #print STDERR "value is \"$_\"\n";
-        Baruwa::Scanner::Log::WarnLog( 'Syntax error in line %d of ruleset %s',
-            $linecounter, $filename );
+        Baruwa::Scanner::Log::WarnLog('Syntax error in line %d of ruleset %s',
+            $linecounter, $filename);
         $errors = 1;
         next;
     }
@@ -2781,18 +2852,17 @@ sub Store1Rule {
 
     # Syntax check and shorten fromto
     $fromto = '';
-    if ( $direction =~ /and/i ) {
+    if ($direction =~ /and/i) {
         $fromto = 'b';    # b = both from AND to at the same time
-    }
-    else {
+    } else {
         $fromto .= 'f' if $direction =~ /from/i;
         $fromto .= 't' if $direction =~ /to/i;
         $fromto = 'v' if $direction =~ /virus/i;
     }
-    if ( $fromto eq '' ) {
+    if ($fromto eq '') {
         Baruwa::Scanner::Log::WarnLog(
             'Syntax error in first field in line ' . '%d of ruleset %s',
-            $linecounter, $filename );
+            $linecounter, $filename);
         $errors = 1;
         next;
     }
@@ -2800,24 +2870,23 @@ sub Store1Rule {
     #
     # Look for 2-part conditions with an "and" at the start of the value
     #
-    my ( $direction2, $rule2, $fromto2 );
+    my ($direction2, $rule2, $fromto2);
     $fromto2 = '';
 
-    if ( $value =~ /^and\s+(\S+)\s+(\S+)(\s+(.+))?$/i ) {
-        ( $direction2, $rule2, $value ) = ( $1, $2, $4 );
+    if ($value =~ /^and\s+(\S+)\s+(\S+)(\s+(.+))?$/i) {
+        ($direction2, $rule2, $value) = ($1, $2, $4);
         $fromto2 = '';
-        if ( $direction2 =~ /and/i ) {
+        if ($direction2 =~ /and/i) {
             $fromto2 = 'b';    # both from and to
-        }
-        else {
+        } else {
             $fromto2 .= 'f' if $direction2 =~ /from/i;
             $fromto2 .= 't' if $direction2 =~ /to/i;
             $fromto2 = 'v' if $direction2 =~ /virus/i;
         }
-        if ( $fromto2 eq '' ) {
+        if ($fromto2 eq '') {
             Baruwa::Scanner::Log::WarnLog(
                 'Syntax error in 4th field in line ' . '%d of ruleset %s',
-                $linecounter, $filename );
+                $linecounter, $filename);
             $errors = 1;
             next;
         }
@@ -2829,11 +2898,11 @@ sub Store1Rule {
     $value =~ s/\\n/\n/g;
 
     my $internalvalue = undef;
-    $internalvalue = InternalDataValue( 'unknown', $settype, $value, %values );
+    $internalvalue = InternalDataValue('unknown', $settype, $value, %values);
 
-    my ( @ruledata, @ruledata2, $ruletype2, $regexp2 );
-    @ruledata = RuleToRegexp( $rule, $fromto, 0 );
-    @ruledata2 = RuleToRegexp( $rule2, $fromto2, 0 ) if $fromto2 ne '';
+    my (@ruledata, @ruledata2, $ruletype2, $regexp2);
+    @ruledata = RuleToRegexp($rule, $fromto, 0);
+    @ruledata2 = RuleToRegexp($rule2, $fromto2, 0) if $fromto2 ne '';
 
     while (@ruledata) {
         $ruletype  = shift @ruledata;
@@ -2842,32 +2911,27 @@ sub Store1Rule {
         $regexp2   = shift @ruledata2;
 
         # 0 might be a valid value!
-        if ( defined $internalvalue || $settype eq 'other' ) {
+        if (defined $internalvalue || $settype eq 'other') {
             if (
-                (
-                       $regexp eq $DefaultAddressRegexp
+                (      $regexp eq $DefaultAddressRegexp
                     || $regexp eq $DefaultVirusRegexp
                 )
                 && $fromto2 ne ''
                 && (   $regexp2 eq $DefaultAddressRegexp
-                    || $regexp2 eq $DefaultVirusRegexp )
-              )
-            {
+                    || $regexp2 eq $DefaultVirusRegexp)
+              ) {
                 # Don't store it in the main ruleset as it will always match,
                 # whereas we want it to be used only if nothing else matches.
                 #print STDERR "Ruleset: Storing Defaults = $internalvalue\n";
                 #$Defaults{$keyword} = $internalvalue;
                 $DefaultValue = $internalvalue;
                 next;
-            }
-            elsif (
-                (
-                       $regexp eq $DefaultAddressRegexp
+            } elsif (
+                (      $regexp eq $DefaultAddressRegexp
                     || $regexp eq $DefaultVirusRegexp
                 )
                 && $fromto2 eq ''
-              )
-            {
+              ) {
                 # Don't store it in the main ruleset as it will always match,
                 # whereas we want it to be used only if nothing else matches.
                 #print STDERR "Ruleset: Storing Defaults = $internalvalue\n";
@@ -2879,42 +2943,42 @@ sub Store1Rule {
             # It is a valid value, so use it and store it
             my ($record);
             if ($fromto2) {
-                $record = join( "\0",
+                $record = join("\0",
                     $fromto, $ruletype, $regexp,
-                    $fromto2, $ruletype2, $regexp2, $internalvalue );
+                    $fromto2, $ruletype2, $regexp2, $internalvalue);
 
                 #print STDERR "Storing long rule $record\n";
-            }
-            else {
+            } else {
                 $record =
-                  join( "\0", $fromto, $ruletype, $regexp, $internalvalue );
+                  join("\0", $fromto, $ruletype, $regexp, $internalvalue);
 
                 #print STDERR "Storing short rule $record\n";
             }
             push @{$StoreIn}, $record;
-        }
-        else {
+        } else {
+
             # It is an invalid value
             Baruwa::Scanner::Log::WarnLog(
                 "Syntax error in line %d of ruleset file " . "%s",
-                $linecounter, $filename );
+                $linecounter, $filename);
             $errors = 1;
         }
     }
-    return ( $errors, $DefaultValue );
+    return ($errors, $DefaultValue);
 }
 
 # Given a ruleset type, a value to check, and a hash defining
 # all the possible valid values and their internal representations.
 sub InternalDataValue {
-    my ( $keyword, $rulesettype, $value, %validvalues ) = @_;
+    my ($keyword, $rulesettype, $value, %validvalues) = @_;
 
-    my ( @words, $word, $word2, $internal );
+    my (@words, $word, $word2, $internal);
     $internal = "";
 
-    @words = split( " ", $value );
+    @words = split(" ", $value);
 
-    if ( $rulesettype =~ /other/i ) {
+    if ($rulesettype =~ /other/i) {
+
         # Other rules can contain anything
         # They might have passed in a comma-separated list,
         # so delete any trailing comma
@@ -2925,54 +2989,55 @@ sub InternalDataValue {
     }
 
     foreach $word (@words) {
-        if ( $rulesettype =~ /yesno/i ) {
-            # YesNo rules can contain words and/or email addresses
-            # They might also have put in a comma-separated list rather than space
+        if ($rulesettype =~ /yesno/i) {
+
+          # YesNo rules can contain words and/or email addresses
+          # They might also have put in a comma-separated list rather than space
             $word2 = lc($word);    # Allow upper+lower case
             $word2 =~ s/,$//;      # Delete any trailing comma
-            if ( defined( $validvalues{$word2} ) ) {
+            if (defined($validvalues{$word2})) {
+
                 # It is a valid keyword
                 $internal .= ' ' if $internal ne "";
                 $internal .= $validvalues{$word2};
-            }
-            elsif ( $word2 =~ /\@/ ) {
+            } elsif ($word2 =~ /\@/) {
+
                 # It is an email address
                 $internal .= ' ' if $internal ne "";
                 $internal .= $word2;
-            }
-            else {
+            } else {
+
                 # It is invalid
                 return undef;
             }
-        }
-        elsif ( $rulesettype =~ /file/i ) {
+        } elsif ($rulesettype =~ /file/i) {
+
             # File rules can only contains filenames which must exist
             # To let them use /dev/null, we just say it exists and isn't a dir
-            if ( lc($keyword) ne 'pidfile' )
+            if (lc($keyword) ne 'pidfile')
             {    # The pidfile is optional, I create it
-                unless ( ( -e $word && !-d $word )
-                    || ( $LDAP && $word !~ /\// ) )
-                {
-                    Baruwa::Scanner::Log::WarnLog( "Could not read file %s",
-                        $word );
+                unless ((-e $word && !-d $word)
+                    || ($LDAP && $word !~ /\//)) {
+                    Baruwa::Scanner::Log::WarnLog("Could not read file %s",
+                        $word);
                     return undef;
                 }
             }
             $internal .= ' ' if $internal ne "";
             $internal .= $word;
-        }
-        elsif ( $rulesettype =~ /dir/i ) {
+        } elsif ($rulesettype =~ /dir/i) {
+
             # Dir rules can only contains directories which must exist
             $word =~ s/\/$//g;    # Delete any trailing '/'
-            unless ( -d $word ) {
-                Baruwa::Scanner::Log::WarnLog( "Could not read directory %s",
-                    $word );
+            unless (-d $word) {
+                Baruwa::Scanner::Log::WarnLog("Could not read directory %s",
+                    $word);
                 return undef;
             }
             $internal .= ' ' if $internal ne "";
             $internal .= $word;
-        }
-        elsif ( $rulesettype =~ /number/i ) {
+        } elsif ($rulesettype =~ /number/i) {
+
             # Number rules can only contain digits and dots and _ and -
             #print STDERR "Word is \"$word\"\n";
             return undef unless $word =~ /^([\d._-]+)([kmgKMG]?)/;
@@ -2986,20 +3051,21 @@ sub InternalDataValue {
             $word = $word * 1000000    if $multiplier eq 'm';
             $word = $word * 1000000000 if $multiplier eq 'g';
             $internal .= $word;
+
             #print STDERR "Word = \"$word\"\n";
-        }
-        elsif ( $rulesettype =~ /command/i ) {
+        } elsif ($rulesettype =~ /command/i) {
+
             # Command rules must contain executable as first
             # element, then anything
-            unless ( -x $words[0] ) {
-                Baruwa::Scanner::Log::WarnLog( "Could not read executable %s",
-                    $words[0] );
+            unless (-x $words[0]) {
+                Baruwa::Scanner::Log::WarnLog("Could not read executable %s",
+                    $words[0]);
                 return undef;
             }
             $internal .= ' ' if $internal ne "";
             $internal .= $word;
-        }
-        else {
+        } else {
+
             # It's unknown, so warn and return something sensible
             Baruwa::Scanner::Log::WarnLog(
                 'Error: Unknown ruleset type %s in ' . 'InternalDataValue(%s)',
@@ -3017,9 +3083,9 @@ sub InternalDataValue {
 }
 
 sub ReadYesNoValue {
-    my ( $keyword, $RulesAllowed, $nodefaults, %values ) = @_;
+    my ($keyword, $RulesAllowed, $nodefaults, %values) = @_;
 
-    my ( $first, $isfile, $isrules );
+    my ($first, $isfile, $isrules);
     $first   = $File{$keyword};
     $isfile  = 1 if $first =~ /^\//;    # Filenames start with '/'
     $isrules = 1
@@ -3028,16 +3094,16 @@ sub ReadYesNoValue {
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;    # DB or LDAP ruleset
 
     # It might be a function name
-    if ( $first =~ /^&/ ) {
+    if ($first =~ /^&/) {
         $first =~ s/^&//;
         $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
         $CustomFunctions{$keyword} =~ s/\(.*//;
         $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
         return;
-    }
-    else {
+    } else {
+
       # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ( $nodefaults eq 'nodefaults' ) {
+        unless ($nodefaults eq 'nodefaults') {
             delete $CustomFunctions{$keyword};
             delete $CustomFunctionsParams{$keyword};
         }
@@ -3047,29 +3113,31 @@ sub ReadYesNoValue {
     delete $StaticScalars{$keyword};
 
     if ($isrules) {
+
         # It's a ruleset so try to read it in if we're allowed to
         #print STDERR "Config: $keyword has a ruleset $isrules\n";
-        if ( !$RulesAllowed ) {
+        if (!$RulesAllowed) {
             Baruwa::Scanner::Log::WarnLog(
                 "Value of %s cannot be a ruleset, only a " . "simple value",
-                $keyword );
+                $keyword);
         }
-        ReadRuleset( $keyword, $first, 'yesno', $nodefaults, %values );
-    }
-    else {
+        ReadRuleset($keyword, $first, 'yesno', $nodefaults, %values);
+    } else {
+
         # It's a simple value
         #print STDERR "Config: $keyword has simple value " . $File{$keyword} .
         #             " = " . $values{$File{$keyword}} . "\n";
         my $internal =
-          InternalDataValue( $keyword, 'yesno', $File{$keyword}, %values );
+          InternalDataValue($keyword, 'yesno', $File{$keyword}, %values);
 
-        if ( $internal ne "" ) {
+        if ($internal ne "") {
+
             # It is a valid value
             #print STDERR "Config: Setting scalar " . $keyword .
             #             " = $internal\n";
             $StaticScalars{$keyword} = $internal unless $nodefaults;
-        }
-        else {
+        } else {
+
             # It is an invalid value
             Baruwa::Scanner::Log::WarnLog(
                 "Syntax error in line %d, value \"%s\" "
@@ -3077,7 +3145,7 @@ sub ReadYesNoValue {
                 $LineNos{$keyword},
                 $File{$keyword},
                 $keyword,
-                join( "\",\"", keys %values )
+                join("\",\"", keys %values)
             );
         }
     }
@@ -3088,15 +3156,15 @@ sub ReadYesNoValue {
 #
 
 sub ProcessYesNo {
-    my ( $line, $category, $nodefaults ) = @_;
+    my ($line, $category, $nodefaults) = @_;
 
-    my ( $keyword, $default, %values, $rules );
+    my ($keyword, $default, %values, $rules);
 
     undef $keyword;
     undef $default;
     undef %values;
 
-    ( $keyword, $default, %values ) = split( " ", lc($line) );
+    ($keyword, $default, %values) = split(" ", lc($line));
     $KeywordCategory{$keyword}   = $category;
     $KeywordType{$keyword}       = 'yesno';
     $HardCodedDefaults{$keyword} = $default;
@@ -3104,17 +3172,16 @@ sub ProcessYesNo {
     # Save the %values for when needed to do internal to external conversion
     $YesNoEtoI{$keyword} = \%values;
     $YesNoItoE{$keyword} = ();
-    my ( $key, $value );
-    while ( ( $key, $value ) = each %values ) {
+    my ($key, $value);
+    while (($key, $value) = each %values) {
         $YesNoItoE{$keyword}{$value} = $key;
     }
-    if ( exists $File{$keyword} ) {
-        ReadYesNoValue( $keyword, ( $category !~ /simple/i ),
-            $nodefaults, %values );
+    if (exists $File{$keyword}) {
+        ReadYesNoValue($keyword, ($category !~ /simple/i),
+            $nodefaults, %values);
         $Defaults{$keyword} = $default unless exists $Defaults{$keyword};
         KeywordDone($keyword);
-    }
-    else {
+    } else {
         $StaticScalars{$keyword} = $default unless $nodefaults;
     }
 }
@@ -3124,9 +3191,9 @@ sub ProcessYesNo {
 #
 
 sub ReadFileValue {
-    my ( $keyword, $RulesAllowed, $nodefaults ) = @_;
+    my ($keyword, $RulesAllowed, $nodefaults) = @_;
 
-    my ( $first, $isfile, $isrules );
+    my ($first, $isfile, $isrules);
     $first = $File{$keyword};
     $first =~ s/\s+.*$//;    # Extract the first word
     $isfile = 1 if $first =~ /^\//;    # Filenames start with '/'
@@ -3135,16 +3202,16 @@ sub ReadFileValue {
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;    # DB or LDAP ruleset
 
     # It might be a function name
-    if ( $first =~ /^&/ ) {
+    if ($first =~ /^&/) {
         $first =~ s/^&//;
         $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
         $CustomFunctions{$keyword} =~ s/\(.*//;
         $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
         return;
-    }
-    else {
+    } else {
+
       # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ( $nodefaults eq 'nodefaults' ) {
+        unless ($nodefaults eq 'nodefaults') {
             delete $CustomFunctions{$keyword};
             delete $CustomFunctionsParams{$keyword};
         }
@@ -3154,57 +3221,58 @@ sub ReadFileValue {
     delete $StaticScalars{$keyword};
 
     if ($isrules) {
+
         #print STDERR "Config: $keyword has a ruleset $isrules\n";
-        if ( !$RulesAllowed ) {
+        if (!$RulesAllowed) {
             Baruwa::Scanner::Log::WarnLog(
                 "Value of %s cannot be a ruleset, only a " . "simple value",
-                $keyword );
+                $keyword);
         }
 
         #print STDERR "Reading ruleset for $keyword, $first, file\n";
-        ReadRuleset( $keyword, $first, 'file', $nodefaults );
-    }
-    else {
+        ReadRuleset($keyword, $first, 'file', $nodefaults);
+    } else {
+
         # It's a simple value
         #print STDERR "Config: $keyword has simple value $first\n";
-        my $internal = InternalDataValue( $keyword, 'file', $File{$keyword} );
+        my $internal = InternalDataValue($keyword, 'file', $File{$keyword});
 
         #print STDERR "Config: internal = \"$internal\"\n";
 
-        if ( $internal ne "" ) {
+        if ($internal ne "") {
+
             # It is a valid value
             #print STDERR "Config: Setting scalar " . $keyword .
             #             " = $internal\n";
             $StaticScalars{$keyword} = $internal unless $nodefaults;
-        }
-        else {
+        } else {
+
             # It is an invalid value
-            Baruwa::Scanner::Log::WarnLog( "Error in line %d, file \"%s\" "
+            Baruwa::Scanner::Log::WarnLog("Error in line %d, file \"%s\" "
                   . "for %s does not exist (or can not be read)",
-                $LineNos{$keyword}, $File{$keyword}, $keyword );
+                $LineNos{$keyword}, $File{$keyword}, $keyword);
         }
     }
 }
 
 sub ProcessFile {
-    my ( $line, $category, $nodefaults ) = @_;
+    my ($line, $category, $nodefaults) = @_;
 
-    my ( $keyword, $default );
+    my ($keyword, $default);
 
     $keyword = undef;
     $default = undef;
-    ( $keyword, $default ) = split( " ", $line );
+    ($keyword, $default) = split(" ", $line);
     $keyword                     = lc($keyword);
     $KeywordCategory{$keyword}   = $category;
     $KeywordType{$keyword}       = 'file';
     $HardCodedDefaults{$keyword} = $default;
 
-    if ( $File{$keyword} ne "" ) {
-        ReadFileValue( $keyword, ( $category !~ /simple/i ), $nodefaults );
+    if ($File{$keyword} ne "") {
+        ReadFileValue($keyword, ($category !~ /simple/i), $nodefaults);
         $Defaults{$keyword} = $default unless exists $Defaults{$keyword};
         KeywordDone($keyword);
-    }
-    else {
+    } else {
         $StaticScalars{$keyword} = $default unless $nodefaults;
     }
 }
@@ -3214,9 +3282,9 @@ sub ProcessFile {
 #
 
 sub ReadCommandValue {
-    my ( $keyword, $RulesAllowed, $nodefaults ) = @_;
+    my ($keyword, $RulesAllowed, $nodefaults) = @_;
 
-    my ( $first, $isfile, $isrules );
+    my ($first, $isfile, $isrules);
     $first = $File{$keyword};
     $first =~ s/\s+.*$//;    # Extract the first word
     $isfile = 1 if $first =~ /^\//;    # Filenames start with '/'
@@ -3225,16 +3293,16 @@ sub ReadCommandValue {
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;   # DB or LDAP ruleset
 
     # It might be a function name
-    if ( $first =~ /^&/ ) {
+    if ($first =~ /^&/) {
         $first =~ s/^&//;
         $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
         $CustomFunctions{$keyword} =~ s/\(.*//;
         $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
         return;
-    }
-    else {
+    } else {
+
       # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ( $nodefaults eq 'nodefaults' ) {
+        unless ($nodefaults eq 'nodefaults') {
             delete $CustomFunctions{$keyword};
             delete $CustomFunctionsParams{$keyword};
         }
@@ -3244,56 +3312,56 @@ sub ReadCommandValue {
     delete $StaticScalars{$keyword};
 
     if ($isrules) {
+
         #print STDERR "Config: $keyword has a ruleset $isrules\n";
-        if ( !$RulesAllowed ) {
+        if (!$RulesAllowed) {
             Baruwa::Scanner::Log::WarnLog(
                 "Value of %s cannot be a ruleset, only a " . "simple value",
-                $keyword );
+                $keyword);
         }
-        ReadRuleset( $keyword, $first, 'file', $nodefaults );
-    }
-    else {
+        ReadRuleset($keyword, $first, 'file', $nodefaults);
+    } else {
+
         # It's a simple value
         #print STDERR "Config: $keyword has simple value $first\n";
-        my $internal =
-          InternalDataValue( $keyword, 'command', $File{$keyword} );
+        my $internal = InternalDataValue($keyword, 'command', $File{$keyword});
 
         #print STDERR "Config: internal = \"$internal\"\n";
 
-        if ( $internal ne "" ) {
+        if ($internal ne "") {
+
             # It is a valid value
             #print STDERR "Config: Setting scalar " . $keyword .
             #             " = $internal\n";
             $StaticScalars{$keyword} = $internal unless $nodefaults;
-        }
-        else {
+        } else {
+
             # It is an invalid value
-            Baruwa::Scanner::Log::WarnLog( "Error in line %d, file \"%s\" "
+            Baruwa::Scanner::Log::WarnLog("Error in line %d, file \"%s\" "
                   . "for %s does not exist (or can not be read)",
-                $LineNos{$keyword}, $File{$keyword}, $keyword );
+                $LineNos{$keyword}, $File{$keyword}, $keyword);
         }
     }
 }
 
 sub ProcessCommand {
-    my ( $line, $category, $nodefaults ) = @_;
+    my ($line, $category, $nodefaults) = @_;
 
-    my ( $keyword, $default );
+    my ($keyword, $default);
 
     $keyword = undef;
     $default = undef;
-    ( $keyword, $default ) = split( " ", $line );
+    ($keyword, $default) = split(" ", $line);
     $keyword                     = lc($keyword);
     $KeywordCategory{$keyword}   = $category;
     $KeywordType{$keyword}       = 'command';
     $HardCodedDefaults{$keyword} = $default;
 
-    if ( $File{$keyword} ne "" ) {
-        ReadCommandValue( $keyword, ( $category !~ /simple/i ), $nodefaults );
+    if ($File{$keyword} ne "") {
+        ReadCommandValue($keyword, ($category !~ /simple/i), $nodefaults);
         $Defaults{$keyword} = $default unless exists $Defaults{$keyword};
         KeywordDone($keyword);
-    }
-    else {
+    } else {
         $StaticScalars{$keyword} = $default unless $nodefaults;
     }
 }
@@ -3303,25 +3371,25 @@ sub ProcessCommand {
 #
 
 sub ReadDirValue {
-    my ( $keyword, $RulesAllowed, $nodefaults ) = @_;
+    my ($keyword, $RulesAllowed, $nodefaults) = @_;
 
-    my ( $first, $isrules );
+    my ($first, $isrules);
     $first = $File{$keyword};
     $isrules = 1 if -f $first;    # Rules are files
     $isrules = 1 if $LDAP && $first =~ /customi[sz]e|\.RuleSet$/; # LDAP ruleset
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;    # DB or LDAP ruleset
 
     # It might be a function name
-    if ( $first =~ /^&/ ) {
+    if ($first =~ /^&/) {
         $first =~ s/^&//;
         $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
         $CustomFunctions{$keyword} =~ s/\(.*//;
         $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
         return;
-    }
-    else {
+    } else {
+
       # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ( $nodefaults eq 'nodefaults' ) {
+        unless ($nodefaults eq 'nodefaults') {
             delete $CustomFunctions{$keyword};
             delete $CustomFunctionsParams{$keyword};
         }
@@ -3334,52 +3402,52 @@ sub ReadDirValue {
 
         #print STDERR "Config: $keyword has a ruleset $isrules\n"
         #  if $keyword =~ /^in.*dir$/i;
-        if ( !$RulesAllowed ) {
+        if (!$RulesAllowed) {
             Baruwa::Scanner::Log::WarnLog(
                 "Value of %s cannot be a ruleset, only a " . "simple value",
-                $keyword );
+                $keyword);
         }
 
         # Read the ruleset here
-        ReadRuleset( $keyword, $first, 'dir', $nodefaults );
-    }
-    else {
+        ReadRuleset($keyword, $first, 'dir', $nodefaults);
+    } else {
+
         # It's a simple value
         $first =~ s/\/$//g;    # Delete any trailing '/'
-        my $internal = InternalDataValue( $keyword, 'dir', $File{$keyword} );
+        my $internal = InternalDataValue($keyword, 'dir', $File{$keyword});
 
-        if ( $internal ne "" ) {
+        if ($internal ne "") {
             $StaticScalars{$keyword} = $internal unless $nodefaults;
-        }
-        else {
+        } else {
+
             # It is an invalid value
-            Baruwa::Scanner::Log::WarnLog( "Error in configuration file line %d, "
+            Baruwa::Scanner::Log::WarnLog(
+                "Error in configuration file line %d, "
                   . "directory %s for %s does not exist (or is not readable)",
-                $LineNos{$keyword}, $first, $keyword );
+                $LineNos{$keyword}, $first, $keyword);
         }
     }
 }
 
 sub ProcessDir {
-    my ( $line, $category, $nodefaults ) = @_;
+    my ($line, $category, $nodefaults) = @_;
 
-    my ( $keyword, $default );
+    my ($keyword, $default);
 
     undef $keyword;
     undef $default;
 
-    ( $keyword, $default ) = split( " ", $line );
+    ($keyword, $default) = split(" ", $line);
     $keyword                     = lc($keyword);
     $KeywordCategory{$keyword}   = $category;
     $KeywordType{$keyword}       = 'dir';
     $HardCodedDefaults{$keyword} = $default;
 
-    if ( defined $File{$keyword} && $File{$keyword} ne "" ) {
-        ReadDirValue( $keyword, ( $category !~ /simple/i ), $nodefaults );
+    if (defined $File{$keyword} && $File{$keyword} ne "") {
+        ReadDirValue($keyword, ($category !~ /simple/i), $nodefaults);
         $Defaults{$keyword} = $default unless exists $Defaults{$keyword};
         KeywordDone($keyword);
-    }
-    else {
+    } else {
         $StaticScalars{$keyword} = $default unless $nodefaults;
     }
 
@@ -3390,25 +3458,27 @@ sub ProcessDir {
 #
 
 sub ReadNumberValue {
-    my ( $keyword, $RulesAllowed, $nodefaults ) = @_;
+    my ($keyword, $RulesAllowed, $nodefaults) = @_;
 
-    my ( $first, $isrules );
+    my ($first, $isrules);
     $first   = $File{$keyword};
-    $isrules = 1 if $first !~ /^[\d._-]+[kmgKMG]?/;    # Rules aren't all digits or ._- followed by optional multiplier
+    $isrules = 1
+      if $first !~ /^[\d._-]+[kmgKMG]?/
+      ;    # Rules aren't all digits or ._- followed by optional multiplier
     $isrules = 1 if $LDAP && $first =~ /customi[sz]e|\.RuleSet$/; # LDAP ruleset
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;    # DB or LDAP ruleset
 
     # It might be a function name
-    if ( $first =~ /^&/ ) {
+    if ($first =~ /^&/) {
         $first =~ s/^&//;
         $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
         $CustomFunctions{$keyword} =~ s/\(.*//;
         $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
         return;
-    }
-    else {
+    } else {
+
       # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ( $nodefaults eq 'nodefaults' ) {
+        unless ($nodefaults eq 'nodefaults') {
             delete $CustomFunctions{$keyword};
             delete $CustomFunctionsParams{$keyword};
         }
@@ -3418,54 +3488,54 @@ sub ReadNumberValue {
     delete $StaticScalars{$keyword};
 
     if ($isrules) {
+
         #print STDERR "Config: $keyword has a ruleset $isrules\n";
-        if ( !$RulesAllowed ) {
+        if (!$RulesAllowed) {
             Baruwa::Scanner::Log::WarnLog(
                 "Value of %s cannot be a ruleset, only a " . "simple value",
-                $keyword );
+                $keyword);
         }
 
         # Read the ruleset here
-        ReadRuleset( $keyword, $first, 'number', $nodefaults );
-    }
-    else {
+        ReadRuleset($keyword, $first, 'number', $nodefaults);
+    } else {
+
         # It's a simple value
         #print STDERR "Config: $keyword has simple value $first\n";
-        my $internal = InternalDataValue( $keyword, 'number', $File{$keyword} );
+        my $internal = InternalDataValue($keyword, 'number', $File{$keyword});
 
-        if ( $internal ne "" ) {
+        if ($internal ne "") {
             $StaticScalars{$keyword} = $internal unless $nodefaults;
-        }
-        else {
+        } else {
+
             # It is an invalid value
             Baruwa::Scanner::Log::WarnLog(
                 "Syntax error in line %d, %s for %s " . "should be a number",
-                $LineNos{$keyword}, $first, $keyword );
+                $LineNos{$keyword}, $first, $keyword);
         }
     }
 }
 
 sub ProcessNumber {
-    my ( $line, $category, $nodefaults ) = @_;
+    my ($line, $category, $nodefaults) = @_;
 
-    my ( $keyword, $default );
+    my ($keyword, $default);
 
     $keyword = undef;
     $default = undef;
 
     #$keyword = EtoI($keyword);
-    ( $keyword, $default ) = split( " ", $line );
+    ($keyword, $default) = split(" ", $line);
     $keyword                     = lc($keyword);
     $KeywordCategory{$keyword}   = $category;
     $KeywordType{$keyword}       = 'number';
     $HardCodedDefaults{$keyword} = $default;
 
-    if ( $File{$keyword} ne "" ) {
-        ReadNumberValue( $keyword, ( $category !~ /simple/i ), $nodefaults );
+    if ($File{$keyword} ne "") {
+        ReadNumberValue($keyword, ($category !~ /simple/i), $nodefaults);
         $Defaults{$keyword} = $default unless exists $Defaults{$keyword};
         KeywordDone($keyword);
-    }
-    else {
+    } else {
         $StaticScalars{$keyword} = $default unless $nodefaults;
     }
 
@@ -3478,9 +3548,9 @@ sub ProcessNumber {
 #
 
 sub ReadOtherValue {
-    my ( $keyword, $RulesAllowed, $nodefaults ) = @_;
+    my ($keyword, $RulesAllowed, $nodefaults) = @_;
 
-    my ( $first, $isrules );
+    my ($first, $isrules);
     $first   = $File{$keyword};
     $isrules = 1
       if $first =~ /^\//
@@ -3490,16 +3560,16 @@ sub ReadOtherValue {
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;    # DB or LDAP ruleset
 
     # It might be a function name
-    if ( $first =~ /^&/ ) {
+    if ($first =~ /^&/) {
         $first =~ s/^&//;
         $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
         $CustomFunctions{$keyword} =~ s/\(.*//;
         $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
         return;
-    }
-    else {
-        # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ( $nodefaults eq 'nodefaults' ) {
+    } else {
+
+      # Do not delete the Custom Function if it's defined from a RulesetFunction
+        unless ($nodefaults eq 'nodefaults') {
             delete $CustomFunctions{$keyword};
             delete $CustomFunctionsParams{$keyword};
         }
@@ -3508,24 +3578,25 @@ sub ReadOtherValue {
     delete $RuleScalars{$keyword};
     delete $StaticScalars{$keyword};
 
-    if ( $isrules && $keyword ne 'inqueuedir' ) {
+    if ($isrules && $keyword ne 'inqueuedir') {
+
         #print STDERR "Config: $keyword has a ruleset $isrules\n";
-        if ( !$RulesAllowed ) {
+        if (!$RulesAllowed) {
             Baruwa::Scanner::Log::WarnLog(
                 "Value of %s cannot be a ruleset, only a " . "simple value",
-                $keyword );
+                $keyword);
         }
 
         # Read the ruleset here
-        ReadRuleset( $keyword, $first, 'other', $nodefaults );
-    }
-    else {
+        ReadRuleset($keyword, $first, 'other', $nodefaults);
+    } else {
+
         # It's a simple value
         #print STDERR "Config: $keyword has simple other value $first\n";
-        my $internal = InternalDataValue( $keyword, 'other', $File{$keyword} );
+        my $internal = InternalDataValue($keyword, 'other', $File{$keyword});
 
         #if ($internal ne "") {
-        if ( defined $internal ) {
+        if (defined $internal) {
             $internal =
               DoPercentVars($internal);    # %vars% must be defined before use
             $internal =~ s/\$\{?(\w+)\}?/$ENV{$1}/g;
@@ -3541,25 +3612,24 @@ sub ReadOtherValue {
 }
 
 sub ProcessOther {
-    my ( $line, $category, $nodefaults ) = @_;
+    my ($line, $category, $nodefaults) = @_;
 
-    my ( $keyword, $default );
+    my ($keyword, $default);
 
-    ( $keyword, $default ) = split( " ", $line, 2 );    # Allow spaces in it
+    ($keyword, $default) = split(" ", $line, 2);    # Allow spaces in it
     $keyword                     = lc($keyword);
     $KeywordCategory{$keyword}   = $category;
     $KeywordType{$keyword}       = 'other';
     $HardCodedDefaults{$keyword} = $default;
 
-    if ( exists $File{$keyword} ) {    # ne "") {
-        ReadOtherValue( $keyword, ( $category !~ /simple/i ), $nodefaults );
-        unless ( exists $Defaults{$keyword} ) {
+    if (exists $File{$keyword}) {                   # ne "") {
+        ReadOtherValue($keyword, ($category !~ /simple/i), $nodefaults);
+        unless (exists $Defaults{$keyword}) {
             $default =~ s/\s+/-/g if $keyword =~ /header$/i && $default =~ /:$/;
             $Defaults{$keyword} = $default;
         }
         KeywordDone($keyword);
-    }
-    else {
+    } else {
         $default =~ s/\s+/-/g if $keyword =~ /header$/i && $default =~ /:$/;
         $StaticScalars{$keyword} = $default unless $nodefaults;
     }
@@ -3575,15 +3645,16 @@ sub ProcessOther {
 # Print out a list of all the changed settings, what their default was and
 # what their new value is. If it's a ruleset, just print out "rules".
 sub PrintNonDefaults {
-    my ( $key, $default, $actual, $external, %Output, $fixed, $fixed2 );
+    my ($key, $default, $actual, $external, %Output, $fixed, $fixed2);
 
     print "\nTable of Changed Values:\n\n";
-    print PrintFixedWidth( "Option Name", 35 )
-      . PrintFixedWidth( "Default", 15 )
+    print PrintFixedWidth("Option Name", 35)
+      . PrintFixedWidth("Default", 15)
       . "Current Value\n";
     print "=" x 79 . "\n";
 
-    while ( ( $key, $default ) = each %HardCodedDefaults ) {
+    while (($key, $default) = each %HardCodedDefaults) {
+
         # This is a cheap Value($key) that won't evaluate Custom Functions
         $actual = $Defaults{$key};
         $actual = $StaticScalars{$key} if exists $StaticScalars{$key};
@@ -3591,61 +3662,65 @@ sub PrintNonDefaults {
         $external = ItoE($key);
 
         # Special case for this one as it is a list of directory names
-        if ( $key eq 'inqueuedir' ) {
-            my @dirs = @{ Value('inqueuedir') };
-            $actual = join( ',', @dirs );
+        if ($key eq 'inqueuedir') {
+            my @dirs = @{Value('inqueuedir')};
+            $actual = join(',', @dirs);
         }
 
         # Translate the internal numbers into user-readable keywords
-        if ( $KeywordType{$key} eq 'yesno' ) {
+        if ($KeywordType{$key} eq 'yesno') {
             $default = 0 unless $default;
             $actual  = 0 unless $actual;
             $default = $YesNoItoE{$key}{$default};
             $actual  = $YesNoItoE{$key}{$actual};
         }
-        $fixed  = PrintFixedWidth( $external, 35 );
-        $fixed2 = PrintFixedWidth( $default,  15 );
+        $fixed  = PrintFixedWidth($external, 35);
+        $fixed2 = PrintFixedWidth($default,  15);
         $actual =~ s/\n/\\n/g;
-        if ( $CustomFunctions{$key} ) {
+        if ($CustomFunctions{$key}) {
+
             # It's a Custom Function
-            $Output{$external} = "$fixed$fixed2" . "FUNCTION:" . $CustomFunctions{$key};
-        }
-        elsif ( $RuleScalars{$key} ) {
+            $Output{$external} =
+              "$fixed$fixed2" . "FUNCTION:" . $CustomFunctions{$key};
+        } elsif ($RuleScalars{$key}) {
+
             # It's a ruleset
             $Output{$external} = "$fixed$fixed2" . "RULESET:Default=$actual";
-        }
-        else {
+        } else {
+
             # It's a scalar
             $Output{$external} = "$fixed$fixed2$actual"
-              if ( $actual ne $default )
-              && !( $default eq '0' && $actual eq '' );
+              if ($actual ne $default)
+              && !($default eq '0' && $actual eq '');
         }
     }
-    foreach $external ( sort keys %Output ) {
+    foreach $external (sort keys %Output) {
         print $Output{$external} . "\n";
     }
 }
 
 sub PrintFixedWidth {
-    my ( $text, $width ) = @_;
+    my ($text, $width) = @_;
     my $length = length $text;
     $text .= ' ';
     $width--;
-    $text .= ' ' x ( $width - $length ) if $width > $length;
+    $text .= ' ' x ($width - $length) if $width > $length;
     return $text;
 }
 
 # Has the LDAP configuration data changed in the last couple of minutes?
 # Only actually do the LDAP query every 2 minutes, just cache it in
 # between.
-my ( $LDAPSerial, $LDAPSerialExpires );
+my ($LDAPSerial, $LDAPSerialExpires);
 my $LDAPSerialRetryTime = 120;    # 2 minutes
 
 sub LDAPUpdated {
+
     # Do nothing if we aren't using LDAP anyway
     return 0 unless $LDAP;
 
-    if ( !$LDAPSerial ) {
+    if (!$LDAPSerial) {
+
         # There is no serial number, so fetch the current serial number
         # and do not trigger a restart.
         $LDAPSerial = LDAPFetchSerial();
@@ -3654,10 +3729,12 @@ sub LDAPUpdated {
 
     # The first time around, the expiry time will be 0 so it will trigger.
     my $now = time;
-    if ( $now > $LDAPSerialExpires ) {
+    if ($now > $LDAPSerialExpires) {
+
         # Serial number has expired, fetch a new one
         my $newserial = LDAPFetchSerial();
         if ($newserial) {
+
             # Attempt to get serial number succeeded.
             # Trigger restart if it has changed.
             return 1 if $newserial ne $LDAPSerial;
@@ -3671,7 +3748,7 @@ sub LDAPUpdated {
 # the LDAP baruwa.conf settings.
 # Attribute is 'baruwaConfSerialNumber'.
 sub LDAPFetchSerial {
-    my ( $result, $searchfor, $number, $entr, $attr, $serial );
+    my ($result, $searchfor, $number, $entr, $attr, $serial);
 
     # Build the search string 1 bit at a time. Gets syntax right that way.
     $searchfor = "(objectClass=baruwaconfmain)";
@@ -3682,10 +3759,11 @@ sub LDAPFetchSerial {
         base   => $LDAPbase,
         scope  => 'sub',
         filter => $searchfor,
+
         #  attrs => ['baruwaConfSerialNumber']
         attrs => ['ConfSerialNumber']
     );
-    if ( $result->code ) {
+    if ($result->code) {
         Baruwa::Scanner::Log::WarnLog(
             "LDAP search for configuration serial number "
               . "returned error: %s",
@@ -3695,40 +3773,40 @@ sub LDAPFetchSerial {
     }
 
     $number = 0;
-    while ( defined( $entr = $result->entry($number) ) ) {
-        foreach $attr ( sort $entr->attributes ) {
+    while (defined($entr = $result->entry($number))) {
+        foreach $attr (sort $entr->attributes) {
             next unless $attr =~ /serialnumber/i;
             next if $attr =~ /;binary$/;
-            $serial = join( ' ', @{ $entr->get_value( $attr, asref => 1 ) } );
+            $serial = join(' ', @{$entr->get_value($attr, asref => 1)});
         }
         $number++;
     }
-    Baruwa::Scanner::Log::DebugLog( "LDAP configuration serial number is %s",
-        $serial );
+    Baruwa::Scanner::Log::DebugLog("LDAP configuration serial number is %s",
+        $serial);
     return $serial;
 }
 
 # Call the CustomAction hook for custom spam actions
 sub CallCustomAction {
-    my ( $message, $yn, $flag ) = @_;
+    my ($message, $yn, $flag) = @_;
 
-    eval { Baruwa::Scanner::CustomConfig::CustomAction( $message, $yn, $flag ); };
+    eval {Baruwa::Scanner::CustomConfig::CustomAction($message, $yn, $flag);};
     if ($@) {
-        Baruwa::Scanner::Log::WarnLog( 'Calling CustomAction returned %s', $@ );
+        Baruwa::Scanner::Log::WarnLog('Calling CustomAction returned %s', $@);
     }
 }
 
 # read the post configuration file
 sub SpamAssassinPostConfig {
     my ($fileh, $filename, $etcdir);
-    my (@text) = ();
+    my (@text)     = ();
     my (@sqlrules) = ();
     $etcdir = $1 if $Baruwa::Scanner::ConfigSQL::ConfFile =~ m#^(.*)/[^/]+$#;
     $filename = "$etcdir/baruwa/rules/local.scores";
     if (-e $filename) {
         $fileh = new FileHandle;
         if ($fileh->open("<$filename")) {
-            flock( $fileh, $LOCK_SH );
+            flock($fileh, $LOCK_SH);
             while (<$fileh>) {
                 chomp;
                 s/^#.*$//;
@@ -3740,17 +3818,20 @@ sub SpamAssassinPostConfig {
                 }
                 push @text, $_;
             }
-            flock( $fileh, $LOCK_UN );
+            flock($fileh, $LOCK_UN);
             $fileh->close();
-        }else{
-            Baruwa::Scanner::Log::WarnLog("Cannot open SpamAssassin post config file %s, skipping", $filename );
+        } else {
+            Baruwa::Scanner::Log::WarnLog(
+                "Cannot open SpamAssassin post config file %s, skipping",
+                $filename);
         }
     }
-    $filename = '/var/lib/spamassassin/3.004001/saupdate_baruwa_com/baruwa.post';
+    $filename =
+      '/var/lib/spamassassin/3.004001/saupdate_baruwa_com/baruwa.post';
     if (-e $filename) {
         $fileh = new FileHandle;
         if ($fileh->open("<$filename")) {
-            flock( $fileh, $LOCK_SH );
+            flock($fileh, $LOCK_SH);
             while (<$fileh>) {
                 chomp;
                 s/^#.*$//;
@@ -3762,23 +3843,24 @@ sub SpamAssassinPostConfig {
                 }
                 push @text, $_;
             }
-            flock( $fileh, $LOCK_UN );
+            flock($fileh, $LOCK_UN);
             $fileh->close();
-        }else{
-            Baruwa::Scanner::Log::WarnLog("Cannot open SpamAssassin post config file %s, skipping", $filename );
+        } else {
+            Baruwa::Scanner::Log::WarnLog(
+                "Cannot open SpamAssassin post config file %s, skipping",
+                $filename);
         }
     }
     if (@text) {
         undef @sqlrules;
-        my $config_text = join( "\n", @text );
+        my $config_text = join("\n", @text);
         undef @text;
         return $config_text;
-    }else{
+    } else {
         undef @text;
         undef @sqlrules;
         return undef;
     }
 }
-
 
 1;

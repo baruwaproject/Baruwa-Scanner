@@ -41,36 +41,42 @@ our $VERSION = '4.086000';
 # If $quiet is true, then don't print any warning.
 #
 sub openlock {
-    my ( $fh, $fn, $rw, $quiet ) = @_;
+    my ($fh, $fn, $rw, $quiet) = @_;
 
     my ($lh);
 
-    defined $rw or $rw = ( ( substr( $fn, 0, 1 ) eq '>' ) ? "w" : "r" );
+    defined $rw or $rw = ((substr($fn, 0, 1) eq '>') ? "w" : "r");
     $rw =~ /^[rs]/i or $rw = 'w';
 
     $fn =~ /^(.*)$/;
     $fn = $1;
-    unless ( open( $fh, $fn ) ) {
-        Baruwa::Scanner::Log::NoticeLog( "Could not open file $fn: %s", $! ) unless $quiet;
+    unless (open($fh, $fn)) {
+        Baruwa::Scanner::Log::NoticeLog("Could not open file $fn: %s", $!)
+          unless $quiet;
         return 0;
     }
 
-    $lh = new File::FcntlLock::XS(l_type => ($rw eq 'w' ? F_WRLCK : F_RDLCK),
+    $lh = new File::FcntlLock::XS(
+        l_type => ($rw eq 'w' ? F_WRLCK : F_RDLCK),
         l_whence => SEEK_SET,
-        l_start => 0,
-        l_len => 0
+        l_start  => 0,
+        l_len    => 0
     );
-    $lh->lock($fh, F_SETLK) and flock($fh, ($rw eq 'w' ? LOCK_EX : LOCK_SH) + LOCK_NB) and return 1;
+    $lh->lock($fh, F_SETLK)
+      and flock($fh, ($rw eq 'w' ? LOCK_EX : LOCK_SH) + LOCK_NB)
+      and return 1;
     close($fh);
 
-    if (($lh->lock_errno() == POSIX::EAGAIN) || ($lh->lock_errno() == POSIX::EACCES)
-        || ($! == POSIX::EAGAIN) || ($! == POSIX::EACCES))
-    {
-        MailScanner::Log::DebugLog( "Failed to lock $fn: %s", $lh->error() )
+    if (   ($lh->lock_errno() == POSIX::EAGAIN)
+        || ($lh->lock_errno() == POSIX::EACCES)
+        || ($! == POSIX::EAGAIN)
+        || ($! == POSIX::EACCES)) {
+        MailScanner::Log::DebugLog("Failed to lock $fn: %s", $lh->error())
           unless $quiet;
-    }
-    else {
-        Baruwa::Scanner::Log::NoticeLog("Failed to lock $fn with unexpected error: %s", $lh->error() );
+    } else {
+        Baruwa::Scanner::Log::NoticeLog(
+            "Failed to lock $fn with unexpected error: %s",
+            $lh->error());
     }
 
     return 0;
@@ -81,10 +87,11 @@ sub unlockclose {
 
     my ($lh);
 
-    $lh = new File::FcntlLock::XS(l_type => F_UNLCK,
+    $lh = new File::FcntlLock::XS(
+        l_type   => F_UNLCK,
         l_whence => SEEK_SET,
-        l_start => 0,
-        l_len => 0
+        l_start  => 0,
+        l_len    => 0
     );
     $lh->lock($fh, F_SETLK);
     flock($fh, LOCK_UN);

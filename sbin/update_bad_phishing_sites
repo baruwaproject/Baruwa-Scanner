@@ -32,84 +32,85 @@ use Fcntl qw(:flock);
 my $lockfile = '/var/lock/Baruwa/phishing.bad.update.lock';
 &lock();
 
-my $base = '/var/lib/baruwa';
-my $current = $base . '/phishingupdate/';
-my $cache   = $current . 'cache/';
-my $status  = $current . 'status';
-my $urlbase = "https://datafeeds.baruwa.com/phishing.bad.sites/";
-my $target  = "/var/lib/baruwa/phishingupdate/phishing.bad.sites.conf";
-my $cdbtarget  = "/var/lib/baruwa/phishingupdate/phishing.bad.sites";
-my $query   = "phishing.datafeed.baruwa.com";
+my $base      = '/var/lib/baruwa';
+my $current   = $base . '/phishingupdate/';
+my $cache     = $current . 'cache/';
+my $status    = $current . 'status';
+my $urlbase   = "https://datafeeds.baruwa.com/phishing.bad.sites/";
+my $target    = "/var/lib/baruwa/phishingupdate/phishing.bad.sites.conf";
+my $cdbtarget = "/var/lib/baruwa/phishingupdate/phishing.bad.sites";
+my $query     = "phishing.datafeed.baruwa.com";
 
 my $baseupdated = 0;
-if ( !-s $target ) {
-    open( FILE, ">$target" ) or die "Failed to open target file so creating a blank file";
+if (!-s $target) {
+    open(FILE, ">$target")
+      or die "Failed to open target file so creating a blank file";
     print FILE "# Wibble";
     close FILE;
 } else {
-    utime( time(), time(), $current );
+    utime(time(), time(), $current);
 }
 
-if ( !-d $current ) {
+if (!-d $current) {
     print "Working directory is not present - making.....";
     mkdir($current) or die "failed";
     print " ok!\n";
 }
 
-if ( !-d $cache ) {
+if (!-d $cache) {
     print "Cache directory is not present - making.....";
     mkdir($cache) or die "failed";
     print " ok!\n";
 }
 
-my ( $status_base, $status_update );
+my ($status_base, $status_update);
 
 $status_base   = -1;
 $status_update = -1;
 
-if ( !-s $status ) {
+if (!-s $status) {
     print "This is the first run of this program.....\n";
 } else {
     print "Reading status from $status\n";
-    open( STATUS_FILE, $status ) or die "Unable to open status file\n";
+    open(STATUS_FILE, $status) or die "Unable to open status file\n";
     my $line = <STATUS_FILE>;
     close(STATUS_FILE);
 
     # The status file is text.text
-    if ( $line =~ /^(.+)\.(.+)$/ ) {
+    if ($line =~ /^(.+)\.(.+)$/) {
         $status_base   = $1;
         $status_update = $2;
     }
 }
 
 print "Checking that $cache$status_base exists...";
-if ( ( !-s "$cache$status_base" ) && ( !( $status_base eq "-1" ) ) ) {
+if ((!-s "$cache$status_base") && (!($status_base eq "-1"))) {
     print " no - resetting.....";
     $status_base = -1;
 }
 print " ok\n";
 
 print "Checking that $cache$status_base.$status_update exists...";
-if ( ( !-s "$cache$status_base.$status_update" ) && ( $status_update > 0 ) ) {
+if ((!-s "$cache$status_base.$status_update") && ($status_update > 0)) {
     print " no - resetting.....";
     $status_update = -1;
 }
 print " ok\n";
 
-my ( $currentbase, $currentupdate );
+my ($currentbase, $currentupdate);
 
 $currentbase   = -1;
 $currentupdate = -1;
 
 # Lets get the current version
 my $res = Net::DNS::Resolver->new();
-my $RR = $res->query( $query, 'TXT' );
+my $RR = $res->query($query, 'TXT');
 my @result;
 
 if ($RR) {
-    foreach my $rr ( $RR->answer ) {
+    foreach my $rr ($RR->answer) {
         my $text = $rr->rdatastr;
-        if ( $text =~ /^"(.+)\.(.+)"$/ ) {
+        if ($text =~ /^"(.+)\.(.+)"$/) {
             $currentbase   = $1;
             $currentupdate = $2;
             last;
@@ -117,9 +118,11 @@ if ($RR) {
     }
 }
 
-die "Failed to retrieve valid current details\n" unless ( !( $currentbase eq "-1" ) );
+die "Failed to retrieve valid current details\n"
+  unless (!($currentbase eq "-1"));
 
-print "Current: $currentbase - $currentupdate and Status: $status_base - $status_update\n";
+print
+  "Current: $currentbase - $currentupdate and Status: $status_base - $status_update\n";
 
 my $generate = 0;
 
@@ -130,81 +133,81 @@ $ua->agent("UpdateBadPhishingSites/0.2 ");
 # Patch from Heinz.Knutzen@dataport.de
 $ua->env_proxy;
 
-if ( !( $currentbase eq $status_base ) ) {
+if (!($currentbase eq $status_base)) {
     print "This is base update\n";
     $status_update = -1;
 
     $baseupdated = 1;
 
     # Create a request
-    my $req = HTTP::Request->new( GET => $urlbase . $currentbase );
+    my $req = HTTP::Request->new(GET => $urlbase . $currentbase);
 
     # Pass request to the user agent and get a response back
     my $res = $ua->request($req);
 
     # Check the outcome of the response
-    if ( $res->is_success ) {
-        open( FILE, ">$cache/$currentbase" )
+    if ($res->is_success) {
+        open(FILE, ">$cache/$currentbase")
           or die "Unable to write base file ($cache/$currentbase)\n";
         print FILE $res->content;
         close(FILE);
         $generate = 1;
-    }
-    else {
+    } else {
         warn "Unable to retrieve $urlbase.$currentbase :" . $res->status_line,
           "\n";
     }
-}
-else {
+} else {
     print "No base update required\n";
 }
 
 # Now see if the sub version is different
-if ( !( $status_update eq $currentupdate ) ) {
+if (!($status_update eq $currentupdate)) {
     my %updates = ();
     print "Update required\n";
-    if ( $currentupdate < $status_update ) {
-        # In the unlikely event we roll back a patch - we have to go from the base
+    if ($currentupdate < $status_update) {
+
+      # In the unlikely event we roll back a patch - we have to go from the base
         print "Error!: $currentupdate<$status_update\n";
         $generate      = 1;
         $status_update = 0;
     }
 
-    # If there are updates avaliable and we haven't donloaded them yet we need to reset the counter
-    if ( $currentupdate > 0 ) {
-        if ( $status_update < 1 ) {
+# If there are updates avaliable and we haven't donloaded them yet we need to reset the counter
+    if ($currentupdate > 0) {
+        if ($status_update < 1) {
             $status_update = 0;
         }
         my $i;
 
-        # Loop through each of the updates, retrieve it and then add the information into the update array
-        for ( $i = $status_update + 1 ; $i <= $currentupdate ; $i++ ) {
+# Loop through each of the updates, retrieve it and then add the information into the update array
+        for ($i = $status_update + 1; $i <= $currentupdate; $i++) {
             print "Retrieving $urlbase$currentbase.$i\n";
-            my $req = HTTP::Request->new( GET => $urlbase . $currentbase . "." . $i );
+            my $req =
+              HTTP::Request->new(GET => $urlbase . $currentbase . "." . $i);
             my $res = $ua->request($req);
-            warn "Failed to retrieve $urlbase$currentbase.$i" unless ( $res->is_success );
+            warn "Failed to retrieve $urlbase$currentbase.$i"
+              unless ($res->is_success);
             my $line;
-            foreach $line ( split( "\n", $res->content ) ) {
+            foreach $line (split("\n", $res->content)) {
+
                 # Is it an addition?
-                if ( $line =~ /^\> (.+)$/ ) {
-                    if ( defined $updates{$1} ) {
-                        if ( $updates{$1} eq "<" ) {
+                if ($line =~ /^\> (.+)$/) {
+                    if (defined $updates{$1}) {
+                        if ($updates{$1} eq "<") {
                             delete $updates{$1};
                         }
-                    }
-                    else {
+                    } else {
                         $updates{$1} = ">";
                     }
                 }
 
                 # Is it an removal?
-                if ( $line =~ /^\< (.+)$/ ) {
-                    if ( defined $updates{$1} ) {
-                        if ( $updates{$1} eq ">" ) {
+                if ($line =~ /^\< (.+)$/) {
+                    if (defined $updates{$1}) {
+                        if ($updates{$1} eq ">") {
                             delete $updates{$1};
                         }
-                    }
-                    else {
+                    } else {
                         $updates{$1} = "<";
                     }
                 }
@@ -212,21 +215,22 @@ if ( !( $status_update eq $currentupdate ) ) {
         }
 
         # OK do we have a previous version to work from?
-        if ( $status_update > 0 ) {
+        if ($status_update > 0) {
+
             # Yes - we open the most recent version
-            open( FILE, "$cache$currentbase.$status_update" )
+            open(FILE, "$cache$currentbase.$status_update")
               or die
               "Unable to open base file ($cache/$currentbase.$status_update)\n";
-        }
-        else {
+        } else {
+
             # No - we open the the base file
-            open( FILE, "$cache$currentbase" )
+            open(FILE, "$cache$currentbase")
               or die "Unable to open base file ($cache/$currentbase)\n";
         }
 
         # Now open the new update file
         print "$cache$currentbase.$currentupdate\n";
-        open( FILEOUT, ">$cache$currentbase.$currentupdate" )
+        open(FILEOUT, ">$cache$currentbase.$currentupdate")
           or die
           "Unable to open new base file ($cache$currentbase.$currentupdate)\n";
 
@@ -234,15 +238,16 @@ if ( !( $status_update eq $currentupdate ) ) {
         while (<FILE>) {
             chop;
             my $line = $_;
-            if ( defined( $updates{$line} ) ) {
+            if (defined($updates{$line})) {
+
                 # Does the line need removing?
-                if ( $updates{$line} eq "<" ) {
+                if ($updates{$line} eq "<") {
                     $generate = 1;
                     next;
                 }
 
                 # Is it marked as an addition but already present?
-                elsif ( $updates{$line} eq ">" ) {
+                elsif ($updates{$line} eq ">") {
                     delete $updates{$line};
                 }
             }
@@ -252,8 +257,8 @@ if ( !( $status_update eq $currentupdate ) ) {
         my $line;
 
         # Are there any additions left
-        foreach $line ( keys %updates ) {
-            if ( $updates{$line} eq ">" ) {
+        foreach $line (keys %updates) {
+            if ($updates{$line} eq ">") {
                 print FILEOUT $line . "\n";
                 $generate = 1;
             }
@@ -268,25 +273,24 @@ if ($generate) {
     print "Updating live file $target\n";
     my $file = "";
 
-    if ( $currentupdate > 0 ) {
+    if ($currentupdate > 0) {
         $file = "$cache/$currentbase.$currentupdate";
-    }
-    else {
+    } else {
         $file = "$cache/$currentbase";
     }
 
-    if ( $file eq "" ) {
+    if ($file eq "") {
         die "Unable to work out file!\n";
     }
 
     move($target, "$target.old");
     copy($file, $target);
     make_cdb();
-    open( STATUS_FILE, ">$status" ) or die "Unable to open status file\n";
+    open(STATUS_FILE, ">$status") or die "Unable to open status file\n";
     print STATUS_FILE "$currentbase.$currentupdate\n";
     close(STATUS_FILE);
 } else {
-    unless(-f "$cdbtarget.cdb") {
+    unless (-f "$cdbtarget.cdb") {
         print "Generating CDB file: $cdbtarget.cdb\n";
         make_cdb();
     }
@@ -297,20 +301,21 @@ my $file;
 my $match1 = "^" . $currentbase . "\$";
 my $match2 = "^" . $currentbase . "." . $currentupdate . "\$";
 $queuedir->open($cache) or die "Unable to do clean up\n";
-while ( defined( $file = $queuedir->read() ) ) {
+while (defined($file = $queuedir->read())) {
     next if $file eq '.' || $file eq '..';
     next if $file =~ /$match1/;
     next if $file =~ /$match2/;
     print "Deleting cached file: $file.... ";
-    unlink( $cache . $file ) or die "failed";
+    unlink($cache . $file) or die "failed";
     print "ok\n";
 }
 $queuedir->close();
 
 sub make_cdb {
     my $fh = new FileHandle;
-    my $cdb = new CDB_File ("$cdbtarget.cdb", "$cdbtarget.$$") or die "Could not open cdb: $!\n";
-    open( $fh, "<$target" ) or die "Could not open $target: $!\n";
+    my $cdb = new CDB_File("$cdbtarget.cdb", "$cdbtarget.$$")
+      or die "Could not open cdb: $!\n";
+    open($fh, "<$target") or die "Could not open $target: $!\n";
     while (<$fh>) {
         chomp;
         s/^#.*$//;      # Remove comments
@@ -326,18 +331,19 @@ sub make_cdb {
 }
 
 sub lock {
-    open( LOCK, ">$lockfile" ) or die "Unable to open lockfile: $!\n";
-    flock( LOCK, LOCK_EX | LOCK_NB )
-      or die "Failed to lock, another instance of the script maybe running: $!\n";
+    open(LOCK, ">$lockfile") or die "Unable to open lockfile: $!\n";
+    flock(LOCK, LOCK_EX | LOCK_NB)
+      or die
+      "Failed to lock, another instance of the script maybe running: $!\n";
 }
 
 sub unlock {
-    flock( LOCK, LOCK_UN );
+    flock(LOCK, LOCK_UN);
     close LOCK;
 }
 
 END {
-    if ( -f $lockfile ) {
+    if (-f $lockfile) {
         &unlock();
     }
 }

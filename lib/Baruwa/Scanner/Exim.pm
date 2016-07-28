@@ -50,9 +50,10 @@ my $UnsortedBatchesLeft;
 # set them to something sensible. This will need to be different
 # for Exim.
 sub initialise {
-    Baruwa::Scanner::Config::Default( 'sendmail', '/usr/sbin/exim' );
-    Baruwa::Scanner::Config::Default( 'sendmail2', Baruwa::Scanner::Config::Value('sendmail')
-          . ' -C /etc/exim/exim_send.conf' );
+    Baruwa::Scanner::Config::Default('sendmail', '/usr/sbin/exim');
+    Baruwa::Scanner::Config::Default('sendmail2',
+        Baruwa::Scanner::Config::Value('sendmail')
+          . ' -C /etc/exim/exim_send.conf');
     $UnsortedBatchesLeft = 0;    # Disable queue-clearing mode
 }
 
@@ -196,37 +197,37 @@ sub new {
 #  Baruwa::Scanner::Log::InfoLog("Configuring baruwa for exim...");
 
 sub DFileName {
-    my ( $this, $id ) = @_;
+    my ($this, $id) = @_;
     return "$id-D";
 }
 
 # No change for V4
 sub HFileName {
-    my ( $this, $id ) = @_;
+    my ($this, $id) = @_;
     return "$id-H";
 }
 
 # No change for V4
 sub TFileName {
-    my ( $this, $id ) = @_;
+    my ($this, $id) = @_;
     return "$id-T";
 }
 
 # Per-message log file is specific to Exim
 sub LFileName {
-    my ( $this, $id ) = @_;
+    my ($this, $id) = @_;
     return "../msglog/$id";
 }
 
 sub ReadQf {
-    my ( $this, $message, $getipfromheader ) = @_;
+    my ($this, $message, $getipfromheader) = @_;
 
     my ($RQf) = $message->{store}{inhhandle};
 
     my %metadata;
-    my ( $InHeader, $InSubject, $InDel, @headers, $msginfo, $from, @to,
-        $subject );
-    my ( $ip, $sender, %acl, %aclc, %aclm, $line, $acltype );
+    my ($InHeader, $InSubject, $InDel, @headers, $msginfo, $from, @to,
+        $subject);
+    my ($ip, $sender, %acl, %aclc, %aclm, $line, $acltype);
     my (@rcvdiplist);
 
     #my($read1strcvd, $ipfromheader);
@@ -235,14 +236,14 @@ sub ReadQf {
 
     # Seek to the start of the file in case anyone read the file
     # between me opening it and locking it.
-    seek( $RQf, 0, 0 );
+    seek($RQf, 0, 0);
 
     # queue file name
-    chomp( $metadata{id} = <$RQf> );
+    chomp($metadata{id} = <$RQf>);
 
     # username, uid, gid that submitted message
-    chomp( ( $metadata{user}, $metadata{uid}, $metadata{gid} ) = split / /,
-        <$RQf> );
+    chomp(($metadata{user}, $metadata{uid}, $metadata{gid}) = split / /,
+        <$RQf>);
 
     # envelope-sender (in <>)
     $sender = <$RQf>;
@@ -260,13 +261,14 @@ sub ReadQf {
     #JKF $message->{from} = lc $metadata{sender};
     # time msg received (seconds since epoch)
     # + number of delay warnings sent
-    chomp( ( $metadata{rcvtime}, $metadata{warncnt} ) = split / /, <$RQf> );
+    chomp(($metadata{rcvtime}, $metadata{warncnt}) = split / /, <$RQf>);
 
     # Loop through -line section, setting metadata
     # items corresponding to Exim's names for them,
     # and tracking them in %{$metadata{dashvars}}
-    while ( chomp( $line = <$RQf> ) ) {
+    while (chomp($line = <$RQf>)) {
         $line =~ s/^-(\w+) ?// or last;
+
         # ACLs patch starts here
         #$metadata{dashvars}{$1} = 0;
         #$line eq "" and $metadata{"dv_$1"} = 1, next;
@@ -274,53 +276,49 @@ sub ReadQf {
         #$metadata{dashvars}{$1} = 1;
         # ACLs can be -acl or -aclc or -aclm.
         $acltype = $1;
-        if ( $acltype =~ /^acl[cm]?$/ ) {
+        if ($acltype =~ /^acl[cm]?$/) {
+
             # we need to handle acl vars differently
-            if ( $line =~ /^(\w+|_[[:alnum:]_]+) (\d+)$/ ) {
+            if ($line =~ /^(\w+|_[[:alnum:]_]+) (\d+)$/) {
                 my $buf;
                 my $pos = $1;
                 my $len = $2;
-                if ( $acltype eq "acl" ) {
+                if ($acltype eq "acl") {
                     $acl{$pos}->[0] = [];
-                }
-                elsif ( $acltype eq "aclc" ) {
+                } elsif ($acltype eq "aclc") {
                     $aclc{$pos}->[0] = [];
-                }
-                elsif ( $acltype eq "aclm" ) {
+                } elsif ($acltype eq "aclm") {
                     $aclm{$pos}->[0] = [];
-                }
-                else {
+                } else {
+
                     # invalid format
                     last;
                 }
-                ( read( $RQf, $buf, $len + 1 ) == $len + 1 ) or last;
-                if ( $buf =~ /\n$/ ) {
+                (read($RQf, $buf, $len + 1) == $len + 1) or last;
+                if ($buf =~ /\n$/) {
                     chomp $buf;
-                }
-                else {
+                } else {
+
                     # invalid format
                     last;
                 }
-                if ( $acltype eq "acl" ) {
+                if ($acltype eq "acl") {
                     $acl{$pos}->[0] = $buf;
-                }
-                elsif ( $acltype eq "aclc" ) {
+                } elsif ($acltype eq "aclc") {
                     $aclc{$pos}->[0] = $buf;
-                }
-                elsif ( $acltype eq "aclm" ) {
+                } elsif ($acltype eq "aclm") {
                     $aclm{$pos}->[0] = $buf;
-                }
-                else {
+                } else {
+
                     # invalid format
                     last;
                 }
-            }
-            else {
+            } else {
+
                 # this is a weird format, and we're not sure how to handle it
                 last;
             }
-        }
-        else {
+        } else {
             $metadata{dashvars}{$1} = 0;
             $line eq "" and $metadata{"dv_$1"} = 1, next;
             $metadata{"dv_$1"} = $line;
@@ -333,34 +331,34 @@ sub ReadQf {
     $metadata{aclmvars} = \%aclm;
 
     # If it was an invalid queue file, log a warning and tell caller
-    unless ( defined $line ) {
-        #Baruwa::Scanner::Log::WarnLog("Batch: Ignoring invalid queue file for " .
-        #                          "message %s", $metadata{id});
+    unless (defined $line) {
+
+      #Baruwa::Scanner::Log::WarnLog("Batch: Ignoring invalid queue file for " .
+      #                          "message %s", $metadata{id});
         return 0;
     }
 
-    # FIXME: we haven't really defined what $message{clientip} should
-    # be when it's a locally-submitted message... so the rest of
-    # the code probably doesn't deal with it well.
-    #
-    #     JKF: Sendmail apparently generates "root@localhost" as the client ip
-    #     address, which I currently don't handle at all, oops!
-    #     It *doesn't* contain a numerical IP address, as opposed to SMTP
-    #     connections from localhost, which get a numerical IP address as normal.
-    #     So how do we describe them? Personally I think we should always treat
-    #     them as normal messages, maybe just coming from 127.0.0.1. I'm not
-    #     convinced that created messages should be handled differently from
-    #     messages from 127.0.0.1, as that will discourage users from doing silly
-    #     things like not scanning created messages.
-    #     I have changed the sendmail code so it puts in 127.0.0.1.
-    #
-    # OK, well I'll probably try having a look at what it would take to
-    # differentiate it later, then... (i.e. put 'local' back in and see
-    # what breaks)
-    #
+   # FIXME: we haven't really defined what $message{clientip} should
+   # be when it's a locally-submitted message... so the rest of
+   # the code probably doesn't deal with it well.
+   #
+   #     JKF: Sendmail apparently generates "root@localhost" as the client ip
+   #     address, which I currently don't handle at all, oops!
+   #     It *doesn't* contain a numerical IP address, as opposed to SMTP
+   #     connections from localhost, which get a numerical IP address as normal.
+   #     So how do we describe them? Personally I think we should always treat
+   #     them as normal messages, maybe just coming from 127.0.0.1. I'm not
+   #     convinced that created messages should be handled differently from
+   #     messages from 127.0.0.1, as that will discourage users from doing silly
+   #     things like not scanning created messages.
+   #     I have changed the sendmail code so it puts in 127.0.0.1.
+   #
+   # OK, well I'll probably try having a look at what it would take to
+   # differentiate it later, then... (i.e. put 'local' back in and see
+   # what breaks)
+   #
     $message->{clientip} =
-      ( exists $metadata{dv_host_address}
-          && defined $metadata{dv_host_address} )
+      (exists $metadata{dv_host_address} && defined $metadata{dv_host_address})
       ? $metadata{dv_host_address}
       : "127.0.0.1";
     if ($message->{clientip} =~ /^(\d+\.\d+\.\d+\.\d+)(\..*)?/) {
@@ -371,61 +369,65 @@ sub ReadQf {
 
     # Deal with b-tree of non-recipients
     $metadata{nonrcpts} = {};
-    if ( $line ne "XX" ) {
+    if ($line ne "XX") {
         my $nodecount = 0;
-        my ( $branches, $address ) = split / /, $line;
+        my ($branches, $address) = split / /, $line;
         $metadata{nonrcpts}{$address} = 1;
-        substr( $branches, 0, 1 ) eq "Y" and $nodecount++;
-        substr( $branches, 1, 1 ) eq "Y" and $nodecount++;
+        substr($branches, 0, 1) eq "Y" and $nodecount++;
+        substr($branches, 1, 1) eq "Y" and $nodecount++;
         while ($nodecount) {
-            chomp( $line = <$RQf> );
+            chomp($line = <$RQf>);
             unless ($line) {
-                #Baruwa::Scanner::Log::WarnLog("Batch: Ignoring invalid queue file for " .
-                #                          "message %s", $metadata{id});
+
+      #Baruwa::Scanner::Log::WarnLog("Batch: Ignoring invalid queue file for " .
+      #                          "message %s", $metadata{id});
                 return 0;
             }
 
-            # $line eq "" and **** --- invalid queue file - JKF won't get here if bad
-            ( $branches, $address ) = split / /, $line;
+       # $line eq "" and **** --- invalid queue file - JKF won't get here if bad
+            ($branches, $address) = split / /, $line;
             $nodecount--;
             $metadata{nonrcpts}{$address} = 1;
-            substr( $branches, 0, 1 ) eq "Y" and $nodecount++;
-            substr( $branches, 1, 1 ) eq "Y" and $nodecount++;
+            substr($branches, 0, 1) eq "Y" and $nodecount++;
+            substr($branches, 1, 1) eq "Y" and $nodecount++;
         }
     }
 
     # Get number of recipients
-    chomp( $metadata{numrcpts} = <$RQf> );
+    chomp($metadata{numrcpts} = <$RQf>);
 
     #print STDERR "Number of recips = " . $metadata{numrcpts} . "\n";
 
     # Read in recipient list
-    for ( my $i = 0 ; $i < $metadata{numrcpts} ; $i++ ) {
-        chomp( $line = <$RQf> );
+    for (my $i = 0; $i < $metadata{numrcpts}; $i++) {
+        chomp($line = <$RQf>);
+
         #print STDERR "Read $line\n";
-        unless ( defined $line && $line ne "" ) {
-            #Baruwa::Scanner::Log::WarnLog("Batch: Ignoring invalid queue file for " .
-            #                          "message %s", $metadata{id});
+        unless (defined $line && $line ne "") {
+
+      #Baruwa::Scanner::Log::WarnLog("Batch: Ignoring invalid queue file for " .
+      #                          "message %s", $metadata{id});
             return 0;
         }
 
         # $line eq "" and ***** -- invalid queue file
-        push @{ $metadata{rcpts} }, $line;
-        unless ( exists $metadata{nonrcpts}{$line} ) {
+        push @{$metadata{rcpts}}, $line;
+        unless (exists $metadata{nonrcpts}{$line}) {
             $line =~ s/ \d+,\d+,\d+$//;
-            if ( $line =~ s/ (\d+),\d+#1$// ) {
-                $line = substr( $line, 0, length($line) - $1 - 1 )
+            if ($line =~ s/ (\d+),\d+#1$//) {
+                $line = substr($line, 0, length($line) - $1 - 1)
                   if defined $1;
             }
-            push @{ $message->{to} }, $line;
+            push @{$message->{to}}, $line;
         }
     }
 
     # This line should be blank
-    chomp( $line = <$RQf> );
+    chomp($line = <$RQf>);
     if ($line) {
-        #Baruwa::Scanner::Log::WarnLog("Batch: Ignoring invalid queue file for " .
-        #                          "message %s", $metadata{id});
+
+      #Baruwa::Scanner::Log::WarnLog("Batch: Ignoring invalid queue file for " .
+      #                          "message %s", $metadata{id});
         return 0;
     }
 
@@ -450,22 +452,25 @@ sub ReadQf {
 
     my $header = {};
     while (<$RQf>) {
+
         # chomp()ing here would screw the header length calculations
         $line = $_;
         $line =~ s/\0//g;    # Delete all null bytes
 
         if ($InHeader) {
+
             # We are expecting a continuation line...
-            $InHeader -= ( length($line) );
-            if ( $InHeader < 0 ) {
-                Baruwa::Scanner::Log::NoticeLog( "Header ($line) too long (wanted "
-                      . "$InHeader) -- using it anyway!!" );
+            $InHeader -= (length($line));
+            if ($InHeader < 0) {
+                Baruwa::Scanner::Log::NoticeLog(
+                        "Header ($line) too long (wanted "
+                      . "$InHeader) -- using it anyway!!");
                 $InHeader = 0;
             }
             $line =~ /^[\t ]/
-              or
-              Baruwa::Scanner::Log::NoticeLog( "Header continuation ($line) doesn't"
-                  . " begin with LWSP -- using it anyway!!" );
+              or Baruwa::Scanner::Log::NoticeLog(
+                    "Header continuation ($line) doesn't"
+                  . " begin with LWSP -- using it anyway!!");
 
             # Push line onto simple @headers array unless it's one
             # that Exim's flagged as deleted...
@@ -476,33 +481,33 @@ sub ReadQf {
 
             # Is this header one that we need to have directly available
             # (currently only subject)
-            $InSubject and chomp( $message->{subject} .= $line );
+            $InSubject and chomp($message->{subject} .= $line);
 
             # Track whether we're still in the middle of anything
-            $InDel     = ( $InDel     && $InHeader );
-            $InSubject = ( $InSubject && $InHeader );
+            $InDel     = ($InDel     && $InHeader);
+            $InSubject = ($InSubject && $InHeader);
 
             # Very important
             next;
         }
 
         # Looking for first line of a header...
-        if ( $line =~ /^([\d]{3,})([A-Z* ]) (.*)/s ) {
+        if ($line =~ /^([\d]{3,})([A-Z* ]) (.*)/s) {
 
             # If we've got a header built, push it onto metadata
             # headers array and clear the decks ready to build
             # another one.
-            if ( exists $header->{name} ) {
-                push @{ $metadata{headers} }, $header;
+            if (exists $header->{name}) {
+                push @{$metadata{headers}}, $header;
                 $header = {};
             }
 
             # Has Exim flagged this header as deleted?
-            $InDel = ( ( my $flagchar = $2 ) eq '*' );
+            $InDel = ((my $flagchar = $2) eq '*');
 
             # got one... track length
-            $InHeader = $1 - ( length($3) );
-            if ( $InHeader < 0 ) {
+            $InHeader = $1 - (length($3));
+            if ($InHeader < 0) {
                 Baruwa::Scanner::Log::WarnLog(
                     "Header too long! -- using it anyway!!");
                 $InHeader = 0;
@@ -527,11 +532,13 @@ sub ReadQf {
 
             # Ignore it if it's flagged as deleted
             unless ($InDel) {
+
                 # It's not deleted, so push it onto headers array
                 push @headers, $headerstring;
 
                 # And if it's the subject, deal with it + track it
-                if ( "subject:" eq lc $1 ) {
+                if ("subject:" eq lc $1) {
+
                     # Make $metadata{subject} and the relevant header
                     # entry point to the same object, just to save hunting
                     # for it later.
@@ -539,16 +546,15 @@ sub ReadQf {
 
                     # And just stick an unfolded string into message subject
                     # attribute.
-                    chomp( $message->{subject} = $2 );
+                    chomp($message->{subject} = $2);
                     $InSubject = 1;
                 }
-                if ( "received:" eq lc $1 ) {
+                if ("received:" eq lc $1) {
                     my $received = $2;
                     my $rcvdip   = '127.0.0.1';
-                    if ( $received =~ /\[(\d+\.\d+\.\d+\.\d+)\]/i ) {
+                    if ($received =~ /\[(\d+\.\d+\.\d+\.\d+)\]/i) {
                         $rcvdip = $1;
-                    }
-                    elsif ( $received =~ /\[([\dabcdef.:]+)\]/i ) {
+                    } elsif ($received =~ /\[([\dabcdef.:]+)\]/i) {
                         $rcvdip = $1;
                     }
                     push @rcvdiplist, $rcvdip;
@@ -556,22 +562,23 @@ sub ReadQf {
             }
 
             # Track anything we may be in the middle of
-            $InDel     = ( $InDel     && $InHeader );
-            $InSubject = ( $InSubject && $InHeader );
+            $InDel     = ($InDel     && $InHeader);
+            $InSubject = ($InSubject && $InHeader);
             next;
         }
+
         # Weren't expecting a continuation, but didn't find
         # something that looked like the first line of a header
         # either...
         Baruwa::Scanner::Log::WarnLog(
-            "Apparently invalid line in queue file!" . "- continuing anyway." );
+            "Apparently invalid line in queue file!" . "- continuing anyway.");
     }
 
     # If we were told to read the IP from the header and it was there...
     $getipfromheader = @rcvdiplist if $getipfromheader > @rcvdiplist;
 
     # If they wanted the 2nd Received from address, give'em element 1 of list
-    $message->{clientip} = $rcvdiplist[ $getipfromheader - 1 ]
+    $message->{clientip} = $rcvdiplist[$getipfromheader - 1]
       if $getipfromheader > 0;
 
     #$message->{clientip} = $ipfromheader
@@ -579,15 +586,16 @@ sub ReadQf {
 
     # We should have the last header built but not pushed
     # onto the metadata headers array at this point...
-    exists $header->{name} and push @{ $metadata{headers} }, $header;
+    exists $header->{name} and push @{$metadata{headers}}, $header;
 
     # Decode ISO subject lines into UTF8
     # Needed for UTF8 support in MailWatch 2.0
     eval {
         $message->{utf8subject} =
-          Encode::decode( 'MIME-Header', $message->{subject} );
+          Encode::decode('MIME-Header', $message->{subject});
     };
     if ($@) {
+
         # Eval failed - store a copy of the subject before MIME::WordDecoder
         # is run, as this appears to destroy the characters of some subjects
         $message->{utf8subject} = $message->{subject};
@@ -597,11 +605,12 @@ sub ReadQf {
     # Over-ride the default default character set handler so it does it
     # much better than the MIME-tools default handling.
     MIME::WordDecoder->default->handler(
-        '*' => \&Baruwa::Scanner::Message::WordDecoderKeep7Bit );
+        '*' => \&Baruwa::Scanner::Message::WordDecoderKeep7Bit);
 
     # Decode the ISO encoded Subject line
-    my $TmpSubject = MIME::WordDecoder::unmime( $message->{subject} );
-    if ( $TmpSubject ne $message->{subject} ) {
+    my $TmpSubject = MIME::WordDecoder::unmime($message->{subject});
+    if ($TmpSubject ne $message->{subject}) {
+
         # The unmime function dealt with an encoded subject, as it did
         # something. Allow up to 10 trailing spaces so that SweepContent
         # is more kind to us and doesn't go and replace the whole subject,
@@ -632,23 +641,22 @@ sub ReadQf {
 # Merge header data from @headers into metadata :(
 
 sub AddHeadersToQf {
-    my ( $this, $message, $headers ) = @_;
-    my ( $header, $h, @newheaders );
+    my ($this, $message, $headers) = @_;
+    my ($header, $h, @newheaders);
 
     #print STDERR Dumper($message->{headers});
 
-    if ( defined $headers ) {
-        @newheaders = split( /\n/, $headers );
-    }
-    else {
-        @newheaders = @{ $message->{headers} };
+    if (defined $headers) {
+        @newheaders = split(/\n/, $headers);
+    } else {
+        @newheaders = @{$message->{headers}};
     }
 
-    return RealAddHeadersToQf( $this, $message, \@newheaders );
+    return RealAddHeadersToQf($this, $message, \@newheaders);
 }
 
 sub RealAddHeadersToQf {
-    my ( $this, $message, $headerref ) = @_;
+    my ($this, $message, $headerref) = @_;
 
     my @newheaders = @$headerref;
 
@@ -690,6 +698,7 @@ sub RealAddHeadersToQf {
     my $InDel     = 0;
 
     foreach (@newheaders) {
+
         # This line to identify problems rather than just work
         # round them (which costs efficiency).
         s/\n\Z//
@@ -697,9 +706,10 @@ sub RealAddHeadersToQf {
             "BUG! header line '$_' should not have newline.");
 
         # This line for safety but inefficiency
-        chomp( $line = $_ );
+        chomp($line = $_);
 
-        if ( $InHeader && ( $line =~ /^[\t ]/ ) ) {
+        if ($InHeader && ($line =~ /^[\t ]/)) {
+
             # Continuation
             # Add it to metadata header object (already
             # built the rest)
@@ -709,8 +719,8 @@ sub RealAddHeadersToQf {
 
             # Very important
             next;
-        }
-        elsif ( $line =~ /^([^: ]+:)(.*)$/ ) {
+        } elsif ($line =~ /^([^: ]+:)(.*)$/) {
+
             # Actually header names *MUST* only contain
             # ASCII 33-126 decimal inclusive...
             # ...but we'll be gentle, just in case.
@@ -723,7 +733,7 @@ sub RealAddHeadersToQf {
 
             # Push any previous header to right place...
             if ($InHeader) {
-                push @{ $message->{metadata}{headers} }, $header;
+                push @{$message->{metadata}{headers}}, $header;
                 $header = {};
             }
 
@@ -737,8 +747,8 @@ sub RealAddHeadersToQf {
 
             # Important
             next;
-        }
-        else {
+        } else {
+
             # Not a continuation and not a valid header start
             Baruwa::Scanner::Log::WarnLog(
                 "Don't know what to do with line '$line' in header array!");
@@ -748,11 +758,11 @@ sub RealAddHeadersToQf {
 
     # We should have the last header built but not pushed
     # onto the metadata headers array at this point...
-    exists $header->{name} and push @{ $message->{metadata}{headers} }, $header;
+    exists $header->{name} and push @{$message->{metadata}{headers}}, $header;
 
     # Since we've just generated a bunch of headers with no "special"
     # flags, note that they've *all* gone missing:
-    foreach ( keys %{ $message->{metadata}{vanishedflags} } ) {
+    foreach (keys %{$message->{metadata}{vanishedflags}}) {
         $message->{metadata}{vanishedflags}{$_} = 1;
     }
 
@@ -760,16 +770,16 @@ sub RealAddHeadersToQf {
 }
 
 sub AddStringOfHeadersToQf {
-    my ( $this, $message, $headers ) = @_;
+    my ($this, $message, $headers) = @_;
     my @headers;
 
-    @headers = split( /\n/, $headers );
+    @headers = split(/\n/, $headers);
 
-    return RealAddHeadersToQf( $this, $message, \@headers );
+    return RealAddHeadersToQf($this, $message, \@headers);
 }
 
 sub AddHeader {
-    my ( $this, $message, $newkey, $newvalue ) = @_;
+    my ($this, $message, $newkey, $newvalue) = @_;
     my ($newheader);
 
     # need an equivalent to "assert"...
@@ -782,14 +792,13 @@ sub AddHeader {
     $newvalue =~ s/^ */ /;
     $newvalue =~ s/\n*\Z/\n/;
 
-    $newheader = { name => $newkey, body => $newvalue, flag => " " };
+    $newheader = {name => $newkey, body => $newvalue, flag => " "};
 
     # DKIM: Add header at top if adding headers at top
-    if ( $message->{newheadersattop} ) {
-        unshift @{ $message->{metadata}{headers} }, $newheader;
-    }
-    else {
-        push @{ $message->{metadata}{headers} }, $newheader;
+    if ($message->{newheadersattop}) {
+        unshift @{$message->{metadata}{headers}}, $newheader;
+    } else {
+        push @{$message->{metadata}{headers}}, $newheader;
     }
 
     return 1;
@@ -800,9 +809,9 @@ sub AddHeader {
 
 # Delete a header from the message's metadata structure
 sub DeleteHeader {
-    my ( $this, $message, $key ) = @_;
+    my ($this, $message, $key) = @_;
 
-    my $usingregexp = ( $key =~ s/^\/(.*)\/$/$1/ ) ? 1 : 0;
+    my $usingregexp = ($key =~ s/^\/(.*)\/$/$1/) ? 1 : 0;
 
     # Add a colon if they forgot it.
     $key .= ':' unless $usingregexp || $key =~ /:$/;
@@ -813,14 +822,15 @@ sub DeleteHeader {
     # Delete header by flagging it as deleted rather than by
     # actually deleting it; might help with debugging.
     # Also keep track of any flags that we've managed to "vanish".
-    my ( $hdrnum, $line );
+    my ($hdrnum, $line);
     my $metadata = $message->{metadata};
-    for ( $hdrnum = 0 ; $hdrnum < @{ $metadata->{headers} } ; $hdrnum++ ) {
+    for ($hdrnum = 0; $hdrnum < @{$metadata->{headers}}; $hdrnum++) {
+
         # Skip if they are using a header name and it doesn't match
         # Quotemeta the header name we are checking as we have done it to $key.
         next
           if !$usingregexp
-          && lc( quotemeta( $metadata->{headers}[$hdrnum]{name} ) ) ne lc $key;
+          && lc(quotemeta($metadata->{headers}[$hdrnum]{name})) ne lc $key;
 
         # Skip if they are using a regexp and it doesn't match
         $line = $metadata->{headers}[$hdrnum]{name}
@@ -829,27 +839,28 @@ sub DeleteHeader {
 
         # Have found the right line
         $metadata->{headers}[$hdrnum]{flag} ne " "
-          and $metadata->{vanishedflags}{ $metadata->{headers}[$hdrnum]{flag} }
-          = 1;
+          and $metadata->{vanishedflags}{$metadata->{headers}[$hdrnum]{flag}} =
+          1;
         $metadata->{headers}[$hdrnum]{flag} = "*";
     }
 }
 
 sub UniqHeader {
-    my ( $this, $message, $key ) = @_;
+    my ($this, $message, $key) = @_;
 
     my $hdrnum;
     my $foundat  = -1;
     my $metadata = $message->{metadata};
-    for ( $hdrnum = 0 ; $hdrnum < @{ $metadata->{headers} } ; $hdrnum++ ) {
+    for ($hdrnum = 0; $hdrnum < @{$metadata->{headers}}; $hdrnum++) {
         next unless lc $metadata->{headers}[$hdrnum]{name} eq lc $key;
+
         # Have found the header line, skip it if we haven't seen it before
-        ( $foundat = $hdrnum ), next if $foundat == -1;
+        ($foundat = $hdrnum), next if $foundat == -1;
 
         # Have found the right line
         $metadata->{headers}[$hdrnum]{flag} ne " "
-          and $metadata->{vanishedflags}{ $metadata->{headers}[$hdrnum]{flag} }
-          = 1;
+          and $metadata->{vanishedflags}{$metadata->{headers}[$hdrnum]{flag}} =
+          1;
         $metadata->{headers}[$hdrnum]{flag} = "*";
     }
 }
@@ -862,11 +873,11 @@ sub UniqHeader {
 # flags on output.
 
 sub ReplaceHeader {
-    my ( $this, $message, $key, $newvalue ) = @_;
+    my ($this, $message, $key, $newvalue) = @_;
 
     # DKIM: Don't do DeleteHeader if adding all headers at top
-    $this->DeleteHeader( $message, $key ) unless $message->{dkimfriendly};
-    $this->AddHeader( $message, $key, $newvalue );
+    $this->DeleteHeader($message, $key) unless $message->{dkimfriendly};
+    $this->AddHeader($message, $key, $newvalue);
 
     return 1;
 }
@@ -876,21 +887,16 @@ sub ReplaceHeader {
 # FOR INTERNAL USE ONLY
 
 sub FindHeader {
-    my ( $this, $message, $name, $includedeleted ) = @_;
+    my ($this, $message, $name, $includedeleted) = @_;
 
     defined $includedeleted or $includedeleted = 0;
 
     $includedeleted and $includedeleted = 1;
 
-    for (
-        my $ignoreflag = 0 ;
-        $ignoreflag < 1 + $includedeleted ;
-        $ignoreflag++
-      )
-    {
-        foreach ( @{ $message->{metadata}{headers} } ) {
+    for (my $ignoreflag = 0; $ignoreflag < 1 + $includedeleted; $ignoreflag++) {
+        foreach (@{$message->{metadata}{headers}}) {
             lc $_->{name} eq lc $name
-              and ( $ignoreflag or $_->{flag} ne '*' )
+              and ($ignoreflag or $_->{flag} ne '*')
               and return $_;
         }
     }
@@ -899,63 +905,63 @@ sub FindHeader {
 }
 
 sub AppendHeader {
-    my ( $this, $message, $key, $newvalue, $sep ) = @_;
+    my ($this, $message, $key, $newvalue, $sep) = @_;
 
-    my $header = FindHeader( $this, $message, $key );
+    my $header = FindHeader($this, $message, $key);
 
-    if ( defined $header ) {
+    if (defined $header) {
+
         # Found it :)
-        chomp( $header->{body} );
+        chomp($header->{body});
         $header->{body} .= $sep . $newvalue . "\n";
-    }
-    else {
+    } else {
+
         # Didn't find it :(
-        $this->AddHeader( $message, $key, $newvalue );
+        $this->AddHeader($message, $key, $newvalue);
     }
     return 1;
 }
 
 sub PrependHeader {
-    my ( $this, $message, $key, $newvalue, $sep ) = @_;
+    my ($this, $message, $key, $newvalue, $sep) = @_;
 
-    my $header = FindHeader( $this, $message, $key );
+    my $header = FindHeader($this, $message, $key);
 
-    if ( defined $header ) {
+    if (defined $header) {
+
         # Found it :)
         #$header->{body} = $newvalue . $sep . $header->{body};
-        chomp( $header->{body} );
+        chomp($header->{body});
         $header->{body} =~ s/^($sep|\s)*/ $newvalue$sep/;
         $header->{body} .= "\n";
-    }
-    else {
+    } else {
+
         # Didn't find it :(
-        $this->AddHeader( $message, $key, $newvalue );
+        $this->AddHeader($message, $key, $newvalue);
     }
     return 1;
 }
 
 sub TextStartsHeader {
-    my ( $this, $message, $key, $text ) = @_;
+    my ($this, $message, $key, $text) = @_;
 
-    my $header = FindHeader( $this, $message, $key );
+    my $header = FindHeader($this, $message, $key);
 
-    if ( defined $header ) {
-        return ( ( $header->{body} =~ /^\s*\Q$text\E/i ) ? 1 : 0 );
-    }
-    else {
+    if (defined $header) {
+        return (($header->{body} =~ /^\s*\Q$text\E/i) ? 1 : 0);
+    } else {
         return 0;
     }
 }
 
 sub TextEndsHeader {
-    my ( $this, $message, $key, $text ) = @_;
+    my ($this, $message, $key, $text) = @_;
 
-    my $header = FindHeader( $this, $message, $key );
+    my $header = FindHeader($this, $message, $key);
 
-    if ( defined $header ) {
-        return ( ( $header->{body} =~ /\Q$text\E$/i ) ? 1 : 0 );
-    }
-    else {
+    if (defined $header) {
+        return (($header->{body} =~ /\Q$text\E$/i) ? 1 : 0);
+    } else {
         return 0;
     }
 }
@@ -966,11 +972,11 @@ sub TextEndsHeader {
 
 sub AddRecipients {
     my $this = shift;
-    my ( $message, @recips ) = @_;
+    my ($message, @recips) = @_;
     my ($recip);
     foreach $recip (@recips) {
         $message->{metadata}{numrcpts}++;
-        push @{ $message->{metadata}{rcpts} }, "$recip";
+        push @{$message->{metadata}{rcpts}}, "$recip";
         exists $message->{metadata}{nonrpcts}{$recip}
           and delete $message->{metadata}{nonrpcts}{$recip};
     }
@@ -997,22 +1003,24 @@ sub DeleteRecipients {
 
 sub KickMessage {
     my $pid;
-    my ( $messages, $sendmail2 ) = @_;
-    my ( @ids, @ThisBatch );
+    my ($messages, $sendmail2) = @_;
+    my (@ids, @ThisBatch);
 
     # Build a list @ids of all the message ids
-    foreach ( values( %{$messages} ) ) {
-        push @ids, split( " ", $_ );
+    foreach (values(%{$messages})) {
+        push @ids, split(" ", $_);
     }
 
     while (@ids) {
         @ThisBatch = splice @ids, $[, 30;
+
         # This code is the simpler version of the #JJH code below here.
-        my $idlist = join( ' ', @ThisBatch );
-        $idlist .= ' &' if Baruwa::Scanner::Config::Value('deliverinbackground');
+        my $idlist = join(' ', @ThisBatch);
+        $idlist .= ' &'
+          if Baruwa::Scanner::Config::Value('deliverinbackground');
 
         #print STDERR "About to do \"Sendmail2 -Mc $idlist\"\n";
-        system( Baruwa::Scanner::Config::Value('sendmail2') . ' -Mc ' . $idlist );
+        system(Baruwa::Scanner::Config::Value('sendmail2') . ' -Mc ' . $idlist);
     }
 
 }
@@ -1046,7 +1054,7 @@ sub CreateQf {
     $Qfile .= $metadata->{warncnt} . "\n";
 
     # Add -<item_name> lines
-    foreach ( keys %{ $metadata->{dashvars} } ) {
+    foreach (keys %{$metadata->{dashvars}}) {
         $Qfile .= "-" . $_;
         $metadata->{dashvars}{$_} and $Qfile .= " " . $metadata->{"dv_$_"};
         $Qfile .= "\n";
@@ -1054,36 +1062,36 @@ sub CreateQf {
 
     # ACLs patch starts here
     # Add the separate ACL Vars
-    my %acl  = %{ $metadata->{aclvars} };
-    my %aclc = %{ $metadata->{aclcvars} };
-    my %aclm = %{ $metadata->{aclmvars} };
-    foreach ( keys %acl ) {
-        if ( $acl{$_} ) {
-            $Qfile .= "-acl " . $_ . " " . length( $acl{$_}->[0] ) . "\n";
+    my %acl  = %{$metadata->{aclvars}};
+    my %aclc = %{$metadata->{aclcvars}};
+    my %aclm = %{$metadata->{aclmvars}};
+    foreach (keys %acl) {
+        if ($acl{$_}) {
+            $Qfile .= "-acl " . $_ . " " . length($acl{$_}->[0]) . "\n";
             $Qfile .= $acl{$_}->[0] . "\n";
         }
     }
-    foreach ( keys %aclc ) {
-        if ( $aclc{$_} ) {
-            $Qfile .= "-aclc " . $_ . " " . length( $aclc{$_}->[0] ) . "\n";
+    foreach (keys %aclc) {
+        if ($aclc{$_}) {
+            $Qfile .= "-aclc " . $_ . " " . length($aclc{$_}->[0]) . "\n";
             $Qfile .= $aclc{$_}->[0] . "\n";
         }
     }
-    foreach ( keys %aclm ) {
-        if ( $aclm{$_} ) {
-            $Qfile .= "-aclm " . $_ . " " . length( $aclm{$_}->[0] ) . "\n";
+    foreach (keys %aclm) {
+        if ($aclm{$_}) {
+            $Qfile .= "-aclm " . $_ . " " . length($aclm{$_}->[0]) . "\n";
             $Qfile .= $aclm{$_}->[0] . "\n";
         }
     }
 
     # Add non-recipients
-    $Qfile .= BTreeString( $metadata->{nonrcpts} );
+    $Qfile .= BTreeString($metadata->{nonrcpts});
 
     # Add number of recipients
     $Qfile .= $metadata->{numrcpts} . "\n";
 
     # Add recipients
-    foreach ( @{ $metadata->{rcpts} } ) {
+    foreach (@{$metadata->{rcpts}}) {
         $Qfile .= "$_\n";
     }
 
@@ -1095,18 +1103,19 @@ sub CreateQf {
     # Then we need to write out headers to a
     # string, calculating length as we go.
     my %flags = ();
-    foreach ( keys %{ $metadata->{vanishedflags} } ) {
+    foreach (keys %{$metadata->{vanishedflags}}) {
         $metadata->{vanishedflags}{$_}
-          and FindAndFlag( $metadata->{headers}, "$_" );
+          and FindAndFlag($metadata->{headers}, "$_");
     }
 
     #  Baruwa::Scanner::Log::InfoLog(Dumper($metadata->{headers}));
-    foreach ( @{ $metadata->{headers} } ) {
+    foreach (@{$metadata->{headers}}) {
         my $htext = $_->{name} . $_->{body};
+
         # We want exactly one \n at the end of each header
         # but this *should* be inefficient and unnecessary
         # $htext =~ s/\n*\Z/\n/;
-        $Qfile .= sprintf( "%03d", length($htext) ) . $_->{flag} . ' ' . $htext;
+        $Qfile .= sprintf("%03d", length($htext)) . $_->{flag} . ' ' . $htext;
     }
 
     return $Qfile;
@@ -1116,7 +1125,7 @@ sub CreateQf {
 # INTERNAL USE ONLY
 
 sub FindAndFlag {
-    my ( $headerary, $flag ) = @_;
+    my ($headerary, $flag) = @_;
 
     # Must be lower-case
     my %headers = (
@@ -1140,7 +1149,7 @@ sub FindAndFlag {
     my $foundone = 0;
     foreach (@$headerary) {
         $_->{flag} ne " " and next;
-        $headers{ uc($flag) } . ":" eq lc $_->{name} or next;
+        $headers{uc($flag)} . ":" eq lc $_->{name} or next;
 
         # OK, found one
         $foundone = 1;
@@ -1182,12 +1191,12 @@ sub BTreeHash {
     my $data;
     my $currentnode;
 
-    while ( $data = pop @nodes ) {
+    while ($data = pop @nodes) {
         $currentnode = pop @nodequeue
           or Baruwa::Scanner::Log::DieLog(
             "Ran out of nodes in BTreeHash - shouldn't happen!");
-        unshift @nodequeue, ( $currentnode->{left}  = {} );
-        unshift @nodequeue, ( $currentnode->{right} = {} );
+        unshift @nodequeue, ($currentnode->{left}  = {});
+        unshift @nodequeue, ($currentnode->{right} = {});
         $currentnode->{data} = $data;
     }
 
@@ -1205,12 +1214,12 @@ sub BTreeDescend {
     exists $treeref->{data} or return "";
 
     my $string = "";
-    $string .= ( exists $treeref->{left}{data}  ? "Y" : "N" );
-    $string .= ( exists $treeref->{right}{data} ? "Y" : "N" );
+    $string .= (exists $treeref->{left}{data}  ? "Y" : "N");
+    $string .= (exists $treeref->{right}{data} ? "Y" : "N");
     $string .= " " . $treeref->{data} . "\n";
 
-    $string .= BTreeDescend( $treeref->{left} );
-    $string .= BTreeDescend( $treeref->{right} );
+    $string .= BTreeDescend($treeref->{left});
+    $string .= BTreeDescend($treeref->{right});
 
     return $string;
 }
@@ -1218,36 +1227,38 @@ sub BTreeDescend {
 # Append, add or replace a given header with a given value.
 sub AddMultipleHeaderName {
     my $this = shift;
-    my ( $message, $headername, $headervalue, $separator ) = @_;
+    my ($message, $headername, $headervalue, $separator) = @_;
 
-    my ($multiple) = Baruwa::Scanner::Config::Value( 'multipleheaders', $message );
-    $this->AppendHeader( $message, $headername, $headervalue, $separator )
+    my ($multiple) =
+      Baruwa::Scanner::Config::Value('multipleheaders', $message);
+    $this->AppendHeader($message, $headername, $headervalue, $separator)
       if $multiple eq 'append';
 
-    $this->AddHeader( $message, $headername, $headervalue )
+    $this->AddHeader($message, $headername, $headervalue)
       if $multiple eq 'add';
 
-    $this->ReplaceHeader( $message, $headername, $headervalue )
+    $this->ReplaceHeader($message, $headername, $headervalue)
       if $multiple eq 'replace';
 }
 
 # Append, add or replace a given header with a given value.
 sub AddMultipleHeader {
     my $this = shift;
-    my ( $message, $headername, $headervalue, $separator ) = @_;
+    my ($message, $headername, $headervalue, $separator) = @_;
 
-    my ($multiple) = Baruwa::Scanner::Config::Value( 'multipleheaders', $message );
-    $this->AppendHeader( $message,
-        Baruwa::Scanner::Config::Value( lc($headername), $message ),
-        $headervalue, $separator )
+    my ($multiple) =
+      Baruwa::Scanner::Config::Value('multipleheaders', $message);
+    $this->AppendHeader($message,
+        Baruwa::Scanner::Config::Value(lc($headername), $message),
+        $headervalue, $separator)
       if $multiple eq 'append';
 
-    $this->AddHeader( $message,
-        Baruwa::Scanner::Config::Value( lc($headername), $message ), $headervalue )
+    $this->AddHeader($message,
+        Baruwa::Scanner::Config::Value(lc($headername), $message), $headervalue)
       if $multiple eq 'add';
 
-    $this->ReplaceHeader( $message,
-        Baruwa::Scanner::Config::Value( lc($headername), $message ), $headervalue )
+    $this->ReplaceHeader($message,
+        Baruwa::Scanner::Config::Value(lc($headername), $message), $headervalue)
       if $multiple eq 'replace';
 }
 
@@ -1255,15 +1266,15 @@ sub AddMultipleHeader {
 # Also passed in the sender's address.
 sub SendMessageString {
     my $this = shift;
-    my ( $message, $email, $sender ) = @_;
+    my ($message, $email, $sender) = @_;
 
     my ($fh);
 
     $fh = new IO::Pipe;
     $fh->writer(
-        split( / +/, Baruwa::Scanner::Config::Value( 'sendmail', $message ) ),
-        @SendmailOptions, $sender )
-      or Baruwa::Scanner::Log::WarnLog( "Could not send email message, %s", $! ),
+        split(/ +/, Baruwa::Scanner::Config::Value('sendmail', $message)),
+        @SendmailOptions, $sender)
+      or Baruwa::Scanner::Log::WarnLog("Could not send email message, %s", $!),
       return 0;
 
     #$fh->open('|$global::cat >> /tmp/1');
@@ -1276,15 +1287,15 @@ sub SendMessageString {
 # Also passed in the sender's address.
 sub SendMessageEntity {
     my $this = shift;
-    my ( $message, $entity, $sender ) = @_;
+    my ($message, $entity, $sender) = @_;
 
     my ($fh);
 
     $fh = new IO::Pipe;
     $fh->writer(
-        split( / +/, Baruwa::Scanner::Config::Value( 'sendmail', $message ) ),
-        @SendmailOptions, $sender )
-      or Baruwa::Scanner::Log::WarnLog( "Could not send email entity, %s", $! ),
+        split(/ +/, Baruwa::Scanner::Config::Value('sendmail', $message)),
+        @SendmailOptions, $sender)
+      or Baruwa::Scanner::Log::WarnLog("Could not send email entity, %s", $!),
       return 0;
 
     #$fh->open('|$global::cat >> /tmp/2');
@@ -1298,22 +1309,23 @@ sub SendMessageEntity {
 
 sub CreateBatch {
     my $this = shift;
-    my ( $batch, $onlyid ) = @_;
+    my ($batch, $onlyid) = @_;
 
-    my ( $queuedirname, $queuedir,   $MsgsInQueue, $mtime );
-    my ( $DirtyMsgs,    $DirtyBytes, $CleanMsgs,   $CleanBytes );
-    my ( $HitLimit1,    $HitLimit2,  $HitLimit3,   $HitLimit4 );
-    my ( $MaxCleanB,    $MaxCleanM,  $MaxDirtyB,   $MaxDirtyM );
-    my ( %ModDate,      $mta,        $file,        $tmpdate, $invalidfiles );
-    my ( @SortedFiles,  $id,         $newmessage,  @queuedirnames );
-    my ( $batchempty, $CriticalQueueSize, $headerfileumask );
+    my ($queuedirname, $queuedir,   $MsgsInQueue, $mtime);
+    my ($DirtyMsgs,    $DirtyBytes, $CleanMsgs,   $CleanBytes);
+    my ($HitLimit1,    $HitLimit2,  $HitLimit3,   $HitLimit4);
+    my ($MaxCleanB,    $MaxCleanM,  $MaxDirtyB,   $MaxDirtyM);
+    my (%ModDate,      $mta,        $file,        $tmpdate, $invalidfiles);
+    my (@SortedFiles,  $id,         $newmessage,  @queuedirnames);
+    my ($batchempty, $CriticalQueueSize, $headerfileumask);
     my ($getipfromheader);
 
-    $queuedir    = new DirHandle;
-    $MsgsInQueue = 0;
-    @queuedirnames = @{ $global::MS->{inq}{dir} };
+    $queuedir      = new DirHandle;
+    $MsgsInQueue   = 0;
+    @queuedirnames = @{$global::MS->{inq}{dir}};
 
-    ( $MaxCleanB, $MaxCleanM, $MaxDirtyB, $MaxDirtyM ) = Baruwa::Scanner::MessageBatch::BatchLimits();
+    ($MaxCleanB, $MaxCleanM, $MaxDirtyB, $MaxDirtyM) =
+      Baruwa::Scanner::MessageBatch::BatchLimits();
 
     # If there are too many messages in the queue, start processing in
     # directory storage order instead of date order.
@@ -1354,16 +1366,14 @@ sub CreateBatch {
             defined(
                 $queuedirname = splice(
                     @aux_queuedirnames,
-                    (
-                        $UnsortedBatchesLeft <= 0
+                    (   $UnsortedBatchesLeft <= 0
                         ? 0
-                        : int( rand(@aux_queuedirnames) )
+                        : int(rand(@aux_queuedirnames))
                     ),
                     1
                 )
             )
-          )
-        {
+          ) {
 
             # FIXME: Probably as a result of in-queue spec being
             # tainted, $queuedirname is tainted... work out exactly why!
@@ -1371,36 +1381,37 @@ sub CreateBatch {
             $queuedirname = $1;
 
             #print STDERR "Scanning dir $queuedirname\n";
-            unless ( chdir $queuedirname ) {
+            unless (chdir $queuedirname) {
                 Baruwa::Scanner::Log::WarnLog(
                     "Cannot cd to dir %s to read messages, %s",
-                    $queuedirname, $! );
+                    $queuedirname, $!);
                 next;
             }
 
             $queuedir->open('.')
               or Baruwa::Scanner::Log::DieLog(
                 "Cannot open queue dir %s for reading " . "message batch, %s",
-                $queuedirname, $! );
+                $queuedirname, $!);
             $mta = $global::MS->{mta};
 
             #print STDERR "Searching " . $queuedirname . " for messages\n";
 
            # Read in modification dates of the qf files & use them in date order
-            while ( defined( $file = $queuedir->read() ) ) {
+            while (defined($file = $queuedir->read())) {
 
                 # Optimised by binning the 50% that aren't H files first
                 next unless $file =~ /$mta->{HFileRegexp}/;
                 next unless -f "$queuedirname/$1-D";
+
                 #print STDERR "Found message file $file\n";
                 $MsgsInQueue++;    # Count the size of the queue
                 push @SortedFiles, "$queuedirname/$file";
-                if ( $UnsortedBatchesLeft <= 0 ) {
+                if ($UnsortedBatchesLeft <= 0) {
 
                     # Running normally
-                    $tmpdate = ( stat($file) )[9];    # 9 = mtime
+                    $tmpdate = (stat($file))[9];    # 9 = mtime
                     next unless -f _;
-                    next if -z _;                     # Skip 0-length qf files
+                    next if -z _;                   # Skip 0-length qf files
                     $ModDate{"$queuedirname/$file"} = $tmpdate;
                 }
             }
@@ -1416,11 +1427,10 @@ sub CreateBatch {
           if $CriticalQueueSize > 0 && $MsgsInQueue >= $CriticalQueueSize;
 
         # SortedFiles is array of full pathnames now, not just filenames
-        if ( $UnsortedBatchesLeft > 0 ) {
+        if ($UnsortedBatchesLeft > 0) {
             $UnsortedBatchesLeft--;
-        }
-        else {
-            @SortedFiles = sort { $ModDate{$a} <=> $ModDate{$b} } keys %ModDate;
+        } else {
+            @SortedFiles = sort {$ModDate{$a} <=> $ModDate{$b}} keys %ModDate;
         }
 
         $batchempty = 1;
@@ -1429,17 +1439,16 @@ sub CreateBatch {
        # Keep going until end of dir or have reached every imposed limit. This
        # now processes the files oldest first to make for fairer queue cleanups.
         umask $headerfileumask;    # Started creating files
-        while ( defined( $file = shift @SortedFiles )
-            && $HitLimit1 + $HitLimit2 + $HitLimit3 + $HitLimit4 < 1 )
-        {
+        while (defined($file = shift @SortedFiles)
+            && $HitLimit1 + $HitLimit2 + $HitLimit3 + $HitLimit4 < 1) {
+
             # In accelerated mode, so we don't know anything about this file
-            if ( $UnsortedBatchesLeft > 0 ) {
+            if ($UnsortedBatchesLeft > 0) {
                 my @stats = stat $file;
                 next unless -f _;
                 next if -z _;
                 $mtime = $stats[9];
-            }
-            else {
+            } else {
                 $mtime = $ModDate{$file};
             }
 
@@ -1447,7 +1456,7 @@ sub CreateBatch {
            # same expression as $file [mumble mumble grrr mumble mumble]
            #print STDERR "Reading file $file from list\n";
            # Split pathname into dir and file again
-            ( $queuedirname, $file ) = ( $1, $2 )
+            ($queuedirname, $file) = ($1, $2)
               if $file =~ /^(.*)\/([^\/]+)$/;
             next unless $file =~ /$mta->{HFileRegexp}/;
             $id = $1;
@@ -1459,8 +1468,9 @@ sub CreateBatch {
 
             # Lock and read the qf file. Skip this message if the lock fails.
             $newmessage =
-              Baruwa::Scanner::Message->new( $id, $queuedirname, $getipfromheader );
-            if ( $newmessage && $newmessage->{INVALID} ) {
+              Baruwa::Scanner::Message->new($id, $queuedirname,
+                $getipfromheader);
+            if ($newmessage && $newmessage->{INVALID}) {
 
                 #if ($newmessage eq 'INVALID') {
                 $invalidfiles .= "$id ";
@@ -1479,44 +1489,47 @@ sub CreateBatch {
             # a simple version first.
             # Just do a "next" if we want to skip the message.
             if ($maxattempts) {
-                my $nexttime = time + 120 + int( rand(240) );   # 4 +- 2 minutes
+                my $nexttime = time + 120 + int(rand(240));    # 4 +- 2 minutes
                      #my $nexttime = time + 10 + int(rand(20)); # 4 +- 2 minutes
                 my @attempts =
                   $Baruwa::Scanner::ProcDBH->selectrow_array(
-                    $Baruwa::Scanner::SthSelectRows, undef, $id );
+                    $Baruwa::Scanner::SthSelectRows,
+                    undef, $id);
 
-                if ( @attempts && $attempts[1] >= $maxattempts ) {
+                if (@attempts && $attempts[1] >= $maxattempts) {
                     Baruwa::Scanner::Log::WarnLog(
                         "Warning: skipping message %s as it has been attempted too many times",
                         $id
                     );
+
                     # JKF 20090301 next;
                     # Instead of just skipping it, quarantine it and notify
                     # the local postmaster.
                     $newmessage->QuarantineDOS();
                     $Baruwa::Scanner::SthDeleteId->execute($id);
-                    $Baruwa::Scanner::SthInsertArchive->execute( $attempts[0],
-                        $attempts[1], $attempts[2] );
-                }
-                elsif ( defined $attempts[1] ) {
+                    $Baruwa::Scanner::SthInsertArchive->execute($attempts[0],
+                        $attempts[1], $attempts[2]);
+                } elsif (defined $attempts[1]) {
+
                     # We have tried this message before
-                    if ( time >= $attempts[2] ) {
+                    if (time >= $attempts[2]) {
 
                         # Time for next attempt has arrived
-                        $Baruwa::Scanner::SthIncrementId->execute( $nexttime, $id );
+                        $Baruwa::Scanner::SthIncrementId->execute($nexttime,
+                            $id);
                         Baruwa::Scanner::Log::InfoLog(
                             "Making attempt %d at processing message %s",
-                            $attempts[1] + 1, $id );
-                    }
-                    else {
+                            $attempts[1] + 1, $id);
+                    } else {
+
                         # Not time for next attempt yet, so ignore the message
                         $newmessage->DropFromBatch();
                         next;
                     }
-                }
-                else {
+                } else {
+
                     # We have never seen this message before
-                    $Baruwa::Scanner::SthInsertProc->execute( $id, 1, $nexttime );
+                    $Baruwa::Scanner::SthInsertProc->execute($id, 1, $nexttime);
                 }
             }
 
@@ -1524,18 +1537,18 @@ sub CreateBatch {
             $newmessage->{mtime}      = $mtime;
             $batchempty               = 0;
 
-            if ( Baruwa::Scanner::Config::Value( "scanmail", $newmessage ) =~ /[12]/
-                || Baruwa::Scanner::Config::Value( "virusscan", $newmessage ) =~ /1/
-                || Baruwa::Scanner::Config::Value( "dangerscan", $newmessage ) =~
-                /1/ )
-            {
+            if (Baruwa::Scanner::Config::Value("scanmail", $newmessage) =~
+                /[12]/
+                || Baruwa::Scanner::Config::Value("virusscan", $newmessage) =~
+                /1/
+                || Baruwa::Scanner::Config::Value("dangerscan", $newmessage) =~
+                /1/) {
                 $newmessage->NeedsScanning(1);
                 $DirtyMsgs++;
                 $DirtyBytes += $newmessage->{size};
                 $HitLimit3 = 1 if $DirtyMsgs >= $MaxDirtyM;
                 $HitLimit4 = 1 if $DirtyBytes >= $MaxDirtyB;
-            }
-            else {
+            } else {
                 $newmessage->NeedsScanning(0);
                 $CleanMsgs++;
                 $CleanBytes += $newmessage->{size};
@@ -1546,25 +1559,26 @@ sub CreateBatch {
         umask 0077;    # Safety net as stopped creating files
 
         # Wait a bit until I check the queue again
-        sleep( Baruwa::Scanner::Config::Value('queuescaninterval') ) if $batchempty;
+        sleep(Baruwa::Scanner::Config::Value('queuescaninterval'))
+          if $batchempty;
     } while $batchempty;    # Keep trying until we get something
 
     # Log the number of invalid messages found
-    Baruwa::Scanner::Log::NoticeLog( "New Batch: Found invalid queue files: %s",
-        $invalidfiles )
+    Baruwa::Scanner::Log::NoticeLog("New Batch: Found invalid queue files: %s",
+        $invalidfiles)
       if $invalidfiles;
 
     # Log the size of the queue if it is more than 1 batch
-    Baruwa::Scanner::Log::InfoLog( "New Batch: Found %d messages waiting",
-        $MsgsInQueue )
-      if $MsgsInQueue > ( $DirtyMsgs + $CleanMsgs );
+    Baruwa::Scanner::Log::InfoLog("New Batch: Found %d messages waiting",
+        $MsgsInQueue)
+      if $MsgsInQueue > ($DirtyMsgs + $CleanMsgs);
 
     Baruwa::Scanner::Log::InfoLog(
         "New Batch: Forwarding %d unscanned messages, " . "%d bytes",
-        $CleanMsgs, $CleanBytes )
+        $CleanMsgs, $CleanBytes)
       if $CleanMsgs;
-    Baruwa::Scanner::Log::InfoLog( "New Batch: Scanning %d messages, %d bytes",
-        $DirtyMsgs, $DirtyBytes )
+    Baruwa::Scanner::Log::InfoLog("New Batch: Scanning %d messages, %d bytes",
+        $DirtyMsgs, $DirtyBytes)
       if $DirtyMsgs;
 
     $batch->{dirtymessages} = $DirtyMsgs;
@@ -1582,13 +1596,13 @@ sub CreateBatch {
 # element, not 1 header per list element.
 sub OriginalMsgHeaders {
     my $this = shift;
-    my ( $message, $separator ) = @_;
+    my ($message, $separator) = @_;
 
-    return @{ $message->{headers} } unless $separator;
+    return @{$message->{headers}} unless $separator;
 
     # There is a separator
-    my ( $h, @result );
-    foreach $h ( @{ $message->{headers} } ) {
+    my ($h, @result);
+    foreach $h (@{$message->{headers}}) {
         push @result, $h . $separator;
     }
     return @result;
@@ -1596,6 +1610,7 @@ sub OriginalMsgHeaders {
 
 sub CheckQueueIsFlat {
     my ($dir) = @_;
+
     # FIXME: What is the purpose of this?
     return 1;
 }

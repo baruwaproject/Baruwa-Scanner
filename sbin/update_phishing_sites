@@ -31,9 +31,10 @@ my $lockfile = '/var/lock/Baruwa/phishing.safe.update.lock';
 &lock();
 
 my $generate = 0;
-my $url = "https://datafeeds.baruwa.com/phishing.safe.sites/phishing.safe.sites.conf.master";
-my $target  = "/var/lib/baruwa/phishingupdate/phishing.safe.sites.conf";
-my $cdbtarget  = "/var/lib/baruwa/phishingupdate/phishing.safe.sites";
+my $url =
+  "https://datafeeds.baruwa.com/phishing.safe.sites/phishing.safe.sites.conf.master";
+my $target    = "/var/lib/baruwa/phishingupdate/phishing.safe.sites.conf";
+my $cdbtarget = "/var/lib/baruwa/phishingupdate/phishing.safe.sites";
 
 print "Downloading: $url\n";
 my $ua = LWP::UserAgent->new;
@@ -61,8 +62,9 @@ if ($generate) {
 
 sub make_cdb {
     my $fh = new FileHandle;
-    my $cdb = new CDB_File ("$cdbtarget.cdb", "$cdbtarget.$$") or die "Could not open cdb: $!\n";
-    open( $fh, "<$target" ) or die "Could not open $target: $!\n";
+    my $cdb = new CDB_File("$cdbtarget.cdb", "$cdbtarget.$$")
+      or die "Could not open cdb: $!\n";
+    open($fh, "<$target") or die "Could not open $target: $!\n";
     while (<$fh>) {
         chomp;
         s/^#.*$//;      # Remove comments
@@ -78,18 +80,19 @@ sub make_cdb {
 }
 
 sub lock {
-    open( LOCK, ">$lockfile" ) or die "Unable to open lockfile: $!\n";
-    flock( LOCK, LOCK_EX | LOCK_NB )
-      or die "Failed to lock, another instance of the script maybe running: $!\n";
+    open(LOCK, ">$lockfile") or die "Unable to open lockfile: $!\n";
+    flock(LOCK, LOCK_EX | LOCK_NB)
+      or die
+      "Failed to lock, another instance of the script maybe running: $!\n";
 }
 
 sub unlock {
-    flock( LOCK, LOCK_UN );
+    flock(LOCK, LOCK_UN);
     close LOCK;
 }
 
 END {
-    if ( -f $lockfile ) {
+    if (-f $lockfile) {
         &unlock();
     }
 }

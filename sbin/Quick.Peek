@@ -36,17 +36,17 @@ sub usage() {
 }
 
 # Command-line syntax is this:
-if ( $ARGV[0] =~ /^-+h(elp)?/ ) {
+if ($ARGV[0] =~ /^-+h(elp)?/) {
     usage;
 }
 
 my $target   = shift;
 my $filename = shift;
 
-if ( !( -f $filename ) ) {
+if (!(-f $filename)) {
     usage;
 }
 
 $target =~ s/\s+//g;
-print Baruwa::Scanner::Config::QuickPeek( $filename, $target ) . "\n";
+print Baruwa::Scanner::Config::QuickPeek($filename, $target) . "\n";
 exit 0;

@@ -57,11 +57,11 @@ sub new {
 sub Checks {
     my ($message) = @_;
 
-    my ( @WholeMessage, $scanner, $maxsize );
+    my (@WholeMessage, $scanner, $maxsize);
 
     #print STDERR "Doing Generic Spam Checks\n";
     # If they aren't using the generic spam scanner, bail out
-    $scanner = Baruwa::Scanner::Config::Value( 'gsscanner', $message );
+    $scanner = Baruwa::Scanner::Config::Value('gsscanner', $message);
 
     #return 0 unless $scanner;
 
@@ -72,11 +72,11 @@ sub Checks {
     # SpamAssassin RBL checks in an attempt to get it working again.
     # If it continues to time out for another maxfailures consecutive
     # attempts, then disable it completely.
-    if ( $maxfailures > 0 && $GSsuccessqsum >= $maxfailures ) {
+    if ($maxfailures > 0 && $GSsuccessqsum >= $maxfailures) {
         return (
             0, 0,
             sprintf(
-                Baruwa::Scanner::Config::LanguageValue( $message, 'gsdisabled' ),
+                Baruwa::Scanner::Config::LanguageValue($message, 'gsdisabled'),
                 $maxfailures
             ),
             0
@@ -85,29 +85,28 @@ sub Checks {
 
     $maxsize = Baruwa::Scanner::Config::Value('maxgssize');
 
-    push( @WholeMessage,
-        $global::MS->{mta}->OriginalMsgHeaders( $message, "\n" ) );
+    push(@WholeMessage, $global::MS->{mta}->OriginalMsgHeaders($message, "\n"));
 
     #print STDERR "Headers are : " . join(', ', @WholeMessage) . "\n";
-    push( @WholeMessage, "\n" );
-    $message->{store}->ReadBody( \@WholeMessage, $maxsize );
+    push(@WholeMessage, "\n");
+    $message->{store}->ReadBody(\@WholeMessage, $maxsize);
 
-    my ( $GenericSpamResult, $GenericSpamReport );
+    my ($GenericSpamResult, $GenericSpamReport);
     $GenericSpamResult = 0;
     $GenericSpamReport = "";
-    ( $GenericSpamResult, $GenericSpamReport ) =
-      GSForkAndTest( $message, \@WholeMessage );
-    return ( $GenericSpamResult, $GenericSpamReport );
+    ($GenericSpamResult, $GenericSpamReport) =
+      GSForkAndTest($message, \@WholeMessage);
+    return ($GenericSpamResult, $GenericSpamReport);
 }
 
 # Run the generic spam scanner, and capture the 2 lines of output
 sub GSForkAndTest {
-    my ( $Message, $Contents ) = @_;
+    my ($Message, $Contents) = @_;
 
-    my ( $pipe, $gsscore, $gsreport, $queuelength );
+    my ($pipe, $gsscore, $gsreport, $queuelength);
     my $PipeReturn = 0;
 
-    $queuelength = Baruwa::Scanner::Config::Value( 'gstimeoutlen', $Message );
+    $queuelength = Baruwa::Scanner::Config::Value('gstimeoutlen', $Message);
 
     $pipe = new IO::Pipe
       or Baruwa::Scanner::Log::DieLog(
@@ -119,23 +118,22 @@ sub GSForkAndTest {
     my $pid = fork();
     die "Can't fork: $!" unless defined($pid);
 
-    if ( $pid == 0 ) {
+    if ($pid == 0) {
 
         # In the child
         $pipe->writer();
         $pipe->autoflush();
-        my ( $gsscore, $gsreport );
+        my ($gsscore, $gsreport);
         eval {
             #print STDERR "ClientIP = " . $Message->{clientip} . "\n";
             #print STDERR "From = " . $Message->{from} . "\n";
             #print STDERR "To = " . join(', ', @{$Message->{to}}) . "\n";
             #print STDERR "This is in the caller\n";
 
-            ( $gsscore, $gsreport ) =
+            ($gsscore, $gsreport) =
               Baruwa::Scanner::CustomConfig::GenericSpamScanner(
                 $Message->{clientip}, $Message->{from},
-                $Message->{to},       $Contents
-              );
+                $Message->{to}, $Contents);
         };
 
         $gsscore = $gsscore + 0.0;
@@ -148,7 +146,7 @@ sub GSForkAndTest {
 
     eval {
         $pipe->reader();
-        local $SIG{ALRM} = sub { die "Command Timed Out" };
+        local $SIG{ALRM} = sub {die "Command Timed Out"};
         alarm Baruwa::Scanner::Config::Value('gstimeout');
         $gsscore  = <$pipe>;
         $gsreport = <$pipe>;
@@ -167,7 +165,7 @@ sub GSForkAndTest {
         push @GSsuccessqueue, 0;
 
         # Roll the queue along one
-        $GSsuccessqsum += ( shift @GSsuccessqueue ) ? 1 : -1
+        $GSsuccessqsum += (shift @GSsuccessqueue) ? 1 : -1
           if @GSsuccessqueue > $queuelength;
 
         #print STDERR "Success: sum = $GSsuccessqsum\n";
@@ -179,63 +177,62 @@ sub GSForkAndTest {
     # it doesn't unblock the SIGALRM after handling it.
     eval {
         my $unblockset = POSIX::SigSet->new(SIGALRM);
-        sigprocmask( SIG_UNBLOCK, $unblockset )
+        sigprocmask(SIG_UNBLOCK, $unblockset)
           or die "Could not unblock alarm: $!\n";
     };
 
     # Note to self: I only close the KID in the parent, not in the child.
 
     # Catch failures other than the alarm
-    Baruwa::Scanner::Log::DieLog("Generic Spam Scanner failed with real error: $@")
+    Baruwa::Scanner::Log::DieLog(
+        "Generic Spam Scanner failed with real error: $@")
       if $@ and $@ !~ /Command Timed Out/;
 
     # In which case any failures must be the alarm
     #if ($@ or $pid>0) {
-    if ( $pid > 0 ) {
+    if ($pid > 0) {
         my $maxfailures = Baruwa::Scanner::Config::Value('maxgstimeouts');
 
         # Increment the "consecutive" counter
         #$safailures++;
-        if ( $maxfailures > 0 ) {
+        if ($maxfailures > 0) {
 
             # We got a failure
             push @GSsuccessqueue, 1;
             $GSsuccessqsum++;
 
             # Roll the queue along one
-            $GSsuccessqsum += ( shift @GSsuccessqueue ) ? 1 : -1
+            $GSsuccessqsum += (shift @GSsuccessqueue) ? 1 : -1
               if @GSsuccessqueue > $queuelength;
 
             #print STDERR "Failure: sum = $GSsuccessqsum\n";
             $GSsuccessqsum = 0 if $GSsuccessqsum < 0;
 
             if (   $GSsuccessqsum > $maxfailures
-                && @GSsuccessqueue >= $queuelength )
-            {
+                && @GSsuccessqueue >= $queuelength) {
                 Baruwa::Scanner::Log::WarnLog(
                     "Generic Spam Scanner timed out and was"
                       . " killed, failure %d of %d",
                     $GSsuccessqsum, $maxfailures
                 );
             }
-        }
-        else {
+        } else {
             Baruwa::Scanner::Log::WarnLog(
                 "Generic Spam Scanner timed out and was killed");
         }
 
         # Make the report say GS was killed
         $gsreport =
-          Baruwa::Scanner::Config::LanguageValue( $Message, 'gstimedout' );
+          Baruwa::Scanner::Config::LanguageValue($Message, 'gstimedout');
 
         # Kill the running child process
         my ($i);
         kill 15, $pid;    # Was -15
                           # Wait for up to 10 seconds for it to die
-        for ( $i = 0 ; $i < 5 ; $i++ ) {
+        for ($i = 0; $i < 5; $i++) {
             sleep 1;
-            waitpid( $pid, &POSIX::WNOHANG );
-            ( $pid = 0 ), last unless kill( 0, $pid );
+            waitpid($pid, &POSIX::WNOHANG);
+            ($pid = 0), last unless kill(0, $pid);
             kill 15, $pid;    # Was -15
         }
 
@@ -259,7 +256,7 @@ sub GSForkAndTest {
     #print STDERR "Generic Spam Scanner points = $gsscore\n";
     #print STDERR "Generic Spam Scanner report = $gsreport\n";
 
-    return ( $gsscore, $gsreport );
+    return ($gsscore, $gsreport);
 }
 
 1;

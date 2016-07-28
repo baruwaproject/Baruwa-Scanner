@@ -39,7 +39,7 @@ $LogType |= 'syslog';    #'stderr';
 $WarningsOnly = 0;
 
 sub Configure {
-    my ( $banner, $type ) = @_;
+    my ($banner, $type) = @_;
 
     $Banner  = $banner ? $banner : undef;
     $LogType = $type   ? $type   : 'syslog';
@@ -50,7 +50,7 @@ sub WarningsOnly {
 }
 
 sub Start {
-    my ( $name, $facility, $logsock ) = @_;
+    my ($name, $facility, $logsock) = @_;
 
     $logsock =~ s/\W//g;    # Take out all the junk
 
@@ -60,17 +60,17 @@ sub Start {
     $Baruwa::Scanner::Log::facility = $facility;
     $Baruwa::Scanner::Log::logsock  = $logsock;
 
-    if ( $LogType eq 'syslog' ) {
-        if ( $logsock eq '' ) {
+    if ($LogType eq 'syslog') {
+        if ($logsock eq '') {
             $logsock = 'unix';
         }
         $Baruwa::Scanner::Log::logsock = $logsock;
         print STDERR "Trying to setlogsock($logsock)\n" unless $WarningsOnly;
-        eval { Sys::Syslog::setlogsock($logsock); };
-        eval { Sys::Syslog::openlog( $name, 'pid, nowait', $facility ); };
+        eval {Sys::Syslog::setlogsock($logsock);};
+        eval {Sys::Syslog::openlog($name, 'pid, nowait', $facility);};
     }
 
-    if ( defined $Banner ) {
+    if (defined $Banner) {
         InfoLog($Banner);
     }
 }
@@ -78,11 +78,11 @@ sub Start {
 # Re-open the logging, used after SA::initialise has nobbled it due to
 # nasty Razor code.
 sub Reset {
-    if ( $LogType eq 'syslog' ) {
-        eval { Sys::Syslog::setlogsock($Baruwa::Scanner::Log::logsock); };
+    if ($LogType eq 'syslog') {
+        eval {Sys::Syslog::setlogsock($Baruwa::Scanner::Log::logsock);};
         eval {
-            Sys::Syslog::openlog( $Baruwa::Scanner::Log::name, 'pid, nowait',
-                $Baruwa::Scanner::Log::facility );
+            Sys::Syslog::openlog($Baruwa::Scanner::Log::name, 'pid, nowait',
+                $Baruwa::Scanner::Log::facility);
         };
     }
 }
@@ -98,7 +98,7 @@ sub DieLog {
 
     my $logmessage = sprintf shift @x, @x;
 
-    LogText( $logmessage, 'err' );
+    LogText($logmessage, 'err');
 
     Sys::Syslog::closelog() if $LogType eq 'syslog';
 
@@ -109,7 +109,7 @@ sub WarnLog {
     my (@x) = @_;
     my $logmessage = sprintf shift @x, @x;
 
-    LogText( $logmessage, 'warning' );
+    LogText($logmessage, 'warning');
 
     carp $logmessage if $LogType eq 'stderr';
 }
@@ -119,7 +119,7 @@ sub NoticeLog {
     my $logmessage = sprintf shift @x, @x;
 
     unless ($WarningsOnly) {
-        LogText( $logmessage, 'notice' );
+        LogText($logmessage, 'notice');
 
         print STDERR "$logmessage\n" if $LogType eq 'stderr';
     }
@@ -130,7 +130,7 @@ sub InfoLog {
     my $logmessage = sprintf shift @x, @x;
 
     unless ($WarningsOnly) {
-        LogText( $logmessage, 'info' );
+        LogText($logmessage, 'info');
 
         print STDERR "$logmessage\n" if $LogType eq 'stderr';
     }
@@ -138,26 +138,26 @@ sub InfoLog {
 
 sub DebugLog {
     my (@x) = @_;
-    if ( Baruwa::Scanner::Config::Value('debug') ) {
+    if (Baruwa::Scanner::Config::Value('debug')) {
         my $logmessage = sprintf shift @x, @x;
 
-        LogText( $logmessage, 'debug' );
+        LogText($logmessage, 'debug');
 
         print STDERR "$logmessage\n" if $LogType eq 'stderr';
     }
 }
 
 sub LogText {
-    my ( $logmessage, $level ) = @_;
+    my ($logmessage, $level) = @_;
 
     return unless $LogType eq 'syslog';
 
     # Force use of 8-bit characters, UTF16 breaks syslog badly.
     use bytes;
 
-    foreach ( split /\n/, $logmessage ) {
+    foreach (split /\n/, $logmessage) {
         s/%/%%/g;
-        eval { Sys::Syslog::syslog( $level, $_ ) if $_ ne "" };
+        eval {Sys::Syslog::syslog($level, $_) if $_ ne ""};
     }
 
     no bytes;

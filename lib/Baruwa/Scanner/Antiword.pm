@@ -46,10 +46,10 @@ sub new {
 
 # Look through an entity to find Doc files. Recursive.
 sub FindDocFiles {
-    my ( $entity, $parent, $already ) = @_;
+    my ($entity, $parent, $already) = @_;
 
     #print STDERR "Called with entity=$entity, parent=$parent\n";
-    my ( @parts, $body, $part, $path, $headfile, $doc, $k, $v );
+    my (@parts, $body, $part, $path, $headfile, $doc, $k, $v);
     my %empty = ();
 
     # CASE: Null leaf, fallen off the tree.
@@ -57,14 +57,14 @@ sub FindDocFiles {
 
     # CASE: Leaf node is attachment. Add just this node to what we were given.
     $body = $entity->bodyhandle;
-    if ( defined($body) && defined( $body->path ) ) {
+    if (defined($body) && defined($body->path)) {
 
         # data is on disk:
         $path = $body->path;
         $path = $1 if $path =~ /([^\/]+)$/;
 
         #print STDERR "Found an attachment, Path is $path\n";
-        if ( $path =~ /\.doc$/i ) {
+        if ($path =~ /\.doc$/i) {
             $already->{$path} = $parent;
 
             #print STDERR "Added $path --> $parent\n";
@@ -79,8 +79,8 @@ sub FindDocFiles {
     foreach $part (@parts) {
 
         #print STDERR "Calling FindDocFiles $part\n";
-        my $newones = FindDocFiles( $part, $entity, \%empty );
-        while ( ( $k, $v ) = each %$newones ) {
+        my $newones = FindDocFiles($part, $entity, \%empty);
+        while (($k, $v) = each %$newones) {
 
             #print STDERR "Adding children $k --> $v\n";
             $already->{$k} = $v;
@@ -97,24 +97,24 @@ sub FindDocFiles {
 # Use antiword.
 # Return 1 on success, 0 on failure.
 sub RunAntiword {
-    my ( $dir, $docname, $parententity, $message ) = @_;
+    my ($dir, $docname, $parententity, $message) = @_;
 
     # Create the subdir to unpack it into
     my $unpackfile = $docname;
     $unpackfile =~ s/\.doc$/.txt$1/i;
-    my $attachfile = substr( $unpackfile, 1 );
+    my $attachfile = substr($unpackfile, 1);
 
     # Normal attachment so starts with an 'n'.
-    $unpackfile = $message->MakeNameSafe( $unpackfile, $dir );
+    $unpackfile = $message->MakeNameSafe($unpackfile, $dir);
 
     my $antiword =
-      Baruwa::Scanner::Config::Value( 'antiword', $message ) . " -m UTF-8.txt";
+      Baruwa::Scanner::Config::Value('antiword', $message) . " -m UTF-8.txt";
     return 0 unless $antiword;
 
     my $cmd = "$antiword '$dir/$docname' > '$dir/$unpackfile' 2>/dev/null";
 
     my ($kid);
-    my ( $TimedOut, $PipeReturn, $pid );
+    my ($TimedOut, $PipeReturn, $pid);
     $kid = new FileHandle;
 
     $TimedOut = 0;
@@ -122,12 +122,12 @@ sub RunAntiword {
     $ENV{'HOME'} = '/';
 
     eval {
-        die "Can't fork: $!" unless defined( $pid = open( $kid, "-|" ) );
+        die "Can't fork: $!" unless defined($pid = open($kid, "-|"));
         if ($pid) {
 
             # In the parent
             local $SIG{ALRM} =
-              sub { $TimedOut = 1; die "Command Timed Out" };    # 2.53
+              sub {$TimedOut = 1; die "Command Timed Out"};    # 2.53
             alarm Baruwa::Scanner::Config::Value('antiwordtimeout');
             close $kid;    # This will wait for completion
             $PipeReturn = $?;
@@ -138,11 +138,10 @@ sub RunAntiword {
             # it doesn't unblock the SIGALRM after handling it.
             eval {
                 my $unblockset = POSIX::SigSet->new(SIGALRM);
-                sigprocmask( SIG_UNBLOCK, $unblockset )
+                sigprocmask(SIG_UNBLOCK, $unblockset)
                   or die "Could not unblock alarm: $!\n";
             };
-        }
-        else {
+        } else {
             POSIX::setsid();    # 2.53
             exec $cmd or die "Can't run Antiword at $antiword: $!";
         }
@@ -152,21 +151,22 @@ sub RunAntiword {
     # Note to self: I only close the $kid in the parent, not in the child.
 
     # Catch failures other than the alarm
-    Baruwa::Scanner::Log::DieLog("Antiword doc decoder failed with real error: $@")
+    Baruwa::Scanner::Log::DieLog(
+        "Antiword doc decoder failed with real error: $@")
       if $@ and $@ !~ /Command Timed Out/;
 
     # In which case any failures must be the alarm
-    if ( $@ or $pid > 0 ) {
+    if ($@ or $pid > 0) {
 
         # Kill the running child process
         my ($i);
         kill 'TERM', $pid;
 
         # Wait for up to 5 seconds for it to die
-        for ( $i = 0 ; $i < 5 ; $i++ ) {
+        for ($i = 0; $i < 5; $i++) {
             sleep 1;
-            waitpid( $pid, &POSIX::WNOHANG );
-            ( $pid = 0 ), last unless kill( 0, $pid );
+            waitpid($pid, &POSIX::WNOHANG);
+            ($pid = 0), last unless kill(0, $pid);
             kill -15, $pid;
         }
 
@@ -178,10 +178,9 @@ sub RunAntiword {
     }
 
     # Now the child is dead, look at all the return values
-    if ( defined $OldHome ) {
+    if (defined $OldHome) {
         $ENV{'HOME'} = $OldHome;
-    }
-    else {
+    } else {
         delete $ENV{'HOME'};
     }
 
@@ -193,12 +192,12 @@ sub RunAntiword {
 
     return 0 unless -f "$dir/$unpackfile" && -s "$dir/$unpackfile";
     $parententity->make_multipart;
-    my ( $safename, @replacements, $unpacked );
+    my ($safename, @replacements, $unpacked);
 
    # Moved up 2: return 0 unless -f "$dir/$unpackfile" && -s "$dir/$unpackfile";
    # The only file that ever existed in the message structure is the safename.
    # Trim off the leading type indicator, as we're storing unsafe filename.
-    my $f = substr( $unpackfile, 1 );
+    my $f = substr($unpackfile, 1);
     $message->{file2parent}{$f} = $docname;
     $parententity->attach(
         Type        => "text/plain",
@@ -210,13 +209,13 @@ sub RunAntiword {
     );
     $message->{bodymodified} = 1;
 
-    $unpackfile = substr( $unpackfile, 1 );    # Trim off before output logging.
-    $docname    = substr( $docname,    1 );    # Trim off before output logging.
+    $unpackfile = substr($unpackfile, 1);    # Trim off before output logging.
+    $docname    = substr($docname,    1);    # Trim off before output logging.
     Baruwa::Scanner::Log::InfoLog(
         "Message %s added Microsoft Word doc '%s' text as %s",
-        $message->{id}, $docname, $unpackfile );
+        $message->{id}, $docname, $unpackfile);
 
-    return 1;                                  # Command succeded and terminated
+    return 1;                                # Command succeded and terminated
 }
 
 1;

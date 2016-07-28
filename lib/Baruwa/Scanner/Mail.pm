@@ -41,28 +41,32 @@ our $VERSION = '4.086000';
 sub TellAbout {
     my (@messages) = @_;
 
-    my ( @idlist, @ThisBatch, $message, %OutQueues, %Sendmail2 );
+    my (@idlist, @ThisBatch, $message, %OutQueues, %Sendmail2);
 
     return unless @messages;
 
-    Baruwa::Scanner::Log::DebugLog("About to deliver " . scalar(@messages) . " messages" )
+    Baruwa::Scanner::Log::DebugLog(
+        "About to deliver " . scalar(@messages) . " messages")
       if @messages;
 
     # Build a list of the messages we actually have to tell sendmail about
     foreach $message (@messages) {
-        my $outq = Baruwa::Scanner::Config::Value( 'outqueuedir', $message );
+        my $outq = Baruwa::Scanner::Config::Value('outqueuedir', $message);
         $OutQueues{$outq} .= " " . $message->{id}
+
           #push @idlist, $message->{id}
-          unless Baruwa::Scanner::Config::Value( 'deliverymethod', $message ) eq
+          unless Baruwa::Scanner::Config::Value('deliverymethod', $message) eq
           'queue';
-        $Sendmail2{$outq} = Baruwa::Scanner::Config::Value( 'sendmail2', $message );
+        $Sendmail2{$outq} =
+          Baruwa::Scanner::Config::Value('sendmail2', $message);
     }
 
     # If there are no "kicking" messages in the list, just get out
     #return unless @idlist;
     return unless %OutQueues;
+
     # Now takes a hash of queues-->space-separated string of message ids
-    Baruwa::Scanner::Sendmail::KickMessage( \%OutQueues, \%Sendmail2 );
+    Baruwa::Scanner::Sendmail::KickMessage(\%OutQueues, \%Sendmail2);
 }
 
 # Constructor.

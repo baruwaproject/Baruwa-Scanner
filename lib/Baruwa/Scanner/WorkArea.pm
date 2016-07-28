@@ -34,7 +34,7 @@ our $VERSION = '4.086000';
 
 #
 # Attributes:
-# $dir			Work area directory for this child process
+# $dir          Work area directory for this child process
 # $uid                  set by new The UID to change files to
 # $gid                  set by new The GID to change files to
 # $changeowner          set by new Should I try to chown the files at all?
@@ -48,20 +48,19 @@ sub new {
     my $this   = {};
 
     # Work out the uid and gid they want to use for the quarantine dir
-    my ( $currentuid, $currentgid ) = ( $<, $( );
-    my ( $destuid, $destuname, $destgid, $destgname );
+    my ($currentuid, $currentgid) = ($<, $();
+    my ($destuid, $destuname, $destgid, $destgname);
     $destuname = Baruwa::Scanner::Config::Value('workuser')
       || Baruwa::Scanner::Config::Value('runasuser');
     $destgname = Baruwa::Scanner::Config::Value('workgroup')
       || Baruwa::Scanner::Config::Value('runasgroup');
     $this->{changeowner} = 0;
-    if ( $destuname ne "" || $destgname ne "" ) {
+    if ($destuname ne "" || $destgname ne "") {
         $destuid = $destuname ? getpwnam($destuname) : 0;
         $destgid = $destgname ? getgrnam($destgname) : 0;
         $this->{gid} = $destgid if $destgid != $currentgid;
         $this->{uid} = $destuid if $destuid != $currentuid;
-    }
-    else {
+    } else {
         $destuid     = 0;
         $destgid     = 0;
         $this->{gid} = 0;
@@ -69,9 +68,9 @@ sub new {
     }
 
     # Create a test file to try with chown
-    my ( $testfn, $testfh, $worked );
+    my ($testfn, $testfh, $worked);
 
-    ( $testfh, $testfn ) = tempfile( 'MS.ownertest.XXXXXX', DIR => '/tmp' )
+    ($testfh, $testfn) = tempfile('MS.ownertest.XXXXXX', DIR => '/tmp')
       or Baruwa::Scanner::Log::WarnLog(
         'Could not test file ownership abilities on %s, please delete the file',
         $testfn
@@ -80,25 +79,25 @@ sub new {
     $testfh->close;
 
     # Now test the changes to see if we can do them
-    my ( $changeuid, $changegid );
-    if ( $destgid != $currentgid ) {
+    my ($changeuid, $changegid);
+    if ($destgid != $currentgid) {
         $worked = chown $currentuid, $destgid, $testfn;
         if ($worked) {
+
             #print STDERR "Can change the GID of the quarantine\n";
             $changegid = 1;
         }
-    }
-    else {
+    } else {
         $changegid = 0;
     }
-    if ( $destuid != $currentuid ) {
+    if ($destuid != $currentuid) {
         $worked = chown $destuid, $destgid, $testfn;
         if ($worked) {
+
             #print STDERR "Can change the UID of the quarantine\n";
             $changeuid = 1;
         }
-    }
-    else {
+    } else {
         $changeuid = 0;
     }
     unlink $testfn;
@@ -110,7 +109,7 @@ sub new {
 
     # Now to work out the new umask
     # Default is 0600 for files, which gives 0700 for directories
-    my ( $perms, $dirumask, $fileumask );
+    my ($perms, $dirumask, $fileumask);
     $perms = Baruwa::Scanner::Config::Value('workperms') || '0600';
     $perms = sprintf "0%lo", $perms unless $perms =~ /^0/;    # Make it octal
     $dirumask = $perms;
@@ -123,11 +122,12 @@ sub new {
     #print STDERR sprintf("Dir  Umask = 0%lo\n", $this->{dirumask});
 
     my $parentdir = Baruwa::Scanner::Config::Value('incomingworkdir');
-    Baruwa::Scanner::Log::DieLog("No Incoming Work Dir defined") unless $parentdir;
+    Baruwa::Scanner::Log::DieLog("No Incoming Work Dir defined")
+      unless $parentdir;
     Baruwa::Scanner::Log::DieLog("Incoming Work Dir does not exist")
       unless -d $parentdir;
     my $realparentdir = abs_path($parentdir);
-    if ( $realparentdir ne $parentdir ) {
+    if ($realparentdir ne $parentdir) {
         Baruwa::Scanner::Log::WarnLog(
             "\"Incoming Work Directory\" should be specified as an absolute path"
         );
@@ -144,10 +144,10 @@ sub new {
 
     # Make it if necessary
     umask $this->{dirumask};
-    mkdir( $parentdir, 0777 ) unless -d $parentdir;
+    mkdir($parentdir, 0777) unless -d $parentdir;
     chown $this->{uid}, $this->{gid}, $parentdir if $this->{changeowner};
-    unless ( -d $childdir ) {
-        mkdir( $childdir, 0777 )
+    unless (-d $childdir) {
+        mkdir($childdir, 0777)
           or Baruwa::Scanner::Log::DieLog(
             "Cannot create temporary Work Dir %s. "
               . "Are the permissions and ownership of %s "
@@ -170,9 +170,9 @@ sub BuildInDirs {
     my $this  = shift;
     my $batch = shift;
 
-    my ( $id, @idlist, $dircounter );
+    my ($id, @idlist, $dircounter);
     my $dir = $this->{dir};
-    @idlist     = keys %{ $batch->{messages} };
+    @idlist     = keys %{$batch->{messages}};
     $dircounter = 0;
 
     umask $this->{dirumask};
@@ -180,13 +180,13 @@ sub BuildInDirs {
         next if $batch->{messages}{$id}->{deleted};
         mkdir "$dir/$id", 0777
           or
-          Baruwa::Scanner::Log::DieLog( "Cannot mkdir %s/%s, %s", $dir, $id, $! );
+          Baruwa::Scanner::Log::DieLog("Cannot mkdir %s/%s, %s", $dir, $id, $!);
         chown $this->{uid}, $this->{gid}, "$dir/$id" if $this->{changeowner};
         $dircounter++;
     }
     umask 0077;
-    Baruwa::Scanner::Log::DebugLog( 'Created attachment dirs for %d messages',
-        $dircounter );
+    Baruwa::Scanner::Log::DebugLog('Created attachment dirs for %d messages',
+        $dircounter);
 }
 
 # Destructor. Clears out the entire work area, including the process-
@@ -195,14 +195,14 @@ sub Destroy {
     my $this = shift;
 
     #print STDERR "About to destroy working area at " . $this->{dir} . "\n";
-    unless ( chdir $this->{dir} . "/.." ) {
+    unless (chdir $this->{dir} . "/..") {
         warn "Could not get to parent of incoming work directory";
         return;
     }
 
     # Delete all of it. Should get "rm" from autoconf.
     #system($global::rm . " -rf \"" . $this->{dir} . "\"");
-    rmtree( $this->{dir}, 0, 1 );
+    rmtree($this->{dir}, 0, 1);
 
     #print STDERR "Working area destroyed.\n";
 }
@@ -217,8 +217,7 @@ sub Clear {
 
     if ($Idlist) {
         $this->ClearIds($Idlist);
-    }
-    else {
+    } else {
         $this->ClearAll();
     }
 }
@@ -226,7 +225,7 @@ sub Clear {
 # Clean up the whole of my work area
 sub ClearAll {
     my $this = shift;
-    my ( $f, $dirhandle, $dir, @ToDelete );
+    my ($f, $dirhandle, $dir, @ToDelete);
 
     #Baruwa::Scanner::Log::InfoLog("Clearing temporary work area.");
 
@@ -234,13 +233,13 @@ sub ClearAll {
 
     #print STDERR "ClearAll: dir = $dir\n";
     chdir $dir
-      or Baruwa::Scanner::Log::DieLog( "Cannot chdir to %s, %s", $dir, $! );
+      or Baruwa::Scanner::Log::DieLog("Cannot chdir to %s, %s", $dir, $!);
     $dirhandle = new DirHandle;
     $dirhandle->open('.')
       or Baruwa::Scanner::Log::DieLog("Cannot read workarea dir $dir");
 
     # Clean up the whole thing
-    while ( $f = $dirhandle->read() ) {
+    while ($f = $dirhandle->read()) {
 
         #print STDERR "Studying \"$f\"\n";
         next if $f =~ /^\./;
@@ -256,7 +255,7 @@ sub ClearAll {
         push @ToDelete, $1 if -d "$1";
     }
     $dirhandle->close();
-    rmtree( \@ToDelete, 0, 1 ) if @ToDelete;
+    rmtree(\@ToDelete, 0, 1) if @ToDelete;
 
     #print STDERR "Finished ClearAll\n";
 }
@@ -267,7 +266,7 @@ sub ClearIds {
     my $this = shift;
     my ($IdList) = @_;
 
-    my ( $f, $dir );
+    my ($f, $dir);
 
     #Baruwa::Scanner::Log::InfoLog("Partially clearing temporary work area.");
 
@@ -275,16 +274,16 @@ sub ClearIds {
 
     #print STDERR "ClearAll: dir = $dir\n";
     chdir $dir
-      or Baruwa::Scanner::Log::DieLog( "Cannot chdir to %s, %s", $dir, $! );
+      or Baruwa::Scanner::Log::DieLog("Cannot chdir to %s, %s", $dir, $!);
 
     # Also delete any core files in the work dir
     push @$IdList, 'core';
-    rmtree( $IdList, 0, 1 );
+    rmtree($IdList, 0, 1);
 }
 
 sub DeleteFile {
     my $this = shift;
-    my ( $message, $attach ) = @_;
+    my ($message, $attach) = @_;
     my $tmp1 = $this->{dir} . '/' . $message->{id} . '/' . $attach;
     $tmp1 =~ /(.*)/;
     $tmp1 = $1;
@@ -299,14 +298,14 @@ sub ChangeToMessage {
 
     my $dest = $this->{dir} . '/' . $message->{id};
     chdir $dest
-      or Baruwa::Scanner::Log::WarnLog( "Cannot chdir to %s, %s", $dest, $! );
+      or Baruwa::Scanner::Log::WarnLog("Cannot chdir to %s, %s", $dest, $!);
 }
 
 # Return true if the attachment file for this message and attachment name
 # exists.
 sub FileExists {
     my $this = shift;
-    my ( $message, $attachment ) = @_;
+    my ($message, $attachment) = @_;
 
     return 1 if -f $this->{dir} . '/' . $message->{id} . '/' . $attachment;
     return 0;

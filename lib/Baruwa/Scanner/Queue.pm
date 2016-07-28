@@ -29,7 +29,7 @@ our $VERSION = '4.086000';
 
 # Attributes are
 #
-# $dir			set by new
+# $dir          set by new
 #
 
 # Constructor.
@@ -38,9 +38,9 @@ sub new {
     my $type = shift;
     my $this = {};
 
-    @{ $this->{dir} } = @_;
+    @{$this->{dir}} = @_;
 
-    #print STDERR "Creating queue at dirs " . join(', ', @{$this->{dir}}) . "\n";
+    # print STDERR "Creating queue at dirs " . join(', ', @{$this->{dir}}) . "\n";
     bless $this, $type;
     return $this;
 }

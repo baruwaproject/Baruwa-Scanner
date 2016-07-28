@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+Àá# -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1859,7 +1859,7 @@ sub ProcessFProt6Output {
     return 1;
 }
 
-# This function provided in its entirety by Ing. Juraj Hant·k <hantak@wg.sk>
+# This function provided in its entirety by Ing. Juraj Hant√°k <hantak@wg.sk>
 #
 sub ProcessNOD32Output {
     my ( $line, $infections, $types, $BaseDir, $Name ) = @_;
@@ -1957,7 +1957,7 @@ sub ProcessNOD32Output {
     }
 }
 
-# This function originally contributed by HÈctor GarcÌa ¡lvarez
+# This function originally contributed by H√©ctor Garc√≠a √Ålvarez
 # <hector@lared.es>
 # From comment (now removed), it looks to be based on Sophos parser at
 # some point in its history.

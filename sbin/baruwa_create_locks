@@ -47,33 +47,38 @@ my $ldgid = getgrnam($ldgname);
 lstat $locksdirname;
 unlink $locksdirname unless -d _;
 lstat $locksdirname;
-unless ( -d _ ) {
+unless (-d _ ) {
     mkdir $locksdirname or die "Can't mkdir $locksdirname, $!";
 }
 
 # Now work through all the virus scanner autoupdate names, building Lock files.
-my ( $dh, $fh, $updatename, $lockname, @updatenames, @locknames );
+my ($dh, $fh, $updatename, $lockname, @updatenames, @locknames);
 $dh = new DirHandle "/usr/libexec/Baruwa";
-die "Can't read dir /usr/libexec/Baruwa to build list of -autoupdate scripts, $!" unless $dh;
-while ( defined( $updatename = $dh->read ) ) {
+die
+  "Can't read dir /usr/libexec/Baruwa to build list of -autoupdate scripts, $!"
+  unless $dh;
+while (defined($updatename = $dh->read)) {
     next unless $updatename =~ s/-autoupdate$//;
     next unless $updatename =~ /^([a-z0-9_-]+)$/i;
     $updatename = $1;
-    $lockname = "$locksdirname/$updatename" . "Busy.lock";
+    $lockname   = "$locksdirname/$updatename" . "Busy.lock";
     lstat $lockname;
-    unless ( -f _ ) {
+    unless (-f _ ) {
+
         # It's not a plain file!
-        if ( -d _ ) {
+        if (-d _ ) {
+
             # It's a directory, so cannot just unlink it
             remove_tree($lockname);
-        }
-        else {
+        } else {
+
             # It's not a plain file nor a directory, so just remove it
             unlink $lockname;
         }
     }
-    $fh = new FileHandle( $lockname, O_CREAT | O_WRONLY | O_APPEND );
+    $fh = new FileHandle($lockname, O_CREAT | O_WRONLY | O_APPEND);
     $fh->close;
+
     # Quicker to collect them and do 1 big chmod and chown call later.
     push @locknames, $lockname;
 }
@@ -81,22 +86,25 @@ $dh->close;
 
 # Now do the Bayes rebuild lock files
 my $lockfname;
-foreach $lockfname ( 'Baruwa.bayes.rebuild.lock', 'Baruwa.bayes.starting.lock' ) {
+foreach $lockfname ('Baruwa.bayes.rebuild.lock', 'Baruwa.bayes.starting.lock') {
     $lockname = "$locksdirname/$lockfname";
     lstat $lockname;
-    unless ( -f _ ) {
+    unless (-f _ ) {
+
         # It's not a plain file!
-        if ( -d _ ) {
+        if (-d _ ) {
+
             # It's a directory, so cannot just unlink it
             remove_tree($lockname);
-        }
-        else {
+        } else {
+
             # It's not a plain file nor a directory, so just remove it
             unlink $lockname;
         }
     }
-    $fh = new FileHandle( $lockname, O_CREAT | O_WRONLY | O_APPEND );
+    $fh = new FileHandle($lockname, O_CREAT | O_WRONLY | O_APPEND);
     $fh->close;
+
     # Quicker to collect them and do 1 big chmod and chown call later.
     push @locknames, $lockname;
 }

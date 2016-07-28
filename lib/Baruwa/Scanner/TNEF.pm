@@ -41,7 +41,7 @@ my ($UseTNEFModule) = 0;
 install MIME::Decoder::UU 'uuencode';
 
 sub initialise {
-    if ( Baruwa::Scanner::Config::Value('tnefexpander') eq 'internal' ) {
+    if (Baruwa::Scanner::Config::Value('tnefexpander') eq 'internal') {
         require Convert::TNEF;
         require File::Copy;
         require File::Temp;
@@ -65,16 +65,16 @@ sub new {
 sub FindTNEFFile {
     my ($entity) = @_;
 
-    my ( @parts, $body, $part, $path, $headfile, $tnef, $filename );
+    my (@parts, $body, $part, $path, $headfile, $tnef, $filename);
 
     # Find the body for this entity
     return undef unless $entity;
     $body = $entity->bodyhandle;
-    if ( defined($body) && defined( $body->path ) ) {    # data is on disk:
+    if (defined($body) && defined($body->path)) {    # data is on disk:
         $path     = $body->path;
         $filename = $path;
         $filename =~ s#^.*/([^/]+)$#$1#;
-        return ( $entity, $filename ) if $filename =~ /winmail\d*\.dat\d*$/i;
+        return ($entity, $filename) if $filename =~ /winmail\d*\.dat\d*$/i;
 
         #$path =~ s#^.*/([^/]*)$#$1#;
     }
@@ -85,18 +85,18 @@ sub FindTNEFFile {
     $headfile = $entity->head->recommended_filename;
     $filename = $headfile;
     $filename =~ s#^.*/([^/]+)$#$1#;
-    return ( $entity, $filename )
-      if ( defined($filename) && $filename =~ /winmail\d*\.dat\d*$/i );
+    return ($entity, $filename)
+      if (defined($filename) && $filename =~ /winmail\d*\.dat\d*$/i);
 
     # And for all its children
     @parts = $entity->parts;
     foreach $part (@parts) {
-        ( $tnef, $filename ) = FindTNEFFile($part);
-        return ( $tnef, $filename ) if defined($tnef);
+        ($tnef, $filename) = FindTNEFFile($part);
+        return ($tnef, $filename) if defined($tnef);
     }
 
     # Must return something.
-    return ( undef, undef );
+    return (undef, undef);
 }
 
 #
@@ -104,26 +104,26 @@ sub FindTNEFFile {
 # as requested in the .conf file.
 #
 sub Decoder {
-    my ( $dir, $tnefname, $message ) = @_;
+    my ($dir, $tnefname, $message) = @_;
 
     my $perms  = $global::MS->{work}->{fileumask} ^ 0777;
     my $owner  = $global::MS->{work}->{uid};
     my $group  = $global::MS->{work}->{gid};
     my $change = $global::MS->{work}->{changeowner};
 
-    return InternalDecoder( $dir, $tnefname, $message,
-        $perms, $owner, $group, $change )
+    return InternalDecoder($dir, $tnefname, $message,
+        $perms, $owner, $group, $change)
       if $UseTNEFModule;
-    return ExternalDecoder( $dir, $tnefname, $message,
-        $perms, $owner, $group, $change );
+    return ExternalDecoder($dir, $tnefname, $message,
+        $perms, $owner, $group, $change);
 }
 
 # Expand the tnef file stored at $1/$2.
 # Use the internal TNEF module.
 # Return 1 on success, 0 on failure.
 sub InternalDecoder {
-    my ( $dir, $tnefname, $message, $perms, $owner, $group, $change ) = @_;
-    my ( $fh, %parms );
+    my ($dir, $tnefname, $message, $perms, $owner, $group, $change) = @_;
+    my ($fh, %parms);
 
     # Make the temporary tnef files be created under /tmp for easy removal.
     my $tempdir = tempdir();
@@ -133,7 +133,7 @@ sub InternalDecoder {
         output_dir      => $tempdir,
         output_to_core  => "NONE"
     );
-    my $tnef = Convert::TNEF->read_in( "$dir/$tnefname", \%parms );
+    my $tnef = Convert::TNEF->read_in("$dir/$tnefname", \%parms);
 
     if ($tnef) {
 
@@ -142,11 +142,11 @@ sub InternalDecoder {
        #print STDERR "List is \"" . join('","', @{$tnef->attachments}) . "\"\n";
         my $addcontents = 0;
         $addcontents = 1
-          if Baruwa::Scanner::Config::Value( 'replacetnef', $message ) =~ /[12]/;
+          if Baruwa::Scanner::Config::Value('replacetnef', $message) =~ /[12]/;
         $message->{entity}->make_multipart if $addcontents;
 
-        my ( $safename, $handle, @replacements, $attachname );
-        foreach $attachname ( @{ $tnef->attachments } ) {
+        my ($safename, $handle, @replacements, $attachname);
+        foreach $attachname (@{$tnef->attachments}) {
 
             #print STDERR "Doing attachment $attachname\n";
             #print STDERR "Have a datahandle $handle\n";
@@ -162,17 +162,17 @@ sub InternalDecoder {
             #                                        UNLINK => 0);
             # file2parent must not contain the leading 't'.
             $safename =
-              $message->MakeNameSafe( 't' . ( $attachname->longname ), $dir );
+              $message->MakeNameSafe('t' . ($attachname->longname), $dir);
 
             #print STDERR "Tempfile = $safename\n";
-            $message->{file2parent}{ substr( $safename, 1 ) } = $tnefname;
+            $message->{file2parent}{substr($safename, 1)} = $tnefname;
             $message->{file2parent}{$safename} = $tnefname;  # For good measure!
             $handle = $attachname->datahandle;
             my $tmpnam1 = "$dir/$safename";
             $tmpnam1 =~ /^(.*)$/;
             $tmpnam1 = $1;
-            if ( $handle && defined( my $file = $handle->path ) ) {
-                rename( $file, $tmpnam1 );
+            if ($handle && defined(my $file = $handle->path)) {
+                rename($file, $tmpnam1);
 
                 # JKF 20090421 CHMOD, then CHOWN and CHGRP it if necessary.
                 chmod $perms, $tmpnam1;
@@ -188,14 +188,14 @@ sub InternalDecoder {
                # Add the member file to the list of attachments in the message
                # The safe filename will have a 't' for TNEF at the front.
                #$safename = $message->MakeNameSafe($attachname->longname, $dir);
-                push @replacements, substr( $safename, 1 );   # Without the type
+                push @replacements, substr($safename, 1);    # Without the type
                 $message->{entity}->attach(
                     Type        => "application/octet-stream",
                     Encoding    => "base64",
                     Disposition => "attachment",
                     Filename    => $attachname->longname,
                     Path        => $tmpnam1
-                );                                            # Has type
+                );                                           # Has type
                 $message->{bodymodified} = 1;
             }
         }
@@ -205,17 +205,17 @@ sub InternalDecoder {
 
         #$message->{entity}->dump_skeleton();
         remove_tree($tempdir);
-        Baruwa::Scanner::Log::InfoLog( "Message %s added TNEF contents %s",
-            $message->{id}, join( ',', @replacements ) )
+        Baruwa::Scanner::Log::InfoLog("Message %s added TNEF contents %s",
+            $message->{id}, join(',', @replacements))
           if @replacements;
         return 1;
-    }
-    else {
+    } else {
+
         # It failed
         undef $tnef;
         remove_tree($tempdir);
         return 1
-          if Baruwa::Scanner::Config::Value( 'deliverunparsabletnef', $message );
+          if Baruwa::Scanner::Config::Value('deliverunparsabletnef', $message);
         return 0;
     }
 }
@@ -226,15 +226,16 @@ sub InternalDecoder {
 # This can't setup file2parent as it doesn't know the name of the children.
 # New - Unpack it into a subdirectory so we don't have name clashes anywhere.
 sub ExternalDecoder {
-    my ( $dir, $tnefname, $message, $perms, $owner, $group, $change ) = @_;
+    my ($dir, $tnefname, $message, $perms, $owner, $group, $change) = @_;
 
     # Create the subdir to unpack it into
-    my $unpackdir = tempdir( "tnefXXXXX", DIR => $dir );
-    unless ( -d $unpackdir ) {
+    my $unpackdir = tempdir("tnefXXXXX", DIR => $dir);
+    unless (-d $unpackdir) {
         Baruwa::Scanner::Log::WarnLog(
             "Trying to unpack %s in message %s, could not create subdirectory %s, 
             failed to unpack TNEF message",
-            $tnefname, $message->{id}, $unpackdir );
+            $tnefname, $message->{id}, $unpackdir
+        );
         return 0;
     }
     chmod 0700, "$unpackdir";
@@ -243,18 +244,18 @@ sub ExternalDecoder {
       . " -f $dir/$tnefname -C $unpackdir --overwrite";
 
     my ($kid);
-    my ( $TimedOut, $PipeReturn, $pid );
+    my ($TimedOut, $PipeReturn, $pid);
     $kid = new FileHandle;
 
     $TimedOut = 0;
 
     eval {
-        die "Can't fork: $!" unless defined( $pid = open( $kid, "-|" ) );
+        die "Can't fork: $!" unless defined($pid = open($kid, "-|"));
         if ($pid) {
 
             # In the parent
             local $SIG{ALRM} =
-              sub { $TimedOut = 1; die "Command Timed Out" };    # 2.53
+              sub {$TimedOut = 1; die "Command Timed Out"};    # 2.53
             alarm Baruwa::Scanner::Config::Value('tneftimeout');
             close $kid;    # This will wait for completion
             $PipeReturn = $?;
@@ -265,11 +266,10 @@ sub ExternalDecoder {
             # it doesn't unblock the SIGALRM after handling it.
             eval {
                 my $unblockset = POSIX::SigSet->new(SIGALRM);
-                sigprocmask( SIG_UNBLOCK, $unblockset )
+                sigprocmask(SIG_UNBLOCK, $unblockset)
                   or die "Could not unblock alarm: $!\n";
             };
-        }
-        else {
+        } else {
             POSIX::setsid();    # 2.53
             exec $cmd or die "Can't run tnef decoder: $!";
         }
@@ -283,17 +283,17 @@ sub ExternalDecoder {
       if $@ and $@ !~ /Command Timed Out/;
 
     # In which case any failures must be the alarm
-    if ( $@ or $pid > 0 ) {
+    if ($@ or $pid > 0) {
 
         # Kill the running child process
         my ($i);
         kill 'TERM', $pid;
 
         # Wait for up to 5 seconds for it to die
-        for ( $i = 0 ; $i < 5 ; $i++ ) {
+        for ($i = 0; $i < 5; $i++) {
             sleep 1;
-            waitpid( $pid, &POSIX::WNOHANG );
-            ( $pid = 0 ), last unless kill( 0, $pid );
+            waitpid($pid, &POSIX::WNOHANG);
+            ($pid = 0), last unless kill(0, $pid);
             kill -15, $pid;
         }
 
@@ -307,25 +307,25 @@ sub ExternalDecoder {
     # Now the child is dead, look at all the return values
 
     # Do we want to deliver unparsable TNEF files anyway (like we used to)
-    if ( Baruwa::Scanner::Config::Value( 'deliverunparsabletnef', $message ) ) {
+    if (Baruwa::Scanner::Config::Value('deliverunparsabletnef', $message)) {
         return 0 if $TimedOut;    # Ignore tnef command exit status
         return 1;                 # Command terminated
-    }
-    else {
+    } else {
         return 0 if $TimedOut || $PipeReturn; # Command failed to exit w'success
-        # It all worked, so now add everything back into the message.
-        #print STDERR "Dir is \"$dir\" and tnefname is \"$tnefname\"\n";
+              # It all worked, so now add everything back into the message.
+              #print STDERR "Dir is \"$dir\" and tnefname is \"$tnefname\"\n";
 
         unless (
-            Baruwa::Scanner::Config::Value( 'replacetnef', $message ) =~ /[12]/ )
-        {
+            Baruwa::Scanner::Config::Value('replacetnef', $message) =~ /[12]/) {
+
         # Just need to move all the unpacked files into the main attachments dir
             my $dirh = new DirHandle "$unpackdir";
             return 0 unless defined $dirh;
-            while ( defined( my $unpacked = $dirh->read ) ) {
+            while (defined(my $unpacked = $dirh->read)) {
                 next unless -f "$unpackdir/$unpacked";
+
                 # Add a 't' to the safename to mark it as a tnef member.
-                my $safe = $message->MakeNameSafe( 't' . $unpacked, $dir );
+                my $safe = $message->MakeNameSafe('t' . $unpacked, $dir);
 
               # This will cause big problems as $safe has a type, and shouldn't!
                 $message->{file2parent}{$safe} = $tnefname;
@@ -341,8 +341,9 @@ sub ExternalDecoder {
                 chmod $perms, $name2;
                 chown $owner, $group, $name2 if $change;
 
-               # So let's remove the type indicator from $safe and store that too :)
-                $safe =~ s#^(.*/)([^/])([^/]+)$#$1$3#;    # I assert $2 will equal 't'.
+           # So let's remove the type indicator from $safe and store that too :)
+                $safe =~
+                  s#^(.*/)([^/])([^/]+)$#$1$3#;    # I assert $2 will equal 't'.
                 $message->{file2parent}{$safe} = $tnefname;
             }
             rmdir "$unpackdir";    # Directory should be empty now
@@ -353,23 +354,23 @@ sub ExternalDecoder {
 
         my $dirh = new DirHandle "$unpackdir";
         return 0 unless defined $dirh;
-        my ( $type, $encoding );
+        my ($type, $encoding);
         $message->{entity}->make_multipart;
-        my ( $safename, @replacements, $unpacked );
-        while ( defined( $unpacked = $dirh->read ) ) {
-            #print STDERR "Directory entry is \"$unpacked\" in \"$unpackdir\"\n";
+        my ($safename, @replacements, $unpacked);
+        while (defined($unpacked = $dirh->read)) {
+
+           #print STDERR "Directory entry is \"$unpacked\" in \"$unpackdir\"\n";
             next unless -f "$unpackdir/$unpacked";
 
             # Add a 't' to the safename to mark it as a tnef member.
-            $safename = $message->MakeNameSafe( 't' . $unpacked, $dir );
+            $safename = $message->MakeNameSafe('t' . $unpacked, $dir);
             if (/^msg[\d-]+\.txt$/) {
-                ( $type, $encoding ) = ( "text/plain", "8bit" );
-            }
-            else {
-                ( $type, $encoding ) = ( "application/octet-stream", "base64" );
+                ($type, $encoding) = ("text/plain", "8bit");
+            } else {
+                ($type, $encoding) = ("application/octet-stream", "base64");
             }
 
-            #print STDERR "Renaming '$unpackdir/$unpacked' to '$dir/$safename'\n";
+          #print STDERR "Renaming '$unpackdir/$unpacked' to '$dir/$safename'\n";
             my $oldname = "$unpackdir/$unpacked";
             my $newname = "$dir/$safename";
             $oldname =~ /^(.*)$/;
@@ -385,9 +386,9 @@ sub ExternalDecoder {
             #chmod $perms, "$dir/$safename";
             chown $owner, $group, $newname if $change;
 
-            #chown $owner, $group, "$dir/$safename" if $change;
-            # The only file that ever existed in the message structure is the safename
-            $message->{file2parent}{ substr( $safename, 1 ) } = $tnefname;
+      #chown $owner, $group, "$dir/$safename" if $change;
+      # The only file that ever existed in the message structure is the safename
+            $message->{file2parent}{substr($safename, 1)} = $tnefname;
             $message->{file2parent}{$safename} = $tnefname;
             push @replacements, $safename;
             $message->{entity}->attach(
@@ -404,10 +405,10 @@ sub ExternalDecoder {
         $message->{foundtnefattachments} = 1;
         undef $dirh;
         rmdir "$unpackdir";    # Directory should be empty now
-        #$message->{entity}->dump_skeleton();
+                               #$message->{entity}->dump_skeleton();
 
-        Baruwa::Scanner::Log::InfoLog( "Message %s added TNEF contents %s",
-            $message->{id}, join( ',', @replacements ) )
+        Baruwa::Scanner::Log::InfoLog("Message %s added TNEF contents %s",
+            $message->{id}, join(',', @replacements))
           if @replacements;
 
         return 1;              # Command succeded and terminated
