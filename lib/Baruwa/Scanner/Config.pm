@@ -32,6 +32,7 @@ no strict 'subs';    # Allow bare words for parameter %'s
 our $VERSION = '4.086000';
 
 # Load modules needed for methods/functions within this package
+use Baruwa::Scanner::Log();
 require FileHandle;
 require Baruwa::Scanner::ConfigSQL;
 
@@ -3802,7 +3803,7 @@ sub SpamAssassinPostConfig {
     my (@text)     = ();
     my (@sqlrules) = ();
     $etcdir = $1 if $Baruwa::Scanner::ConfigSQL::ConfFile =~ m#^(.*)/[^/]+$#;
-    $filename = "$etcdir/baruwa/rules/local.scores";
+    $filename = "$etcdir/dynamic/rules/local.scores";
     if (-e $filename) {
         $fileh = new FileHandle;
         if ($fileh->open("<$filename")) {
