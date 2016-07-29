@@ -71,7 +71,7 @@ sub openlock {
         || ($lh->lock_errno() == POSIX::EACCES)
         || ($! == POSIX::EAGAIN)
         || ($! == POSIX::EACCES)) {
-        MailScanner::Log::DebugLog("Failed to lock $fn: %s", $lh->error())
+        Baruwa::Scanner::Log::DebugLog("Failed to lock $fn: %s", $lh->error())
           unless $quiet;
     } else {
         Baruwa::Scanner::Log::NoticeLog(
