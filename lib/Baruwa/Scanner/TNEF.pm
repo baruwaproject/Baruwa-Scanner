@@ -38,7 +38,7 @@ my ($UseTNEFModule) = 0;
 #
 
 # Install an extra MIME decoder for badly-header uue messages.
-install MIME::Decoder::UU 'uuencode';
+# install MIME::Decoder::UU 'uuencode';
 
 sub initialise {
     if (Baruwa::Scanner::Config::Value('tnefexpander') eq 'internal') {
@@ -317,8 +317,7 @@ sub ExternalDecoder {
 
         unless (
             Baruwa::Scanner::Config::Value('replacetnef', $message) =~ /[12]/) {
-
-        # Just need to move all the unpacked files into the main attachments dir
+            # Just need to move all the unpacked files into the main attachments dir
             my $dirh = new DirHandle "$unpackdir";
             return 0 unless defined $dirh;
             while (defined(my $unpacked = $dirh->read)) {
@@ -327,7 +326,7 @@ sub ExternalDecoder {
                 # Add a 't' to the safename to mark it as a tnef member.
                 my $safe = $message->MakeNameSafe('t' . $unpacked, $dir);
 
-              # This will cause big problems as $safe has a type, and shouldn't!
+                # This will cause big problems as $safe has a type, and shouldn't!
                 $message->{file2parent}{$safe} = $tnefname;
                 my $name1 = "$unpackdir/$unpacked";
                 $name1 =~ /(.*)/;
@@ -341,7 +340,7 @@ sub ExternalDecoder {
                 chmod $perms, $name2;
                 chown $owner, $group, $name2 if $change;
 
-           # So let's remove the type indicator from $safe and store that too :)
+                # So let's remove the type indicator from $safe and store that too :)
                 $safe =~
                   s#^(.*/)([^/])([^/]+)$#$1$3#;    # I assert $2 will equal 't'.
                 $message->{file2parent}{$safe} = $tnefname;
@@ -358,8 +357,7 @@ sub ExternalDecoder {
         $message->{entity}->make_multipart;
         my ($safename, @replacements, $unpacked);
         while (defined($unpacked = $dirh->read)) {
-
-           #print STDERR "Directory entry is \"$unpacked\" in \"$unpackdir\"\n";
+            # print STDERR "Directory entry is \"$unpacked\" in \"$unpackdir\"\n";
             next unless -f "$unpackdir/$unpacked";
 
             # Add a 't' to the safename to mark it as a tnef member.
@@ -370,7 +368,7 @@ sub ExternalDecoder {
                 ($type, $encoding) = ("application/octet-stream", "base64");
             }
 
-          #print STDERR "Renaming '$unpackdir/$unpacked' to '$dir/$safename'\n";
+            # print STDERR "Renaming '$unpackdir/$unpacked' to '$dir/$safename'\n";
             my $oldname = "$unpackdir/$unpacked";
             my $newname = "$dir/$safename";
             $oldname =~ /^(.*)$/;
@@ -386,8 +384,6 @@ sub ExternalDecoder {
             #chmod $perms, "$dir/$safename";
             chown $owner, $group, $newname if $change;
 
-      #chown $owner, $group, "$dir/$safename" if $change;
-      # The only file that ever existed in the message structure is the safename
             $message->{file2parent}{substr($safename, 1)} = $tnefname;
             $message->{file2parent}{$safename} = $tnefname;
             push @replacements, $safename;
