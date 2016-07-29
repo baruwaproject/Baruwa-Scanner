@@ -32,6 +32,9 @@ my $builder = Module::Build->new(
     build_requires => {
         'Test::More' => 0,
     },
+    test_requires => {
+        'Devel::Cover' => 0,
+    },
     requires => {
         'Archive::Zip' => 0,
         'Carp' => 0,
@@ -77,6 +80,7 @@ my $builder = Module::Build->new(
         'POSIX' => 0,
         'Socket' => 0,
         'Sys::Hostname::Long' => 0,
+        'Sys::SigAction' => 0,
         'Sys::Syslog' => 0,
         'Time::HiRes' => 0,
         'Time::localtime' => 0,

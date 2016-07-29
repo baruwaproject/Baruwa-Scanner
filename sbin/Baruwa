@@ -187,6 +187,7 @@ if ($Versions) {
       POSIX
       Socket
       Sys::Hostname::Long
+      Sys::SigAction
       Sys::Syslog
       Time::HiRes
       Time::localtime/;
