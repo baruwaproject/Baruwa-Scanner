@@ -34,6 +34,7 @@ my $builder = Module::Build->new(
     },
     test_requires => {
         'Devel::Cover' => 0,
+        'Test::Exception' => 0,
     },
     requires => {
         'Archive::Zip' => 0,
