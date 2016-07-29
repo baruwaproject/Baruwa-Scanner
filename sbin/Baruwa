@@ -147,6 +147,7 @@ if ($Versions) {
       Carp
       CDB_File
       Compress::Zlib
+      Convert::BinHex
       Convert::TNEF
       Data::Dumper
       Date::Parse
