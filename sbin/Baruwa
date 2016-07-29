@@ -157,6 +157,7 @@ if ($Versions) {
       Fcntl
       File::Basename
       File::Copy
+      File::FcntlLock::XS
       FileHandle
       File::Path
       File::Temp

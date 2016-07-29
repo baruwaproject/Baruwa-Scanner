@@ -50,6 +50,7 @@ my $builder = Module::Build->new(
         'Fcntl' => 0,
         'File::Basename' => 0,
         'File::Copy' => 0,
+        'File::FcntlLock::XS' => 0,
         'FileHandle' => 0,
         'File::Path' => 0,
         'File::Temp' => 0,
