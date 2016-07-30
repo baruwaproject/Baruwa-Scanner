@@ -27,6 +27,7 @@ use strict;
 use File::FcntlLock::XS;
 use Fcntl qw(:DEFAULT :flock);
 use POSIX qw(:unistd_h :errno_h);
+use Baruwa::Scanner::Log();
 
 our $VERSION = '4.086000';
 

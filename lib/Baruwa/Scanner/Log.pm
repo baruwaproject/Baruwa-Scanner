@@ -28,6 +28,7 @@ package Baruwa::Scanner::Log;
 use strict;
 use Sys::Syslog();
 use Carp;
+use Baruwa::Scanner::Config();
 
 our $VERSION = '4.086000';
 our ($LogType, $Banner, $WarningsOnly);
