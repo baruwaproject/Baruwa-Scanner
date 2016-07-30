@@ -18,10 +18,11 @@ diag(
 );
 
 SKIP: {
-    skip('Only run tests on Linux', 4) unless($^O eq 'linux');
+    skip('Only run tests on Linux', 5) unless($^O eq 'linux');
     my $lockhandle = new FileHandle;
     my $filename   = "$Bin/data/var/lock/Baruwa/test-lock";
     is(Baruwa::Scanner::Lock::openlock($lockhandle, '+<' . $filename, 'w', 0), 1);
+    is(Baruwa::Scanner::Lock::openlock($lockhandle, '+<' . $filename . 'noexist', 'w', 0), 0);
     # is(Baruwa::Scanner::Lock::openlock($lockhandle, '+<' . $filename, 'w', 0), 0);
     is(Baruwa::Scanner::Lock::unlockclose($lockhandle), 1);
     is(Baruwa::Scanner::Lock::openlock($lockhandle, '+<' . $filename, 'r', 0), 1);
