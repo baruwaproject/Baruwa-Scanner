@@ -106,7 +106,7 @@ sub Lock {
 
     #print STDERR "Got dlock\n";
     Baruwa::Scanner::Lock::openlock($this->{inhhandle}, '+<' . $this->{hpath},
-        ' w', 'quiet')
+        'w', 'quiet')
       or return 0;
 
     #print STDERR "Got hlock\n";
