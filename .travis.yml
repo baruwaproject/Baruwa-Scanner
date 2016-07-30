@@ -1,8 +1,9 @@
 language: perl
 perl:
   - "5.10"
+sudo: required
 install:
-  - cpanm -f Mail::SPF
+  - cpanm -S Mail::SPF
   - cpanm Net::DNS
   - cpanm NetAddr::IP
   - cpanm -v --installdeps --notest .
