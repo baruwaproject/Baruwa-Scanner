@@ -7,7 +7,9 @@ use Test::More qw(no_plan);
 # plan tests => 1;
 
 BEGIN {
-    use_ok('Baruwa::Scanner::Sendmail') || print "Bail out!\n";
+    require_ok('Baruwa/Scanner/Sendmail.pm') || print "Bail out!\n";
 }
 
 diag("Testing Baruwa::Scanner::Sendmail $Baruwa::Scanner::Sendmail::VERSION, Perl $], $^X");
+
+can_ok('Baruwa::Scanner::Sendmail', 'new');

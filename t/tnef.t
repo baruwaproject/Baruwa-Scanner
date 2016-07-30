@@ -11,3 +11,5 @@ BEGIN {
 }
 
 diag("Testing Baruwa::Scanner::TNEF $Baruwa::Scanner::TNEF::VERSION, Perl $], $^X");
+
+can_ok('Baruwa::Scanner::TNEF', 'new');

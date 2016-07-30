@@ -11,3 +11,5 @@ BEGIN {
 }
 
 diag("Testing Baruwa::Scanner::SweepOther $Baruwa::Scanner::SweepOther::VERSION, Perl $], $^X");
+
+can_ok('Baruwa::Scanner::SweepOther', 'new');

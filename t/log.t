@@ -35,3 +35,7 @@ is($Baruwa::Scanner::Log::logsock, 'unix');
 
 Baruwa::Scanner::Log::Start('Andrew', 'info', 'tcp');
 is($Baruwa::Scanner::Log::logsock, 'tcp');
+
+# Baruwa::Scanner::Config::SetValue('debug', 1);
+# Baruwa::Scanner::Log::Configure('TestBanner', 'stderr');
+# like(Baruwa::Scanner::Log::DebugLog('Test log message'), qr/Test log message/);

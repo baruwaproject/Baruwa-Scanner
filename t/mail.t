@@ -11,3 +11,10 @@ BEGIN {
 }
 
 diag("Testing Baruwa::Scanner::Mail $Baruwa::Scanner::Mail::VERSION, Perl $], $^X");
+
+can_ok('Baruwa::Scanner::Mail', 'new');
+
+my $mail = new Baruwa::Scanner::Mail();
+
+isa_ok($mail, 'Baruwa::Scanner::Mail');
+

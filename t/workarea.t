@@ -11,3 +11,5 @@ BEGIN {
 }
 
 diag("Testing Baruwa::Scanner::WorkArea $Baruwa::Scanner::WorkArea::VERSION, Perl $], $^X");
+
+can_ok('Baruwa::Scanner::WorkArea', 'new');
