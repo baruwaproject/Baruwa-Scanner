@@ -27,6 +27,7 @@ no strict 'subs';    # Allow bare words for parameter %'s
 
 use File::Copy;
 use File::Temp qw ( tempfile tempdir );
+use Baruwa::Scanner::Config();
 
 our $VERSION = '4.086000';
 
