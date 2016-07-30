@@ -92,41 +92,41 @@ $DefaultVirusRegexp   = '.*';
 # 3 little accessor functions for reading package-local variables from
 # inside Custom Functions, so you can make a configuration option act
 # as a Function and a Ruleset at the same time :-)
-sub GetFileValue {
-    my ($name) = @_;
-    return $File{$name};
-}
+# sub GetFileValue {
+#     my ($name) = @_;
+#     return $File{$name};
+# }
 
-sub SetFileValue {
-    my ($name, $value) = @_;
-    if (defined $value) {
-        $File{$name} = $value;
-    } else {
-        delete $File{$name};
-    }
-}
+# sub SetFileValue {
+#     my ($name, $value) = @_;
+#     if (defined $value) {
+#         $File{$name} = $value;
+#     } else {
+#         delete $File{$name};
+#     }
+# }
 
-sub GetItoE {
-    return \%ItoE;
-}
+# sub GetItoE {
+#     return \%ItoE;
+# }
 
-sub GetEtoI {
-    return \%EtoI;
-}
+# sub GetEtoI {
+#     return \%EtoI;
+# }
 
-sub SetCustomFunction {
-    my ($func, $value) = @_;
-    if (defined $value) {
-        $CustomFunctions{$func} = $value;
-    } else {
-        delete $CustomFunctions{$func};
-    }
-}
+# sub SetCustomFunction {
+#     my ($func, $value) = @_;
+#     if (defined $value) {
+#         $CustomFunctions{$func} = $value;
+#     } else {
+#         delete $CustomFunctions{$func};
+#     }
+# }
 
-sub GetCustomFunction {
-    my ($func) = @_;
-    return $CustomFunctions{$func};
-}
+# sub GetCustomFunction {
+#     my ($func) = @_;
+#     return $CustomFunctions{$func};
+# }
 
 # Tiny little accessor function to force a configuration variable to be a
 # value. The opposite of Value(). Useful in baruwa --lint.
@@ -603,7 +603,6 @@ sub AllMatchesValue {
 
     # Pre-compile $regexp2 and include case-insensitivity flag
     $regexp = qr/$regexp2/i;
-
     if ($iporaddr eq 't') {
 
         # We may be over-riding the "to" addresses we are looking up with
@@ -710,7 +709,7 @@ sub AllMatchesValue {
 
         # It's a hostname or domain name and it's a "From:" match on {clientip}.
         # Convert $msg->{clientip} into a hostname
-        #print STDERR "Clientip = " . $msg->{clientip} . " and hostname = ";
+        # print STDERR "Clientip = " . $msg->{clientip} . " and hostname = ";
             my $fromname = GetClientHostname($msg, $iporaddr);
             $fromname = '.' . $fromname
               if $fromname && $fromname ne "_SPOOFED_";
@@ -1308,10 +1307,6 @@ sub FilenameRulesValue {
     #print STDERR "Filename rulesets are " . join(', ', @filenamelist) . "\n";
     foreach $file (@filenamelist) {
         if (!exists($Rules->{$file})) {
-
-       #print STDERR "Could not find filenamerules $file, forcing a re-read.\n";
-       # This filename has not been seen before, so compile it now.
-       # Skip the file if it didn't exist, error already generated.
             next unless $Rules->{$file} = ReadOneFilenameRulesFile($file);
         }
         $listref = $Rules->{$file};
@@ -1403,31 +1398,22 @@ sub ReadFilenameRules {
         $regexp, $filename, $namelist,  %donefile
     );
 
-    #print STDERR "About to read in all the possible filename rules\n";
-
     # Do the static filename list if there is one
     $namelist = $StaticScalars{$keyword};
-
-   #print STDERR "Filename-rules: keyword is $keyword, filename is $namelist\n";
     if (defined($namelist)) {
         foreach $filename (split(" ", $namelist)) {
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-
-      #print STDERR "Storing: $filename is " . $FilenameRules{$filename} . "\n";
         }
     }
 
     # Do the default filename list if there is one
     $namelist = $Defaults{$keyword};
 
-#print STDERR "Filename-rules: default keyword is $keyword, filename is $namelist\n";
     if (defined $namelist) {
         foreach $filename (split(" ", $namelist)) {
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-
-      #print STDERR "Storing: $filename is " . $FilenameRules{$filename} . "\n";
         }
     }
 
@@ -1445,8 +1431,6 @@ sub ReadFilenameRules {
               split(/\0/, $namelist, 4);
         }
 
-    #print STDERR "Filename rules are $direction $iporaddr $regexp $namelist\n";
-
         # Each value in the list can itself be a list of filename-rules files
         foreach $filename (split(" ", $namelist)) {
 
@@ -1456,8 +1440,6 @@ sub ReadFilenameRules {
 
             # This builds a hash of filename-->ref-to-list-of-rules
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-
-      #print STDERR "Storing: $filename is " . $FilenameRules{$filename} . "\n";
         }
     }
 }
@@ -1476,20 +1458,20 @@ sub ReadFiletypeRules {
     # Do the static filename list if there is one
     $namelist = $StaticScalars{$keyword};
 
-   #print STDERR "Filetype-rules: keyword is $keyword, filename is $namelist\n";
+  # print STDERR "Filetype-rules: keyword is $keyword, filename is $namelist\n";
     if (defined($namelist)) {
         foreach $filename (split(" ", $namelist)) {
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
 
-      #print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
+     # print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
         }
     }
 
     # Do the default filename list if there is one
     $namelist = $Defaults{$keyword};
 
-#print STDERR "Filetype-rules: default keyword is $keyword, filename is $namelist\n";
+# print STDERR "Filetype-rules: default keyword is $keyword, filename is $namelist\n";
     if (defined $namelist) {
         foreach $filename (split(" ", $namelist)) {
             $donefile{"$filename"} = 1;
@@ -1513,9 +1495,8 @@ sub ReadFiletypeRules {
               split(/\0/, $namelist, 4);
         }
 
-    #print STDERR "Filename rules are $direction $iporaddr $regexp $namelist\n";
-
-        # Each value in the list can itself be a list of filename-rules files
+   # print STDERR "Filename rules are $direction $iporaddr $regexp $namelist\n";
+   # Each value in the list can itself be a list of filename-rules files
         foreach $filename (split(" ", $namelist)) {
 
             # Skip this allow/deny filename if we've read it already
@@ -1525,7 +1506,7 @@ sub ReadFiletypeRules {
             # This builds a hash of filename-->ref-to-list-of-rules
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
 
-      #print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
+     # print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
         }
     }
 }
@@ -2253,7 +2234,7 @@ sub ReadData {
                 # Setup LDAP Connection
                 ($LDAP, $LDAPserver, $LDAPbase, $LDAPsite) = ConnectLDAP();
 
-          #print STDERR "Made LDAP connection to $LDAP, $LDAPbase, $LDAPsite\n";
+         # print STDERR "Made LDAP connection to $LDAP, $LDAPbase, $LDAPsite\n";
                 ReadConfBasicLDAP($LDAP, $LDAPbase, $LDAPsite) if $LDAP;
             }
 
@@ -2276,7 +2257,7 @@ sub ReadData {
             ProcessNumber($line, $category, $nodefaults);
         } else {
 
-         #print STDERR "line is $line category $category\n" if $line =~ /tnef/i;
+        # print STDERR "line is $line category $category\n" if $line =~ /tnef/i;
             ProcessOther($line, $category, $nodefaults);
         }
 
