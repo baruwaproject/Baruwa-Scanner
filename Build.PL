@@ -73,7 +73,7 @@ my $builder = Module::Build->new(
         'MIME::Head' => 0,
         'MIME::Parser' => 0,
         'MIME::QuotedPrint' => 0,
-        'MIME::Tools' => '> 5.420',
+        'MIME::Tools' => '> 5.420 <= 5.427',
         'NetAddr::IP' => '>= 4.010',
         'Net::DNS' => '>= 0.34',
         'Net::DNS::Resolver::Programmable' => 0,
