@@ -1,0 +1,11 @@
+language: perl
+perl:
+  - "5.10"
+install:
+  - cpanm -v --installdeps --notest .
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+    recipients:
+        - andrew@topdog.za.net
