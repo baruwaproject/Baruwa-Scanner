@@ -1,7 +1,6 @@
 language: perl
 perl:
   - "5.10"
-sudo: required
 before_install:
   - cpanm Error
   - cpanm Net::DNS
