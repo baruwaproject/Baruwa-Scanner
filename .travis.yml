@@ -3,12 +3,14 @@ perl:
   - "5.10"
 sudo: required
 before_install:
+  - cpanm Error
+  - cpanm Net::DNS
+  - cpanm NetAddr::IP
   - curl -O http://www.cpan.org/authors/id/J/JM/JMEHNLE/mail-spf/Mail-SPF-v2.9.0.tar.gz
   - tar xzvf Mail-SPF-v2.9.0.tar.gz
   - pushd Mail-SPF-v2.9.0
   - perl Build.PL && ./Build install --install_path sbin=/home/travis/perl5/perlbrew/perls/5.10/sbin
-  - cpanm Net::DNS
-  - cpanm NetAddr::IP
+  - popd && rm -rf Mail-SPF-v2.9.0
 install:
   - cpanm -v --installdeps --notest .
 notifications:
