@@ -2,6 +2,9 @@ language: perl
 perl:
   - "5.10"
 install:
+  - cpanm -f Mail::SPF
+  - cpanm Net::DNS
+  - cpanm NetAddr::IP
   - cpanm -v --installdeps --notest .
 notifications:
   email:
