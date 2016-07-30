@@ -8,6 +8,8 @@ Email Filtering Gateway.
 
 =for HTML <a href="https://travis-ci.org/baruwaproject/Baruwa-Scanner"><img src="https://travis-ci.org/baruwaproject/Baruwa-Scanner.svg?branch=master" /></a>
 
+=for HTML <a href="https://codecov.io/gh/baruwaproject/Baruwa-Scanner"><img src="https://codecov.io/gh/baruwaproject/Baruwa-Scanner/branch/master/graph/badge.svg" alt="Coverage via Codecov" /></a>
+
 Baruwa-Scanner was forked from MailScanner in July 2016.
 
 =head2 Installation
