@@ -11,3 +11,9 @@ BEGIN {
 }
 
 diag("Testing Baruwa::Scanner::SA $Baruwa::Scanner::SA::VERSION, Perl $], $^X");
+
+can_ok('Baruwa::Scanner::SA', 'new');
+
+my $s = new Baruwa::Scanner::SA();
+
+isa_ok($s, 'Baruwa::Scanner::SA', '$s');

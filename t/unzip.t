@@ -13,3 +13,7 @@ BEGIN {
 diag("Testing Baruwa::Scanner::Unzip $Baruwa::Scanner::Unzip::VERSION, Perl $], $^X");
 
 can_ok('Baruwa::Scanner::Unzip', 'new');
+
+my $u = new Baruwa::Scanner::Unzip();
+
+isa_ok($u, 'Baruwa::Scanner::Unzip', '$u');

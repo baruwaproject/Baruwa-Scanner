@@ -10,6 +10,8 @@ BEGIN {
 
 diag("Testing Baruwa::Scanner::Antiword $Baruwa::Scanner::Antiword::VERSION, Perl $], $^X");
 
-$a = new Baruwa::Scanner::Antiword();
+can_ok('Baruwa::Scanner::Antiword', 'new');
+
+my $a = new Baruwa::Scanner::Antiword();
 
 isa_ok($a, 'Baruwa::Scanner::Antiword', '$a');

@@ -13,3 +13,7 @@ BEGIN {
 diag("Testing Baruwa::Scanner::SMDiskStore $Baruwa::Scanner::SMDiskStore::VERSION, Perl $], $^X");
 
 can_ok('Baruwa::Scanner::SMDiskStore', 'new');
+
+my $s = new Baruwa::Scanner::SMDiskStore();
+
+isa_ok($s, 'Baruwa::Scanner::SMDiskStore', '$s');

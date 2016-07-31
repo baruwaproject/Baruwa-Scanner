@@ -13,3 +13,7 @@ BEGIN {
 diag("Testing Baruwa::Scanner::SweepContent $Baruwa::Scanner::SweepContent::VERSION, Perl $], $^X");
 
 can_ok('Baruwa::Scanner::SweepContent', 'new');
+
+my $s = new Baruwa::Scanner::SweepContent();
+
+isa_ok($s, 'Baruwa::Scanner::SweepContent', '$s');
