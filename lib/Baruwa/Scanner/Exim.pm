@@ -29,6 +29,7 @@ use Data::Dumper;
 use IO::Pipe;
 use Carp;
 use Encode;
+use Baruwa::Scanner::Config();
 
 our $VERSION = '4.086000';
 

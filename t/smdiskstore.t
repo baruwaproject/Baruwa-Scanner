@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -T
+#!/usr/bin/env perl
 use v5.10;
 use strict;
 use warnings;
@@ -10,6 +10,8 @@ use Baruwa::Scanner::Queue;
 use Baruwa::Scanner::Config;
 use Baruwa::Scanner::Quarantine;
 require "Baruwa/Scanner/Sendmail.pm";
+use lib "$Bin/lib";
+use Test::Baruwa::Scanner;
 
 # plan tests => 1;
 
@@ -23,7 +25,10 @@ diag(
 
 can_ok('Baruwa::Scanner::SMDiskStore', 'new');
 
-my $conf = "$Bin/data/etc/mail/baruwa/baruwa.conf";
+my $from    = "$Bin/configs/template.conf";
+my $conf    = "$Bin/data/etc/mail/baruwa/baruwa.conf";
+my $datadir = "$Bin/data";
+create_config($from, $conf, $datadir);
 Baruwa::Scanner::Config::Read($conf, 0);
 my $workarea = new Baruwa::Scanner::WorkArea;
 my $inqueue =

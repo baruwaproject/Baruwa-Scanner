@@ -17,3 +17,11 @@ can_ok('Baruwa::Scanner::Sendmail', 'new');
 my $e = new Baruwa::Scanner::Sendmail();
 
 isa_ok($e, 'Baruwa::Scanner::Sendmail', '$e');
+
+can_ok($e, 'initialise');
+
+# is($Baruwa::Scanner::UnsortedBatchesLeft, undef);
+
+$e->initialise();
+
+# is($Baruwa::Scanner::UnsortedBatchesLeft, 0);
