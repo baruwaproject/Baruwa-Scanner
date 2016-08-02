@@ -1,8 +1,11 @@
-#!/usr/bin/env perl -T
+#!/usr/bin/env perl
 use v5.10;
 use strict;
 use warnings;
 use Test::More qw(no_plan);
+# use FindBin '$Bin';
+# use lib "$Bin/lib";
+# use Test::Baruwa::Scanner;
 
 # plan tests => 1;
 
