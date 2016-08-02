@@ -44,7 +44,9 @@ use Fcntl;
 use File::Path;
 use File::Temp;
 use File::Copy qw/move/;
-use Baruwa::Scanner::FileInto;
+use Baruwa::Scanner::TNEF();
+use Baruwa::Scanner::FileInto();
+require "Baruwa/Scanner/EximDiskStore.pm";
 
 # Install an extra MIME decoder for badly-header uue messages.
 install MIME::Decoder::UU 'uuencode';
@@ -188,7 +190,7 @@ sub new {
     my ($mta, $addr, $user, $domain);
     my ($archiveplaces);
 
-    #print STDERR "Creating message $id\n";
+    # print STDERR "Creating message $id\n";
 
     $this->{id} = $id;
     @{$this->{archiveplaces}}    = ();
@@ -205,10 +207,10 @@ sub new {
     $this->{store} = new Baruwa::Scanner::SMDiskStore($id, $queuedirname);
 
     # Try to open and exclusive-lock this message. Return undef if failed.
-    #print STDERR "Trying to lock message " . $this->{id} . "\n";
+    # print STDERR "Trying to lock message " . $this->{id} . "\n";
     $this->{store}->Lock() or return undef;
 
-    #print STDERR "Locked message\n";
+    # print STDERR "Locked message\n";
     Baruwa::Scanner::Log::InfoLog("Locked message: %s", $this->{id});
 
     # getipfromheader used to be a yes or no option
@@ -1636,7 +1638,7 @@ sub HandleSpamBounceAttachment {
     my $explodeinto = $global::MS->{work}->{dir} . '/' . $this->{id};
 
     #print STDERR "Extracting spam bounce message into $explodeinto\n";
-    my $filer = MIME::Parser::Baruwa::Scanner->new($explodeinto);
+    my $filer = Baruwa::Scanner::FileInto->new($explodeinto);
     $parser->filer($filer);
 
     my $bounce = eval {$parser->parse_data(\$plaintext)};
@@ -2339,27 +2341,31 @@ sub Explode {
     $workarea = $global::MS->{work};
     my $explodeinto = $workarea->{dir} . "/" . $this->{id};
 
-    #print STDERR "Going to explode message " . $this->{id} .
+    # print STDERR "Going to explode message " . $this->{id} .
     #             " into $explodeinto\n";
 
     # Setup everything for the MIME parser
     my $parser = MIME::Parser->new;
-    my $filer  = MIME::Parser::Baruwa::Scanner->new($explodeinto);
+    my $filer  = Baruwa::Scanner::FileInto->new($explodeinto);
 
     # Over-ride the default default character set handler so it does it
     # much better than the MIME-tools default handling.
     MIME::WordDecoder->default->handler('*' => \&WordDecoderKeep7Bit);
 
-    #print STDERR "Exploding message " . $this->{id} . " into " .
+    # print STDERR "Exploding message " . $this->{id} . " into " .
     #             $explodeinto . "\n";
     $parser->filer($filer);
     $parser->extract_uuencode(1);       # uue is off by default
-    $parser->output_to_core('NONE');    # everything into files
+    $parser->output_to_core(0);    # everything into files
 
     $handle = IO::File->new_tmpfile
       or die "Your /tmp needs to be set to \"chmod 1777 /tmp\"";
     binmode($handle);
-    $this->{store}->ReadMessageHandle($this, $handle) or return;
+    # $this->{store}->ReadMessageHandle($this, $handle) or return;
+    unless ($this->{store}->ReadMessageHandle($this, $handle)) {
+        print STDERR "Failed to read message $this->{id}\n";
+        return;
+    }
 
     ## Do the actual parsing
     my $maxparts = Baruwa::Scanner::Config::Value('maxparts', $this) || 200;
@@ -2368,7 +2374,7 @@ sub Explode {
     # Inform MIME::Parser about our maximum
     $parser->max_parts($maxparts * 3);
     $entity = eval {$parser->parse($handle)};
-
+    print STDERR "ERROR: $@\n" if ($@);
     # close and delete tmpfile
     close($handle);
 
@@ -2886,7 +2892,7 @@ sub ExplodePartAndArchives {
                         # Setup everything for the MIME parser
                         my $parser = MIME::Parser->new;
                         my $filer =
-                          MIME::Parser::Baruwa::Scanner->new($explodeinto);
+                          Baruwa::Scanner::FileInto->new($explodeinto);
 
              # Over-ride the default default character set handler so it does it
              # much better than the MIME-tools default handling.
@@ -3898,7 +3904,7 @@ sub ExplodePart {
 
         # Setup everything for the MIME parser
         my $parser = MIME::Parser->new;
-        my $filer  = MIME::Parser::Baruwa::Scanner->new($explodeinto);
+        my $filer  = Baruwa::Scanner::FileInto->new($explodeinto);
 
         # Over-ride the default default character set handler so it does it
         # much better than the MIME-tools default handling.
