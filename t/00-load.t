@@ -1,8 +1,11 @@
-#!/usr/bin/env perl -T
+#!/usr/bin/env perl
 use v5.10;
 use strict;
 use warnings;
 use Test::More qw(no_plan);
+use FindBin '$Bin';
+use lib "$Bin/lib";
+use Test::Baruwa::Scanner;
 
 # plan tests => 1;
 
@@ -11,6 +14,8 @@ BEGIN {
 }
 
 diag("Testing Baruwa::Scanner $Baruwa::Scanner::VERSION, Perl $], $^X");
+diag("Greating Test directory structures");
+make_test_dirs();
 
 my $scanner = new Baruwa::Scanner(
     InQueue    => 'inqueue',

@@ -60,6 +60,9 @@ is(Baruwa::Scanner::Config::PrintFixedWidth('TEST', 6), 'TEST  ');
 
 is(Baruwa::Scanner::Config::PrintFixedWidth('TEST', 4), 'TEST ');
 
+open(POSTCONFIG, '>', "$Bin/data/etc/mail/baruwa/dynamic/rules/local.scores") or die "failed to create local.scores file";
+print POSTCONFIG "score           BASE_BARUWAHASHDB                       15.0\n";
+close(POSTCONFIG);
 $Baruwa::Scanner::ConfigSQL::ConfFile = $conf;
 my @rules = Baruwa::Scanner::Config::SpamAssassinPostConfig();
 is($rules[0], 'score           BASE_BARUWAHASHDB                       15.0');

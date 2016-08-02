@@ -18,3 +18,4 @@ Baruwa-Scanner-*
 Baruwa-Scanner-*.tar.gz
 MANIFEST.bak
 packaging/
+t/data/
