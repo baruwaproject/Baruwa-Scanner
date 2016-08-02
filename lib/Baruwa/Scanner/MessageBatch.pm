@@ -34,6 +34,7 @@ use Time::HiRes qw ( time );
 use POSIX;
 use File::Temp qw ( tempfile tempdir );
 use DBI qw(:sql_types);
+use Baruwa::Scanner::Log();
 
 our $VERSION = '4.086000';
 
@@ -543,32 +544,32 @@ sub CreateEntitiesHelpers {
 }
 
 # Print out the number of parts in each message
-sub PrintNumParts {
-    my $this = shift;
-    my ($id, $message);
+# sub PrintNumParts {
+#     my $this = shift;
+#     my ($id, $message);
 
-    while (($id, $message) = each %{$this->{messages}}) {
-        next if $message->{deleted};
+#     while (($id, $message) = each %{$this->{messages}}) {
+#         next if $message->{deleted};
 
-        #print "Message $id has " . $message->{numberparts} . " parts\n";
-    }
-}
+#         #print "Message $id has " . $message->{numberparts} . " parts\n";
+#     }
+# }
 
 # Print out the filenames in each message
-sub PrintFilenames {
-    my $this = shift;
-    my ($id,     $message);
-    my ($fnames, @filenames);
+# sub PrintFilenames {
+#     my $this = shift;
+#     my ($id,     $message);
+#     my ($fnames, @filenames);
 
-    while (($id, $message) = each %{$this->{messages}}) {
+#     while (($id, $message) = each %{$this->{messages}}) {
 
-        #next if $message->{deleted};
-        #print STDERR "Message $id has filenames ";
-        @filenames = keys %{$message->{file2entity}};
+#         #next if $message->{deleted};
+#         #print STDERR "Message $id has filenames ";
+#         @filenames = keys %{$message->{file2entity}};
 
-        #print STDERR join(", ", @filenames) . "\n";
-    }
-}
+#         #print STDERR join(", ", @filenames) . "\n";
+#     }
+# }
 
 # Print out the infected sections of all messages
 sub PrintInfectedSections {
