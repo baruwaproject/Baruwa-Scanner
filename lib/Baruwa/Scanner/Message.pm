@@ -457,10 +457,6 @@ sub checkHMAC {
 
 sub createHMAC {
     my ($expiry, $email, $date, $secret, $msgid) = @_;
-
-#print STDERR "I am generating a hash using the input of: $expiry, $email, $date, $secret, $msgid\n";
-
-# JKF Watermark fix June 2008 return Digest::MD5::md5_base64(join("\$\%", $expiry, $email, $date, $secret, $msgid));
     return Digest::MD5::md5_base64(
         join("\$\%", $expiry, $date, $secret, $msgid));
 }

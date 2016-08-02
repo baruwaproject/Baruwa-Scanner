@@ -98,18 +98,18 @@ sub print {
 sub Lock {
     my $this = shift;
 
-    #print STDERR "About to lock " . $this->{hpath} . " and " .
+    # print STDERR "About to lock " . $this->{hpath} . " and " .
     #             $this->{dpath} . "\n";
     Baruwa::Scanner::Lock::openlock($this->{indhandle}, '+<' . $this->{dpath},
         'w', 'quiet')
       or return 0;
 
-    #print STDERR "Got dlock\n";
+    # print STDERR "Got dlock\n";
     Baruwa::Scanner::Lock::openlock($this->{inhhandle}, '+<' . $this->{hpath},
         'w', 'quiet')
       or return 0;
 
-    #print STDERR "Got hlock\n";
+    # print STDERR "Got hlock\n";
     return 0 unless $this->{inhhandle} && $this->{indhandle};
     return 1;
 }
@@ -221,11 +221,12 @@ sub LinkData {
     $OutDPath = OutQName($OutQ, $this->{dname});
 
     #Baruwa::Scanner::Log::DebugLog("LinkData to $OutDPath");
+    # print STDERR "LinkData from $InDPath to $OutDPath";
 
     # If the link fails for some reason, then skip this message and
     # move on to the next one. This one will get delivered when
     # the previous one with the same name has been delivered.
-    unless (link $InDPath, $OutDPath) {
+    unless (link($InDPath, $OutDPath)) {
 
         # The link failed, so get the inode numbers of the two files
         my ($ininode, $outinode);

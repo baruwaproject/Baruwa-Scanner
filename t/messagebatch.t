@@ -25,6 +25,8 @@ diag(
     "Testing Baruwa::Scanner::MessageBatch $Baruwa::Scanner::MessageBatch::VERSION, Perl $], $^X"
 );
 
+make_test_dirs();
+
 can_ok('Baruwa::Scanner::MessageBatch', 'new');
 
 throws_ok {my $batch = new Baruwa::Scanner::MessageBatch('normal', undef)}

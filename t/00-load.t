@@ -14,7 +14,7 @@ BEGIN {
 }
 
 diag("Testing Baruwa::Scanner $Baruwa::Scanner::VERSION, Perl $], $^X");
-diag("Greating Test directory structures");
+diag("Greating Test directory structures under $Bin/data");
 make_test_dirs();
 
 my $scanner = new Baruwa::Scanner(
