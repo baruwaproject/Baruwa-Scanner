@@ -65,14 +65,17 @@ sub openlock {
     );
     unless ($lh->lock($fh, F_SETLK)) {
         # print STDERR "Failed to Fcntllock: $fn => $!\n";
+        close($fh);
         return 0;
     }
     unless (flock($fh, ($rw eq 'w' ? LOCK_EX : LOCK_SH) + LOCK_NB)) {
         # print STDERR "Failed to flock: $fn => $!\n";
-        return 0 unless ($^O eq 'darwin');
+        unless ($^O eq 'darwin') {
+            close($fh);
+            return 0;
+        }
     }
     return 1;
-    close($fh);
 
     if (   ($lh->lock_errno() == POSIX::EAGAIN)
         || ($lh->lock_errno() == POSIX::EACCES)
