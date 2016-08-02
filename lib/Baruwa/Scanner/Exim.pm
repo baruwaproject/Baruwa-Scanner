@@ -30,6 +30,7 @@ use IO::Pipe;
 use Carp;
 use Encode;
 use Baruwa::Scanner::Config();
+use Baruwa::Scanner::Message();
 
 our $VERSION = '4.086000';
 
@@ -1404,7 +1405,7 @@ sub CreateBatch {
                 next unless $file =~ /$mta->{HFileRegexp}/;
                 next unless -f "$queuedirname/$1-D";
 
-                #print STDERR "Found message file $file\n";
+                # print STDERR "Found message file $file\n";
                 $MsgsInQueue++;    # Count the size of the queue
                 push @SortedFiles, "$queuedirname/$file";
                 if ($UnsortedBatchesLeft <= 0) {
@@ -1465,7 +1466,7 @@ sub CreateBatch {
            # If they want a particular message id, ignore it if it doesn't match
             next if $onlyid ne "" && $id ne $onlyid;
 
-            #print STDERR "Adding $id to batch\n";
+            # print STDERR "Adding $id to batch\n";
 
             # Lock and read the qf file. Skip this message if the lock fails.
             $newmessage =
