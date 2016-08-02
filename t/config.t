@@ -3,6 +3,7 @@ use v5.10;
 use strict;
 use warnings;
 use FindBin '$Bin';
+use Test::Output;
 use Test::Exception;
 use Test::More qw(no_plan);
 use lib "$Bin/lib";
@@ -60,8 +61,10 @@ is(Baruwa::Scanner::Config::PrintFixedWidth('TEST', 6), 'TEST  ');
 
 is(Baruwa::Scanner::Config::PrintFixedWidth('TEST', 4), 'TEST ');
 
-open(POSTCONFIG, '>', "$Bin/data/etc/mail/baruwa/dynamic/rules/local.scores") or die "failed to create local.scores file";
-print POSTCONFIG "score           BASE_BARUWAHASHDB                       15.0\n";
+open(POSTCONFIG, '>', "$Bin/data/etc/mail/baruwa/dynamic/rules/local.scores")
+  or die "failed to create local.scores file";
+print POSTCONFIG
+  "score           BASE_BARUWAHASHDB                       15.0\n";
 close(POSTCONFIG);
 $Baruwa::Scanner::ConfigSQL::ConfFile = $conf;
 my @rules = Baruwa::Scanner::Config::SpamAssassinPostConfig();
@@ -74,8 +77,14 @@ is($langs->{'theentiremessage'}, 'the entire message');
 Baruwa::Scanner::Config::Default('clamdlockFile', '/tmp/clamd.lock');
 is(Baruwa::Scanner::Config::Value('clamdlockFile'), '/tmp/clamd.lock');
 
-# Baruwa::Scanner::Config::Read($conf, 1);
-# like(Baruwa::Scanner::Config::PrintNonDefaults(), qr/Table of Changed Values/);
+TODO: {
+    local $TODO = 'Skip tests until i figure this out';
+    Baruwa::Scanner::Config::Read($conf, 1);
+    output_like(sub {Baruwa::Scanner::Config::PrintNonDefaults();},
+        qr/notifysenders                      yes            no/,
+        qr/notifysenders                      yes            no/
+    );
+}
 
 my $countryfile = "$Bin/data/etc/mail/baruwa/country.domains.conf";
 Baruwa::Scanner::Config::ReadCountryDomainList($countryfile);
