@@ -297,8 +297,11 @@ sub ChangeToMessage {
     my $message = shift;
 
     my $dest = $this->{dir} . '/' . $message->{id};
-    chdir $dest
-      or Baruwa::Scanner::Log::WarnLog("Cannot chdir to %s, %s", $dest, $!);
+    unless (chdir $dest) {
+        Baruwa::Scanner::Log::WarnLog("Cannot chdir to %s, %s", $dest, $!);
+        return 0;
+    }
+    return 1;
 }
 
 # Return true if the attachment file for this message and attachment name
