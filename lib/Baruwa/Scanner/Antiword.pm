@@ -63,31 +63,30 @@ sub FindDocFiles {
         $path = $body->path;
         $path = $1 if $path =~ /([^\/]+)$/;
 
-        #print STDERR "Found an attachment, Path is $path\n";
+        # print STDERR "Found an attachment, Path is $path\n";
         if ($path =~ /\.doc$/i) {
             $already->{$path} = $parent;
 
-            #print STDERR "Added $path --> $parent\n";
+            # print STDERR "Added $path --> $parent\n";
             return $already;
         }
 
-        #return ($path,@already) if $path =~ /\.doc$/i;
+        # return ($path,@already) if $path =~ /\.doc$/i;
     }
 
     # CASE: Non-leaf node, branch node, has children. Add each child.
     @parts = $entity->parts;
     foreach $part (@parts) {
 
-        #print STDERR "Calling FindDocFiles $part\n";
+        # print STDERR "Calling FindDocFiles $part\n";
         my $newones = FindDocFiles($part, $entity, \%empty);
         while (($k, $v) = each %$newones) {
-
-            #print STDERR "Adding children $k --> $v\n";
+            # print STDERR "Adding children $k --> $v\n";
             $already->{$k} = $v;
         }
     }
 
-    #print STDERR "Returning " . join(',',@already) . "\n";
+    # print STDERR "Returning " . join(',',@already) . "\n";
     return $already;
 }
 

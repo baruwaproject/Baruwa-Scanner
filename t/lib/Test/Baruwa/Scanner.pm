@@ -246,6 +246,8 @@ sub create_config {
 }
 
 sub make_test_dirs {
+    remove_tree("$Bin/data/var/spool/exim/input", {keep_root => 1});
+    remove_tree("$Bin/data/var/spool/exim.in/input", {keep_root => 1});
     remove_tree("$Bin/data/var/spool/baruwa/incoming", {keep_root => 1});
     foreach (@paths) {
         make_path($_, {mode => 0700}) unless (-d $_);

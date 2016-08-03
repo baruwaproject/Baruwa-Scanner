@@ -24,6 +24,8 @@ diag(
     "Testing Baruwa::Scanner::SMDiskStore $Baruwa::Scanner::SMDiskStore::VERSION, Perl $], $^X"
 );
 
+make_test_dirs();
+
 can_ok('Baruwa::Scanner::SMDiskStore', 'new');
 
 my $from    = "$Bin/configs/template.conf";

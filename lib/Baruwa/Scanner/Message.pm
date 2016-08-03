@@ -2442,7 +2442,7 @@ sub Explode {
     $DeleteTNEF = 1
       if Baruwa::Scanner::Config::Value('replacetnef', $this) !~ /[01]/;
 
-#print STDERR "ReplaceTNEF = " . Baruwa::Scanner::Config::Value('replacetnef', $this) . "\n";
+    # print STDERR "ReplaceTNEF = " . Baruwa::Scanner::Config::Value('replacetnef', $this) . "\n";
 
     if (Baruwa::Scanner::Config::Value('tnefexpander') && $this->{tnefentity}) {
         my ($tneffile, @tneffiles);
@@ -2476,12 +2476,11 @@ sub Explode {
             $result =
               Baruwa::Scanner::TNEF::Decoder($explodeinto, $tneffile, $this);
             if ($result) {
-
-# If they want to replace the TNEF rather than add to it,
-# then delete the original winmail.dat-style attachment
-# and remove the flag saying it is a TNEF message at all.
-#print STDERR "***** Found TNEF Attachments = " . $this->{foundtnefattachments} . "\n";
-#print STDERR "*** DeleteTNEF = $DeleteTNEF and foundtnefatt = " . $this->{foundtnefattachments} . "\n";
+                # If they want to replace the TNEF rather than add to it,
+                # then delete the original winmail.dat-style attachment
+                # and remove the flag saying it is a TNEF message at all.
+                # print STDERR "***** Found TNEF Attachments = " . $this->{foundtnefattachments} . "\n";
+                # print STDERR "*** DeleteTNEF = $DeleteTNEF and foundtnefatt = " . $this->{foundtnefattachments} . "\n";
                 if ($DeleteTNEF && $this->{foundtnefattachments}) {
                     $this->DeleteEntity($this->{tnefentity}, $this->{entity},
                         $this->{tnefentity});
