@@ -3,6 +3,7 @@ use v5.10;
 use strict;
 use warnings;
 use File::Touch;
+use Test::Output;
 use FindBin '$Bin';
 use Test::Exception;
 use File::Path qw(make_path);
@@ -118,6 +119,12 @@ isnt(-d $workarea->{dir}, 1);
 throws_ok {$workarea->ClearIds(\@ids)}
 qr/Cannot chdir to/,
   'Throws error if msg work directory does not exist';
+
+stderr_like(
+    sub {$workarea->Destroy();},
+    qr/Could not get to parent of incoming work directory/,
+    qr/Could not get to parent of incoming work directory/
+);
 
 sub create_working_dirs {
     touch(@files);
