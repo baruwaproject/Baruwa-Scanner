@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use File::Touch;
 use FindBin '$Bin';
+use Test::Exception;
 use File::Path qw(make_path);
 use Test::More qw(no_plan);
 use Baruwa::Scanner::Config();
@@ -74,10 +75,15 @@ check_existance();
 my @ids = ($files[0], $dirs[1]);
 $workarea->ClearIds(\@ids);
 
-isnt(-f $files[0], 1);
-is(-f $files[1], 1);
-isnt(-d $dirs[1], 1);
-is(-d $dirs[0], 1);
+check_partial();
+
+$workarea->ClearAll();
+
+create_working_dirs();
+check_existance();
+$workarea->Clear(\@ids);
+
+check_partial();
 
 $workarea->ClearAll();
 
@@ -109,6 +115,10 @@ $workarea->Destroy();
 
 isnt(-d $workarea->{dir}, 1);
 
+throws_ok {$workarea->ClearIds(\@ids)}
+qr/Cannot chdir to/,
+  'Throws error if msg work directory does not exist';
+
 sub create_working_dirs {
     touch(@files);
     foreach (@dirs) {
@@ -135,4 +145,11 @@ sub check_non_existance {
     foreach (@files) {
         isnt(-f $_, 1);
     }
+}
+
+sub check_partial {
+    isnt(-f $files[0], 1);
+    is(-f $files[1], 1);
+    isnt(-d $dirs[1], 1);
+    is(-d $dirs[0], 1);
 }
