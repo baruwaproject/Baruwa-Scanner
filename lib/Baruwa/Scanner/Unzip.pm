@@ -120,8 +120,8 @@ sub UnpackZipMembers {
 
             $message->{entity}->make_multipart;
 
-        # The only file that ever existed in message structure is the safename.
-        # Trim off the leading type indicator, as we're storing unsafe filename.
+            # The only file that ever existed in message structure is the safename.
+            # Trim off the leading type indicator, as we're storing unsafe filename.
             $message->{file2parent}{substr($unsafemember, 1)} = $zipname;
             $message->{entity}->attach(
                 Type =>
