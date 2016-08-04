@@ -5399,11 +5399,11 @@ sub DeliverUnmodifiedBody {
             $subjectchanged = 1;
         } elsif ($where =~ /start|1/
             && !$global::MS->{mta}
-            ->TextStartsHeader($this, 'Subject:', $disarmtag)) {
+            ->TextStartsHeader($this, 'Subject:', $phishingtag)) {
 
             #print STDERR "start\n";
             $global::MS->{mta}
-              ->PrependHeader($this, 'Subject:', $disarmtag, ' ');
+              ->PrependHeader($this, 'Subject:', $phishingtag, ' ');
             $subjectchanged = 1;
         }
 
