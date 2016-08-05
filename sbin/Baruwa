@@ -52,7 +52,6 @@ use Baruwa::Scanner::SweepContent;
 use Baruwa::Scanner::SweepOther;
 use Baruwa::Scanner::SweepViruses;
 use Baruwa::Scanner::TNEF;
-use Baruwa::Scanner::Unzip;
 use Baruwa::Scanner::WorkArea;
 use Baruwa::Scanner;
 

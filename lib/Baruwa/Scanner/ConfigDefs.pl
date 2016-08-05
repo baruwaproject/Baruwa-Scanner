@@ -216,10 +216,6 @@ unpackole			= UnpackMicrosoftDocuments
 unscannedheader			= unscannedheadervalue
 usedefaultswithmanyrecips       = usedefaultruleswithmultiplerecipients
 tagphishingsubject		= phishingmodifysubject
-unzipmaxmembers			= UnzipMaximumFilesPerArchive
-unzipmaxsize			= UnzipMaximumFileSize
-unzipmembers			= UnzipFilenames
-unzipmimetype			= UnzipMimeType
 virusmodifysubject		= virusmodifysubject
 virusscan			= virusscanning
 warnsenders			= notifysenders
@@ -486,8 +482,6 @@ MinStars			0
 mshmacvalid			604800
 NormalRBLs			1
 ReqSpamAssassinScore		6
-unzipmaxmembers			0
-unzipmaxsize			50000
 
 [First,Other]
 Antiword			/usr/bin/antiword -f
@@ -534,8 +528,6 @@ HamActions		deliver header "X-Spam-Status: No"
 SpamActions		deliver header "X-Spam-Status: Yes"
 HighScoreSpamActions	deliver header "X-Spam-Status: Yes"
 SizeSubjectText		{Size}
-unzipmembers		*.txt *.ini *.log *.csv
-unzipmimetype		text/plain
 
 [All,YesNo]
 AddEnvFrom		1	no	0	yes	1

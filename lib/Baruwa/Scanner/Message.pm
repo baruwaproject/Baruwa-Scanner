@@ -2590,11 +2590,6 @@ sub Explode {
         }
     }
 
-    # Unpack zip and other archives if they are very small and they want me to
-    if (Baruwa::Scanner::Config::Value('unzipmaxmembers', $this) > 0) {
-        Baruwa::Scanner::Unzip::UnpackZipMembers($this, $explodeinto);
-    }
-
     # Check we haven't filled the disk. Remove this message if we have, so
     # that we can continue processing the other messages.
     my $dir = Baruwa::Scanner::Config::Value("incomingworkdir");
