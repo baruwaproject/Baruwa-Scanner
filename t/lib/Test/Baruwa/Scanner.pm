@@ -14,6 +14,7 @@ use Exporter qw/import/;
 our @EXPORT = qw/create_config make_test_dirs create_file/;
 
 my @paths = (
+    "$Bin/data/var/lib/baruwa/archive",
     "$Bin/data/var/run/baruwa/scanner",
     "$Bin/data/var/spool/baruwa/incoming",
     "$Bin/data/var/spool/baruwa/quarantine",
@@ -22,6 +23,12 @@ my @paths = (
     "$Bin/data/var/lock/Baruwa",
     "$Bin/data/etc/mail/baruwa/dynamic/rules",
     "$Bin/data/etc/mail/baruwa/dynamic/signatures",
+);
+my @clean_paths = (
+    "$Bin/data/var/spool/exim/input",
+    "$Bin/data/var/lib/baruwa/archive",
+    "$Bin/data/var/spool/exim.in/input",
+    "$Bin/data/var/spool/baruwa/incoming",
 );
 my @files = ("$Bin/data/var/lock/Baruwa/test-lock");
 our @msgs = ('1bUUOQ-0000g4-C7', '1bUvRz-0001Mr-4W', '1bVCqk-0001rd-7G');
@@ -549,9 +556,10 @@ sub create_config {
 }
 
 sub make_test_dirs {
-    remove_tree("$Bin/data/var/spool/exim/input",      {keep_root => 1});
-    remove_tree("$Bin/data/var/spool/exim.in/input",   {keep_root => 1});
-    remove_tree("$Bin/data/var/spool/baruwa/incoming", {keep_root => 1});
+    foreach (@clean_paths) {
+        next unless (chdir $_ . "/..");
+        remove_tree($_, {keep_root => 1});
+    }
     foreach (@paths) {
         make_path($_, {mode => 0700}) unless (-d $_);
     }
