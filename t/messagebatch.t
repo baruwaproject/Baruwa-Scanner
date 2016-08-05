@@ -87,19 +87,22 @@ is($batch->Empty(), 0);
 
 can_ok($batch, 'Explode');
 
-for my $i (0 .. $#Test::Baruwa::Scanner::msgs) {
-    is( -d "$Bin/data/var/spool/baruwa/incoming/$$/$Test::Baruwa::Scanner::msgs[$i]",
-        1
-    );
+foreach (@Test::Baruwa::Scanner::msgs) {
+    is(-d "$Bin/data/var/spool/baruwa/incoming/$$/$_", 1);
 }
 
 $batch->Explode();
 
-for my $i (0 .. $#Test::Baruwa::Scanner::msgs) {
-    my $num = $i + 1;
-    is( -f "$Bin/data/var/spool/baruwa/incoming/$$/$Test::Baruwa::Scanner::msgs[$i]/nmsg-$$-$num.txt",
-        1
-    );
+my ($key, $message);
+while (($key, $message) = each %{$batch->{messages}}) {
+    is(-f $message->{headerspath}, 1);
+    if (scalar(@{$message->{entity}->{ME_Parts}})) {
+        foreach my $part (@{$message->{entity}->{ME_Parts}}) {
+            is(-f $part->{ME_Bodyhandle}->{MB_Path}, 1);
+        }
+    } else {
+        is(-f $message->{entity}->{ME_Bodyhandle}->{MB_Path}, 1);
+    }
 }
 
 isnt(exists $batch->{'endtime'}, 1);
