@@ -107,9 +107,24 @@ while (($key, $message) = each %{$batch->{messages}}) {
 
 isnt(exists $batch->{'endtime'}, 1);
 
+can_ok($batch, 'DropBatch');
+
+$batch->DropBatch();
+
+while (($key, $message) = each %{$batch->{messages}}) {
+    is($message->{deleted}, 1);
+    is($message->{gonefromdisk}, 1);
+}
+
 can_ok($batch, 'EndBatch');
 
 $batch->EndBatch();
 
 is(exists $batch->{'endtime'}, 1);
+
+$batch->CreateEicarBatch();
+while (($key, $message) = each %{$batch->{messages}}) {
+    is($message->{from}, 'sender@example.com');
+    is($message->{subject}, 'Virus Scanner Test Message');
+}
 
