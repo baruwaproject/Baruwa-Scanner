@@ -527,26 +527,26 @@ sub ReadMessageHandle {
 # Produce a pipe that will read the whole message.
 # Need to be passed the message to find the headers path
 # as it's not part of the DiskStore.
-sub ReadMessagePipe {
-    my $this    = shift;
-    my $message = shift;
+# sub ReadMessagePipe {
+#     my $this    = shift;
+#     my $message = shift;
 
-    my $pipe = new IO::Pipe;
+#     my $pipe = new IO::Pipe;
 
-    Baruwa::Scanner::Log::DieLog(
-        "Cannot build message from $this->{dpath} "
-          . "and $message->{headerspath}, %s",
-        $!
-    ) unless defined $pipe;
+#     Baruwa::Scanner::Log::DieLog(
+#         "Cannot build message from $this->{dpath} "
+#           . "and $message->{headerspath}, %s",
+#         $!
+#     ) unless defined $pipe;
 
-    my $pid = $this->WriteEntireMessage($message, $pipe, 'pipe');
+#     my $pid = $this->WriteEntireMessage($message, $pipe, 'pipe');
 
-    # We have to tell the caller what the child's pid is in order to
-    # reap it. Although IO::Pipe does this for us when it is told to
-    # fork and exec, it unfortunately doesn't have a neat hook for us
-    # to tell it the pid when we do the fork. Bah.
-    return ($pipe, $pid);
+#     # We have to tell the caller what the child's pid is in order to
+#     # reap it. Although IO::Pipe does this for us when it is told to
+#     # fork and exec, it unfortunately doesn't have a neat hook for us
+#     # to tell it the pid when we do the fork. Bah.
+#     return ($pipe, $pid);
 
-}
+# }
 
 1;
