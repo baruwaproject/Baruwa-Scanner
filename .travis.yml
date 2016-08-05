@@ -12,7 +12,7 @@ before_install:
   - curl -O http://www.cpan.org/authors/id/J/JM/JMEHNLE/mail-spf/Mail-SPF-v2.9.0.tar.gz
   - tar xzvf Mail-SPF-v2.9.0.tar.gz
   - pushd Mail-SPF-v2.9.0
-  - perl Build.PL && ./Build install --install_path sbin=/home/travis/perl5/perlbrew/perls/5.10/sbin
+  - perl Build.PL && ./Build install --install_path sbin=${PERLBREW_ROOT}/perls/${PERLBREW_PERL}/sbin
   - popd && rm -rf Mail-SPF-v2.9.0
 install:
   - cpanm -v --installdeps --notest .
