@@ -11,7 +11,7 @@ use FindBin '$Bin';
 use File::Path qw(make_path remove_tree);
 use Exporter qw/import/;
 
-our @EXPORT = qw/create_config make_test_dirs/;
+our @EXPORT = qw/create_config make_test_dirs create_file/;
 
 my @paths = (
     "$Bin/data/var/run/baruwa/scanner",
@@ -24,7 +24,7 @@ my @paths = (
     "$Bin/data/etc/mail/baruwa/dynamic/signatures",
 );
 my @files = ("$Bin/data/var/lock/Baruwa/test-lock");
-our @msgs = ('1bUUOQ-0000g4-C7', '1bUvRz-0001Mr-4W');
+our @msgs = ('1bUUOQ-0000g4-C7', '1bUvRz-0001Mr-4W', '1bVCqk-0001rd-7G');
 
 my $header1 = <<'HEADER1';
 1bUUOQ-0000g4-C7-H
@@ -466,6 +466,71 @@ AAAAAAAAAABDAAAAdAAAAAAAAAA=
 
 
 BODY2
+my $header3 = <<'HEADER3';
+1bVCqk-0001rd-7G-H
+exim 93 93
+<andrew@home.topdog-software.com>
+1470294830 0
+-helo_name fuzzylumpkins.local
+-host_address 192.168.1.52.61162
+-interface_address 192.168.1.14.25
+-active_hostname ms2.home.topdog-software.com
+-received_protocol esmtps
+-aclc _n 1
+0
+-aclc _l 3
+250
+-aclm _av_scanner 32
+clamd:/var/run/clamav/clamd.sock
+-aclm 0 2
+no
+-body_linecount 20
+-max_received_linelength 76
+-host_lookup_failed
+-tls_cipher TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256
+-tls_ourcert -----BEGIN CERTIFICATE-----\nMIIGRjCCBS6gAwIBAgISAyaEr1dYsVd/bDUKfZmQByDFMA0GCSqGSIb3DQEBCwUA\nMEoxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MSMwIQYDVQQD\nExpMZXQncyBFbmNyeXB0IEF1dGhvcml0eSBYMzAeFw0xNjA2MTgxNjAwMDBaFw0x\nNjA5MTYxNjAwMDBaMCoxKDAmBgNVBAMTH3NjYW5uZXIubGFiLnRvcGRvZy1zb2Z0\nd2FyZS5jb20wggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQCu9Xl/A28t\n3TeU/NkVQtAlioDOtEPqkOdslKviiKS/saQItq1ojlX/ohb37v+aW/74EiW2IjYd\nQwXa2sI1XjwLCHJ3PGQVpxMGhvvFW5lLfsBEi4lqjQdaIt7G/ZN3oAMJf078Hs28\nVMjKPvMx1HxwFmxcdeTwpjBOXa4F4/HqLcRp8JrOcwBbZMgQQxfZagfpmQ4XKMsC\nrXAL16KT6x+T0cLDxtLo32mc75hQZ1UhutWRNFI7O151pgS+cdNR77Y/FiRcfQ8y\nqz4NNIMQEuSy8UPtlHgw+mHrpjnYmuHf8ogchJMb3ZvdsQUX+xFL5a/VVtuMTYmk\nFdx7V0Guz7Y1YUzVDU9tsz96G0V3y0UaIOgAPUabBvUnsyhQ40Js7nR+/BZ34uzx\nFBLp9BSA5zhc3shslUN7WrV+3v9462mYKTrdjH3qwyaeh9d8HNM39O2yJmkkJvv/\npwevbLvqIRN3vCCBmlFi8qsgwOG08Zm/yiDOzFg5BjZVXw6ADI7sMUqlvxZx5whM\nOHnr1ua/GNpHRwTeXkGuQtvFAjqPmQAXZeSQTNuUpNrclosgEvgpJchAKnkqBRFd\nXpKqGbKlp8UQYg0AQJiIipXc06ZHiIrZQ4g+3cbr7uQUrkuFxti4bo4fpXOj4P6M\nkXfPnoAGqx+dpv85ZEMkLpCjVr3/hxzoLQIDAQABo4ICRDCCAkAwDgYDVR0PAQH/\nBAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAMBgNVHRMBAf8E\nAjAAMB0GA1UdDgQWBBR7b9MfNDC6QGMCDOdpv7W0QVUskjAfBgNVHSMEGDAWgBSo\nSmpjBH3duubRObemRWXv86jsoTBwBggrBgEFBQcBAQRkMGIwLwYIKwYBBQUHMAGG\nI2h0dHA6Ly9vY3NwLmludC14My5sZXRzZW5jcnlwdC5vcmcvMC8GCCsGAQUFBzAC\nhiNodHRwOi8vY2VydC5pbnQteDMubGV0c2VuY3J5cHQub3JnLzBOBgNVHREERzBF\ngiJwb3N0b2ZmaWNlLmxhYi50b3Bkb2ctc29mdHdhcmUuY29tgh9zY2FubmVyLmxh\nYi50b3Bkb2ctc29mdHdhcmUuY29tMIH+BgNVHSAEgfYwgfMwCAYGZ4EMAQIBMIHm\nBgsrBgEEAYLfEwEBATCB1jAmBggrBgEFBQcCARYaaHR0cDovL2Nwcy5sZXRzZW5j\ncnlwdC5vcmcwgasGCCsGAQUFBwICMIGeDIGbVGhpcyBDZXJ0aWZpY2F0ZSBtYXkg\nb25seSBiZSByZWxpZWQgdXBvbiBieSBSZWx5aW5nIFBhcnRpZXMgYW5kIG9ubHkg\naW4gYWNjb3JkYW5jZSB3aXRoIHRoZSBDZXJ0aWZpY2F0ZSBQb2xpY3kgZm91bmQg\nYXQgaHR0cHM6Ly9sZXRzZW5jcnlwdC5vcmcvcmVwb3NpdG9yeS8wDQYJKoZIhvcN\nAQELBQADggEBAC3CFdwbBbVbGGh4Lga1yF8GDVkkjE7twQmJI0oWfjX87J4axJIG\neLK+DGdI0ZuknpwsxxA6CBIdibS6X9beEOYaOHza8WLz7GW2zX2u5RuOuBq6bpkd\nvxA8iBdWPY63DH4tYVceo8dqmCrlbHtEA99pesvUcH3Uy2IlvlVRjdSk9t0m9+em\nMWeF9gOwYxgdPys3QUayfBzK/x+lltJjxisibtUbou2AYDTIiMCxjrRTyiYYctNR\nTRdVKV0nOjjgvsscIkFBKP6iwmzyH6DgOTsfkzZkTqlOVU0rrBMlWXlqmd+3Be1Q\nIzRqELgGN2T7+j8cY9mgKyYhzZ3GrH7HIac=\n-----END CERTIFICATE-----\n
+XX
+1
+angel@home.topdog-software.com
+
+318P Received: from [192.168.1.52] (helo=fuzzylumpkins.local)
+    by postoffice.lab.topdog-software.com with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
+    (Baruwa 2.0)
+    (envelope-from <andrew@home.topdog-software.com>)
+    id 1bVCqk-0001rd-7G ret-id none;
+    for angel@home.topdog-software.com; Thu, 04 Aug 2016 09:13:50 +0200
+038  Date: Thu, 04 Aug 2016 09:13:52 +0200
+035T To: angel@home.topdog-software.com
+038F From: andrew@home.topdog-software.com
+046  Subject: test Thu, 04 Aug 2016 09:13:52 +0200
+057  X-Mailer: swaks v20130209.0 jetmore.org/john/code/swaks/
+018  MIME-Version: 1.0
+071  Content-Type: multipart/mixed; boundary="----=_MIME_BOUNDARY_000_5270"
+049  X-Baruwa-Virus-Checks: bypassed smtp time checks
+HEADER3
+my $body3 = <<'BODY3';
+1bVCqk-0001rd-7G-D
+------=_MIME_BOUNDARY_000_5270
+Content-Type: text/plain
+
+This is a test mailing
+------=_MIME_BOUNDARY_000_5270
+Content-Type: application/octet-stream; name="ignore.txt.zip"
+Content-Description: ignore.txt.zip
+Content-Disposition: attachment; filename="ignore.txt.zip"
+Content-Transfer-Encoding: BASE64
+
+UEsDBBQACAAIAOJO60gAAAAAAAAAAAAAAAAKABAAaWdub3JlLnR4dFVYDADs6qJX11CDV/UBFABl
+jLEOwjAQQ/f7lEq9SvwBlRgzwcIUXdIUoqa5KLm0gq+nFWVisZ9sy4omN/rgQB2AHAboq/8pGhJQ
+l9sZG1D3A9DsVQf6cMuLy3owHZjgN/XRdoBhTZZ58q5sTEX0d1aEpEB8Sco8IleBxMPpKXODMidI
+sxbW+w/0lOtK7dVSjC63zV+AQhkfb/gAUEsHCNqQup6LAAAAxgAAAFBLAQIVAxQACAAIAOJO60ja
+kLqeiwAAAMYAAAAKAAwAAAAAAAAAAECkgQAAAABpZ25vcmUudHh0VVgIAOzqolfXUINXUEsFBgAA
+AAABAAEARAAAANMAAAAAAA==
+
+------=_MIME_BOUNDARY_000_5270--
+
+
+BODY3
 
 sub create_config {
     my ($from, $to, $path) = @_;
@@ -501,6 +566,9 @@ sub make_test_dirs {
     create_file("$Bin/data/var/spool/exim.in/input/1bUvRz-0001Mr-4W-H",
         $header2);
     create_file("$Bin/data/var/spool/exim.in/input/1bUvRz-0001Mr-4W-D", $body2);
+    create_file("$Bin/data/var/spool/exim.in/input/1bVCqk-0001rd-7G-H",
+        $header3);
+    create_file("$Bin/data/var/spool/exim.in/input/1bVCqk-0001rd-7G-D", $body3);
 }
 
 sub create_file {
