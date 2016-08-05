@@ -1067,11 +1067,8 @@ t/lib/Test/Baruwa/Scanner.pm
 t/lock.t
 t/log.t
 t/mail.t
-t/manifest.t
 t/message.t
 t/messagebatch.t
-t/pod-coverage.t
-t/pod.t
 t/quarantine.t
 t/queue.t
 t/rbls.t
