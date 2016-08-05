@@ -19,7 +19,7 @@
 # :copyright: Copyright (C) 2002  Julian Field
 #
 
-package Baruwa::Scanner::Sendmail;
+package Baruwa::Scanner::Mta;
 
 use strict 'vars';
 use strict 'refs';

@@ -6,28 +6,28 @@ use Test::Output;
 use FindBin '$Bin';
 use Test::More qw(no_plan);
 use Baruwa::Scanner();
+use Baruwa::Scanner::Mta();
 use Baruwa::Scanner::Message();
 use Baruwa::Scanner::WorkArea();
 use Baruwa::Scanner::Queue();
 use Baruwa::Scanner::Config();
 use Baruwa::Scanner::Quarantine();
-require "Baruwa/Scanner/Exim.pm";
 use lib "$Bin/lib";
 use Test::Baruwa::Scanner;
 
 # plan tests => 1;
 
 BEGIN {
-    require_ok('Baruwa/Scanner/EximDiskStore.pm') || print "Bail out!\n";
+    use_ok('Baruwa::Scanner::EximDiskStore') || print "Bail out!\n";
 }
 
 diag(
-    "Testing Baruwa::Scanner::SMDiskStore $Baruwa::Scanner::SMDiskStore::VERSION, Perl $], $^X"
+    "Testing Baruwa::Scanner::EximDiskStore $Baruwa::Scanner::EximDiskStore::VERSION, Perl $], $^X"
 );
 
 make_test_dirs();
 
-can_ok('Baruwa::Scanner::SMDiskStore', 'new');
+can_ok('Baruwa::Scanner::EximDiskStore', 'new');
 
 my $from    = "$Bin/configs/template.conf";
 my $conf    = "$Bin/data/etc/mail/baruwa/baruwa.conf";
@@ -37,7 +37,7 @@ Baruwa::Scanner::Config::Read($conf, 0);
 my $workarea = new Baruwa::Scanner::WorkArea;
 my $inqueue =
   new Baruwa::Scanner::Queue(@{Baruwa::Scanner::Config::Value('inqueuedir')});
-my $mta  = new Baruwa::Scanner::Sendmail;
+my $mta  = new Baruwa::Scanner::Mta;
 my $quar = new Baruwa::Scanner::Quarantine;
 my $q    = Baruwa::Scanner::Config::Value('inqueuedir');
 my $oq   = Baruwa::Scanner::Config::Value('outqueuedir');
@@ -50,9 +50,9 @@ $global::MS = new Baruwa::Scanner(
 );
 
 my $msgid = $Test::Baruwa::Scanner::msgs[0];
-my $s = new Baruwa::Scanner::SMDiskStore($msgid, $q->[0]);
+my $s = new Baruwa::Scanner::EximDiskStore($msgid, $q->[0]);
 #
-isa_ok($s, 'Baruwa::Scanner::SMDiskStore', '$s');
+isa_ok($s, 'Baruwa::Scanner::EximDiskStore', '$s');
 
 can_ok($s, 'print');
 
@@ -90,7 +90,7 @@ unless (-d $dir) {
 }
 $m->WriteHeaderFile();
 $m->Explode();
-$s = new Baruwa::Scanner::SMDiskStore($msgid, $q->[0]);
+$s = new Baruwa::Scanner::EximDiskStore($msgid, $q->[0]);
 
 can_ok($s, 'OutQDir');
 
@@ -98,7 +98,7 @@ is($s->OutQDir(), '/');
 
 can_ok($s, 'OutQName');
 
-is(Baruwa::Scanner::SMDiskStore::OutQName($oq, $s->{hname}),
+is(Baruwa::Scanner::EximDiskStore::OutQName($oq, $s->{hname}),
     $oq . '/' . $s->{'hname'});
 
 my (@body, $retval);
@@ -151,7 +151,7 @@ isnt(-f $s->{'dpath'}, 1);
 
 make_test_dirs();
 
-$s = new Baruwa::Scanner::SMDiskStore($msgid, $q->[0]);
+$s = new Baruwa::Scanner::EximDiskStore($msgid, $q->[0]);
 $s->Lock();
 
 can_ok($s, 'CopyToDir');
@@ -169,7 +169,7 @@ is(-f $s->{'dpath'}, 1);
 
 can_ok($s, 'DoPendingDeletes');
 
-@Baruwa::Scanner::SMDiskStore::DeletesPending = ($s->{'hpath'}, $s->{'dpath'});
+@Baruwa::Scanner::EximDiskStore::DeletesPending = ($s->{'hpath'}, $s->{'dpath'});
 
 $s->DoPendingDeletes();
 

@@ -66,7 +66,7 @@ sub TellAbout {
     return unless %OutQueues;
 
     # Now takes a hash of queues-->space-separated string of message ids
-    Baruwa::Scanner::Sendmail::KickMessage(\%OutQueues, \%Sendmail2);
+    Baruwa::Scanner::Mta::KickMessage(\%OutQueues, \%Sendmail2);
 }
 
 # Constructor.

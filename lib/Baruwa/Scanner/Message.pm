@@ -46,7 +46,7 @@ use File::Temp;
 use File::Copy qw/move/;
 use Baruwa::Scanner::TNEF();
 use Baruwa::Scanner::FileInto();
-require "Baruwa/Scanner/EximDiskStore.pm";
+use Baruwa::Scanner::EximDiskStore();
 
 # Install an extra MIME decoder for badly-header uue messages.
 install MIME::Decoder::UU 'uuencode';
@@ -60,7 +60,7 @@ our $VERSION = '4.086000';
 # Attributes are
 #
 # $id     set by new
-# $store    set by new (is a SMDiskStore for now)
+# $store    set by new (is a EximDiskStore for now)
 # #$hpath   set by new
 # #$dpath   set by new
 # $size     set by new (copy of $store->{size})
@@ -199,12 +199,12 @@ sub new {
 
     if ($fake) {
         bless $this, $type;
-        $this->{store} = new Baruwa::Scanner::SMDiskStore($id, $queuedirname);
+        $this->{store} = new Baruwa::Scanner::EximDiskStore($id, $queuedirname);
         return $this;
     }
 
     # Create somewhere to store the message
-    $this->{store} = new Baruwa::Scanner::SMDiskStore($id, $queuedirname);
+    $this->{store} = new Baruwa::Scanner::EximDiskStore($id, $queuedirname);
 
     # Try to open and exclusive-lock this message. Return undef if failed.
     # print STDERR "Trying to lock message " . $this->{id} . "\n";

@@ -6,10 +6,10 @@ use FindBin '$Bin';
 use File::Path qw(remove_tree);
 use Test::More qw(no_plan);
 use Baruwa::Scanner();
+use Baruwa::Scanner::Mta();
 use Baruwa::Scanner::Queue();
 use Baruwa::Scanner::Config();
 use Baruwa::Scanner::WorkArea();
-require "Baruwa/Scanner/Exim.pm";
 use lib "$Bin/lib";
 use Test::Baruwa::Scanner;
 
@@ -47,7 +47,7 @@ is(Baruwa::Scanner::Quarantine::TodayDir(), $today);
 my $workarea = new Baruwa::Scanner::WorkArea;
 my $inqueue =
   new Baruwa::Scanner::Queue(@{Baruwa::Scanner::Config::Value('inqueuedir')});
-my $mta = new Baruwa::Scanner::Sendmail;
+my $mta = new Baruwa::Scanner::Mta;
 my $q   = Baruwa::Scanner::Config::Value('inqueuedir');
 
 $global::MS = new Baruwa::Scanner(

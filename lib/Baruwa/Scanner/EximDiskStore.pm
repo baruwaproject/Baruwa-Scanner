@@ -19,7 +19,7 @@
 # :copyright: Copyright (C) 2002  Julian Field
 #
 
-package Baruwa::Scanner::SMDiskStore;
+package Baruwa::Scanner::EximDiskStore;
 
 use strict 'vars';
 use strict 'refs';
@@ -60,7 +60,7 @@ sub new {
     my $mta  = $global::MS->{mta};
     $this->{dir} = $dir;
 
-    #print STDERR "Creating SMDiskStore($id)\n";
+    #print STDERR "Creating EximDiskStore($id)\n";
     $this->{dname} = $mta->DFileName($id);
     $this->{hname} = $mta->HFileName($id);
     $this->{tname} = $mta->TFileName($id);
@@ -269,7 +269,7 @@ sub WriteHeader {
       Baruwa::Scanner::Log::DieLog("Cannot create + lock clean tempfile %s, %s",
         $tfile, $!);
 
-    $Tf->print(Baruwa::Scanner::Sendmail::CreateQf($message))
+    $Tf->print(Baruwa::Scanner::Mta::CreateQf($message))
       or Baruwa::Scanner::Log::DieLog(
         "Failed to write headers for unscanned " . "message %s, %s",
         $message->{id}, $!);

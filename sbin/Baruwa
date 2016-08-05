@@ -53,6 +53,8 @@ use Baruwa::Scanner::SweepOther;
 use Baruwa::Scanner::SweepViruses;
 use Baruwa::Scanner::TNEF;
 use Baruwa::Scanner::WorkArea;
+use Baruwa::Scanner::Mta;
+use Baruwa::Scanner::EximDiskStore;
 use Baruwa::Scanner;
 
 my $autoinstalled = 0;
@@ -343,19 +345,6 @@ Baruwa::Scanner::Config::SetPercent('version',
 # Load the MTA modules we need
 my ($MTAmod, $MTADSmod);
 
-# LEOH:if (Baruwa::Scanner::Config::QuickPeek($ConfFile, 'mta') =~ /exim/i) {
-$_ = Baruwa::Scanner::Config::QuickPeek($ConfFile, 'mta');
-$_ = 'sendmail' if $WantLintOnly || $WantLintLiteOnly || $WantRuleCheck;
-if (/exim/i) {
-    $MTAmod   = 'Exim.pm';
-    $MTADSmod = 'EximDiskStore.pm';
-} else {
-    $MTAmod   = 'Sendmail.pm';
-    $MTADSmod = 'SMDiskStore.pm';
-}
-require "Baruwa/Scanner/$MTAmod";
-require "Baruwa/Scanner/$MTADSmod";
-
 # All they want is the list of settings that have been changed from the
 # default values hard-coded into ConfigDefs.pl. These values may well be
 # different from those supplied in the default baruwa.conf file.
@@ -505,7 +494,7 @@ if ($WantLintOnly || $WantLintLiteOnly) {
     my $workarea = new Baruwa::Scanner::WorkArea;
     my $inqueue  = new Baruwa::Scanner::Queue(
         @{Baruwa::Scanner::Config::Value('inqueuedir')});
-    my $mta  = new Baruwa::Scanner::Sendmail;
+    my $mta  = new Baruwa::Scanner::Mta;
     my $quar = new Baruwa::Scanner::Quarantine;
 
     $global::MS = new Baruwa::Scanner(
@@ -526,7 +515,7 @@ if ($WantLintOnly || $WantLintLiteOnly) {
     Baruwa::Scanner::SA::initialise(0, 1);    # Just do a Lint check
     Baruwa::Scanner::Log::Reset();
     Baruwa::Scanner::TNEF::initialise();
-    Baruwa::Scanner::Sendmail::initialise();
+    Baruwa::Scanner::Mta::initialise();
     Baruwa::Scanner::SweepViruses::initialise();
     CreateProcessingDatabase(1);              # Just do a Lint check
 
@@ -593,7 +582,7 @@ if ($WantRuleCheck ne "") {
     my $inqueue =
       new Baruwa::Scanner::Queue(
         @{Baruwa::Scanner::Config::Value('inqueuedir')});
-    my $mta  = new Baruwa::Scanner::Sendmail;
+    my $mta  = new Baruwa::Scanner::Mta;
     my $quar = new Baruwa::Scanner::Quarantine;
     $global::MS = new Baruwa::Scanner(
         WorkArea   => $workarea,
@@ -946,7 +935,7 @@ sub WorkForHours {
     Baruwa::Scanner::TNEF::initialise();
 
     # Setup the Sendmail and Sendmail2 variables if they aren't set yet
-    Baruwa::Scanner::Sendmail::initialise();
+    Baruwa::Scanner::Mta::initialise();
     CheckQueuesAreTogether();    # Can only do this after reading conf file
     Baruwa::Scanner::SweepViruses::initialise();    # Setup Sophos SAVI library
     CreateProcessingDatabase();
@@ -955,7 +944,7 @@ sub WorkForHours {
     my $inqueue =
       new Baruwa::Scanner::Queue(
         @{Baruwa::Scanner::Config::Value('inqueuedir')});
-    my $mta  = new Baruwa::Scanner::Sendmail;
+    my $mta  = new Baruwa::Scanner::Mta;
     my $quar = new Baruwa::Scanner::Quarantine;
 
     $global::MS = new Baruwa::Scanner(
@@ -1209,7 +1198,7 @@ sub ExitChild {
     Baruwa::Scanner::Log::InfoLog("Baruwa child caught a SIG%s", $sig);
 
     # Finish off any incoming queue file deletes that were pending
-    Baruwa::Scanner::SMDiskStore::DoPendingDeletes();
+    Baruwa::Scanner::EximDiskStore::DoPendingDeletes();
 
     # Delete SpamAssassin rebuild signaller
     unlink $Baruwa::Scanner::SA::BayesRebuildStartLock
@@ -1500,7 +1489,7 @@ sub CheckQueuesAreTogether {
     #print STDERR "Queues are \"" . join('","',@inqdirs) . "\"\n";
 
    #Baruwa::Scanner::Log::WarnLog("Queuedir is %s", $outqdir);
-   #Outq cannot be split: Baruwa::Scanner::Sendmail::CheckQueueIsFlat($outqdir);
+   #Outq cannot be split: Baruwa::Scanner::Mta::CheckQueueIsFlat($outqdir);
     chdir($outqdir);    # This should be the default
     @outstat = stat('.');
     ($outdevice, $outuid, $outgrp) = @outstat[0, 4, 5];
@@ -1515,7 +1504,7 @@ sub CheckQueuesAreTogether {
         $inqdir = $1;
 
         #Baruwa::Scanner::Log::WarnLog("Inq %s", $inqdir);
-        Baruwa::Scanner::Sendmail::CheckQueueIsFlat($inqdir);
+        Baruwa::Scanner::Mta::CheckQueueIsFlat($inqdir);
         chdir($inqdir);
         @instat = stat('.');
         ($indevice, $inuid, $ingrp) = @instat[0, 4, 5];

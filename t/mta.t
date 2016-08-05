@@ -10,16 +10,16 @@ use Test::More qw(no_plan);
 # plan tests => 1;
 
 BEGIN {
-    require_ok('Baruwa/Scanner/Exim.pm') || print "Bail out!\n";
+    use_ok('Baruwa::Scanner::Mta') || print "Bail out!\n";
 }
 
-diag("Testing Baruwa::Scanner::Sendmail $Baruwa::Scanner::Sendmail::VERSION, Perl $], $^X");
+diag("Testing Baruwa::Scanner::Mta $Baruwa::Scanner::Mta::VERSION, Perl $], $^X");
 
-can_ok('Baruwa::Scanner::Sendmail', 'new');
+can_ok('Baruwa::Scanner::Mta', 'new');
 
-my $e = new Baruwa::Scanner::Sendmail();
+my $e = new Baruwa::Scanner::Mta();
 
-isa_ok($e, 'Baruwa::Scanner::Sendmail', '$e');
+isa_ok($e, 'Baruwa::Scanner::Mta', '$e');
 
 can_ok($e, 'initialise');
 
