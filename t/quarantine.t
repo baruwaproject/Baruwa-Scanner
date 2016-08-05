@@ -77,3 +77,13 @@ is(-d "$qbase/$today", 1);
 is(-f "$qbase/$today/$msgid/message", 1);
 
 is($m->{quarantineplaces}[0], "$qbase/$today/$msgid");
+
+remove_tree("$qbase", {keep_root => 0});
+
+isnt(-d "$qbase/$today", 1);
+
+$qdir->StoreInfections($m);
+
+is(-d "$qbase/$today", 1);
+
+is($m->{quarantineplaces}[0], "$qbase/$today/$msgid");
