@@ -1157,8 +1157,8 @@ sub CreateEicarBatch {
     ($fh, $temporaryname) = tempfile()
       or die "Could not create temp file $temporaryname for test message, $!";
 
-   # This is a Base64-encoded, then ROT13-encoded copy of the EICAR test string.
-   # Had to ROT13 it, otherwise new clamd detects it and quarantines this file.
+    # This is a Base64-encoded, then ROT13-encoded copy of the EICAR test string.
+    # Had to ROT13 it, otherwise new clamd detects it and quarantines this file.
     my $eicarstring =
       "JQICVINyDRSDJmEpHScLAGDbHS4cA0AQXGq9WRIWD0SFYIAHDH5RDIWRYHSBIRyJFIWIHl1HEIAH\nYHMWGRHuWRteFPb=\n";
     $eicarstring =~ tr[a-zA-Z][n-za-mN-ZA-M];    # Undo ROT13 encoding
