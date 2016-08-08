@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use File::Which;
 use FindBin '$Bin';
-use File::Map qw(map_file);
 use Test::More qw(no_plan);
 use Baruwa::Scanner();
 use Baruwa::Scanner::Mta();
@@ -31,20 +30,21 @@ my $a = new Baruwa::Scanner::Antiword();
 
 isa_ok($a, 'Baruwa::Scanner::Antiword', '$a');
 
-my $from    = "$Bin/configs/template.conf";
-my $conf    = "$Bin/data/etc/mail/baruwa/baruwa.conf";
-my $datadir = "$Bin/data";
+my $from          = "$Bin/configs/template.conf";
+my $conf          = "$Bin/data/etc/mail/baruwa/baruwa.conf";
+my $conf_antiword = "$Bin/data/etc/mail/baruwa/baruwa-antiword.conf";
+my $datadir       = "$Bin/data";
 create_config($from, $conf, $datadir);
-map_file my $conf_map, $conf, '+<';
+
 my $antiword_path = which('antiword');
 if ($antiword_path) {
-    {
-        no warnings;
-        $conf_map =~ s|Antiword = /usr/bin/antiword|Antiword = $antiword_path|;
-        create_file($conf, $conf_map, 1);
-    }
+    my @antiword_matches = ('Antiword = /usr/bin/antiword');
+    my @antiword_repls   = ("Antiword = $antiword_path");
+    update_config($conf, $conf_antiword, \@antiword_matches, \@antiword_repls);
+    Baruwa::Scanner::Config::Read($conf_antiword, 0);
+} else {
+    Baruwa::Scanner::Config::Read($conf, 0);
 }
-Baruwa::Scanner::Config::Read($conf, 0);
 
 my $workarea = new Baruwa::Scanner::WorkArea;
 my $inqueue =
@@ -74,11 +74,12 @@ is(exists $docfiles->{'nkudzu.doc'}, 1);
 
 SKIP: {
     my ($docfile, $parent, $antiword, $len, @anti);
-    $len = keys %$docfiles;
-    @anti = split(/\s+/, Baruwa::Scanner::Config::Value('antiword'));
+    $len      = keys %$docfiles;
+    @anti     = split(/\s+/, Baruwa::Scanner::Config::Value('antiword'));
     $antiword = $anti[0];
-    skip('Antiword is required to run this test', $len) unless(-f $antiword);
+    skip('Antiword is required to run this test', $len) unless (-f $antiword);
     while (($docfile, $parent) = each %$docfiles) {
-        is(Baruwa::Scanner::Antiword::RunAntiword($dir, $docfile, $parent, $m), 1);
+        is(Baruwa::Scanner::Antiword::RunAntiword($dir, $docfile, $parent, $m),
+            1);
     }
 }

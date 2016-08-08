@@ -36,11 +36,10 @@ my $builder = Module::Build->new(
         'Devel::Cover' => 0,
         'Test::Exception' => 0,
         'File::Touch' => 0,
-        'File::NCopy' => 0,
         'File::Path' => 0,
-        'File::Map' => 0,
         'File::Which' => 0,
         'Test::Output' => 0,
+        'File::Copy::Recursive' => 0,
     },
     requires => {
         'Archive::Zip' => 0,

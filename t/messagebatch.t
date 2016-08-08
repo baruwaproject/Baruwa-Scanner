@@ -2,6 +2,7 @@
 use v5.10;
 use strict;
 use warnings;
+use File::Which;
 use Test::Output;
 use FindBin '$Bin';
 use Test::Exception;
@@ -33,8 +34,14 @@ throws_ok {my $batch = new Baruwa::Scanner::MessageBatch('normal', undef)}
 qr/Tried to create a MessageBatch without calling initglobals/,
   'Throws error if Baruwa::Scanner::MessageBatch::initialize not called';
 
-my $conf = "$Bin/data/etc/mail/baruwa/baruwa.conf";
-Baruwa::Scanner::Config::Read($conf, 0);
+my $tnef_path = which('tnef');
+$tnef_path = '/usr/bin/tnef' unless ($tnef_path);
+my $conf             = "$Bin/data/etc/mail/baruwa/baruwa.conf";
+my $conf_external    = "$Bin/data/etc/mail/baruwa/baruwa-tnef-external.conf";
+my @external_matches = ('^TNEF Expander = /usr/bin/tnef --maxsize=100000000$');
+my @external_repls   = ("TNEF Expander = $tnef_path --maxsize=100000000");
+update_config($conf, $conf_external, \@external_matches, \@external_repls);
+Baruwa::Scanner::Config::Read($conf_external, 0);
 my $workarea = new Baruwa::Scanner::WorkArea;
 my $inqueue =
   new Baruwa::Scanner::Queue(@{Baruwa::Scanner::Config::Value('inqueuedir')});
@@ -112,7 +119,7 @@ can_ok($batch, 'DropBatch');
 $batch->DropBatch();
 
 while (($key, $message) = each %{$batch->{messages}}) {
-    is($message->{deleted}, 1);
+    is($message->{deleted},      1);
     is($message->{gonefromdisk}, 1);
 }
 
@@ -124,7 +131,7 @@ is(exists $batch->{'endtime'}, 1);
 
 $batch->CreateEicarBatch();
 while (($key, $message) = each %{$batch->{messages}}) {
-    is($message->{from}, 'sender@example.com');
+    is($message->{from},    'sender@example.com');
     is($message->{subject}, 'Virus Scanner Test Message');
 }
 
