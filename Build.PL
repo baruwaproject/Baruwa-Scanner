@@ -39,6 +39,7 @@ my $builder = Module::Build->new(
         'File::Path' => 0,
         'File::Which' => 0,
         'Test::Output' => 0,
+        'Test::MockModule' => 0,
         'File::Copy::Recursive' => 0,
     },
     requires => {
