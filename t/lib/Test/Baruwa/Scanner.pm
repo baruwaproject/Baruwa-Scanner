@@ -580,8 +580,8 @@ sub make_test_dirs {
 }
 
 sub create_file {
-    my ($filename, $data) = @_;
-    unless (-f "$filename") {
+    my ($filename, $data, $overwrite) = @_;
+    unless (-f "$filename" and !$overwrite) {
         open(FILE, '>', $filename) or die "Could not create file: $filename";
         print FILE $data;
         close(FILE);

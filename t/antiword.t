@@ -2,7 +2,9 @@
 use v5.10;
 use strict;
 use warnings;
+use File::Which;
 use FindBin '$Bin';
+use File::Map qw(map_file);
 use Test::More qw(no_plan);
 use Baruwa::Scanner();
 use Baruwa::Scanner::Mta();
@@ -33,6 +35,15 @@ my $from    = "$Bin/configs/template.conf";
 my $conf    = "$Bin/data/etc/mail/baruwa/baruwa.conf";
 my $datadir = "$Bin/data";
 create_config($from, $conf, $datadir);
+map_file my $conf_map, $conf, '+<';
+my $antiword_path = which('antiword');
+if ($antiword_path) {
+    {
+        no warnings;
+        $conf_map =~ s|Antiword = /usr/bin/antiword|Antiword = $antiword_path|;
+        create_file($conf, $conf_map, 1);
+    }
+}
 Baruwa::Scanner::Config::Read($conf, 0);
 
 my $workarea = new Baruwa::Scanner::WorkArea;

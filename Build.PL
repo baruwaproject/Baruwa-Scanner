@@ -38,6 +38,8 @@ my $builder = Module::Build->new(
         'File::Touch' => 0,
         'File::NCopy' => 0,
         'File::Path' => 0,
+        'File::Map' => 0,
+        'File::Which' => 0,
         'Test::Output' => 0,
     },
     requires => {
