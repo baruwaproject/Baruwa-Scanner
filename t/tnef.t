@@ -49,14 +49,6 @@ update_config(
 );
 Baruwa::Scanner::Config::Read($conf_external, 0);
 
-can_ok('Baruwa::Scanner::TNEF', 'new');
-
-my $t = new Baruwa::Scanner::TNEF();
-
-isa_ok($t, 'Baruwa::Scanner::TNEF', '$t');
-
-can_ok($t, 'initialise');
-
 is($Baruwa::Scanner::TNEF::UseTNEFModule, 0);
 
 my $workarea = new Baruwa::Scanner::WorkArea;
@@ -79,7 +71,6 @@ can_ok('Baruwa::Scanner::TNEF', 'FindTNEFFile');
 my ($tnefentity, $tnefname, $msg, $entity);
 ($msg, $entity) = _parse_msg($msgid);
 
-# $msg->{entity} = $entity;
 ($tnefentity, $tnefname) = Baruwa::Scanner::TNEF::FindTNEFFile($entity);
 
 is($tnefentity, undef);
@@ -117,8 +108,7 @@ is($msg->{bodymodified}, 1);
 
 Baruwa::Scanner::Config::Read($conf_internal, 0);
 
-$t = new Baruwa::Scanner::TNEF();
-$t->initialise();
+Baruwa::Scanner::TNEF::initialise();
 
 is($Baruwa::Scanner::TNEF::UseTNEFModule, 1);
 

@@ -49,17 +49,6 @@ sub initialise {
     }
 }
 
-# Constructor.
-sub new {
-    my $type = shift;
-    my $this = {};
-
-    #$this->{dir} = shift;
-
-    bless $this, $type;
-    return $this;
-}
-
 # Look through an entity to find a TNEF file. Recursive.
 # Returns a list of the entity and the real filename with type indicator
 sub FindTNEFFile {
