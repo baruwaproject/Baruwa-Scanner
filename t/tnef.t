@@ -75,6 +75,7 @@ my ($tnefentity, $tnefname, $msg, $entity);
 
 is($tnefentity, undef);
 is($tnefname,   undef);
+$msg->{store}->Unlock();
 
 $msgid = $Test::Baruwa::Scanner::msgs[4];
 ($msg,        $entity)   = _parse_msg($msgid);
@@ -90,6 +91,7 @@ is( Baruwa::Scanner::TNEF::Decoder(
     1
 );
 is($msg->{bodymodified}, 1);
+$msg->{store}->Unlock();
 
 my $perms  = $global::MS->{work}->{fileumask} ^ 0777;
 my $owner  = $global::MS->{work}->{uid};
@@ -105,6 +107,7 @@ is( Baruwa::Scanner::TNEF::ExternalDecoder(
     1
 );
 is($msg->{bodymodified}, 1);
+$msg->{store}->Unlock();
 
 Baruwa::Scanner::Config::Read($conf_internal, 0);
 
@@ -121,6 +124,7 @@ is( Baruwa::Scanner::TNEF::InternalDecoder(
     1
 );
 is($msg->{bodymodified}, 1);
+$msg->{store}->Unlock();
 
 sub _parse_msg {
     my ($msgid) = @_;
