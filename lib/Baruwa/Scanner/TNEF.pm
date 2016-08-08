@@ -32,7 +32,7 @@ use POSIX qw(:signal_h setsid);    # For Solaris 9 SIG bug workaround
 
 our $VERSION = '4.086000';
 
-my ($UseTNEFModule) = 0;
+our ($UseTNEFModule) = 0;
 
 # Attributes are
 #
@@ -125,8 +125,7 @@ sub InternalDecoder {
     my ($dir, $tnefname, $message, $perms, $owner, $group, $change) = @_;
     my ($fh, %parms);
 
-    # Make the temporary tnef files be created under /tmp for easy removal.
-    my $tempdir = tempdir();
+    my $tempdir = tempdir("tnefXXXXX", DIR => $dir);
     chmod 0700, $tempdir;
     %parms = (
         ignore_checksum => "true",
@@ -137,9 +136,11 @@ sub InternalDecoder {
 
     if ($tnef) {
 
-       #print STDERR "Parsing returned something\n";
-       #print STDERR "Attachment list is \"" . $tnef->attachments . "\"\n";
-       #print STDERR "List is \"" . join('","', @{$tnef->attachments}) . "\"\n";
+        # print STDERR "Parsing returned something\n";
+        # print STDERR "Attachment list is \"" . $tnef->attachments . "\"\n";
+        # print STDERR "List is \"" . join('","', @{$tnef->attachments}) . "\"\n";
+        # use Data::Dumper;
+        # print STDERR "TNEF: ". Dumper($tnef);
         my $addcontents = 0;
         $addcontents = 1
           if Baruwa::Scanner::Config::Value('replacetnef', $message) =~ /[12]/;
