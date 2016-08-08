@@ -40,13 +40,6 @@ my ($LOCK_EX) = 2;
 my ($LOCK_NB) = 4;
 my ($LOCK_UN) = 8;
 
-# Sophos SAVI Library object and ide directory modification time
-my ( $SAVI, $SAVIidedirmtime, $SAVIlibdirmtime, $SAVIinuse, %SAVIwatchfiles );
-$SAVIidedirmtime = 0;
-$SAVIlibdirmtime = 0;
-$SAVIinuse       = 0;
-%SAVIwatchfiles  = ();
-
 # ClamAV Module object and library directory modification time
 my ( $Clam, $Claminuse, %Clamwatchfiles, %ClamAVAlreadyLogged );
 $Claminuse      = 0;
@@ -76,19 +69,6 @@ my %Scanners = (
         ScanOptions      => '',
         InitParser       => \&InitGenericParser,
         ProcessOutput    => \&ProcessGenericOutput,
-        SupportScanning  => $S_SUPPORTED,
-        SupportDisinfect => $S_NONE,
-    },
-    sophossavi => {
-        Name => 'SophosSAVI',
-        Lock => 'sophosBusy.lock',
-
-        # In next line, '-ss' makes it work nice and quietly
-        CommonOptions    => '',
-        DisinfectOptions => '',
-        ScanOptions      => '',
-        InitParser       => \&InitSophosSAVIParser,
-        ProcessOutput    => \&ProcessSophosSAVIOutput,
         SupportScanning  => $S_SUPPORTED,
         SupportDisinfect => $S_NONE,
     },
@@ -318,7 +298,7 @@ my %Scanners = (
     },
 );
 
-# Initialise the Sophos SAVI library if we are using it.
+# Initialise the scannerlist.
 sub initialise {
     my (@scanners);
     $scannerlist = Baruwa::Scanner::Config::Value('virusscanners');
@@ -342,155 +322,6 @@ sub initialise {
     }
 
     $scannerlist =~ tr/,//d;
-    @scanners = split( " ", $scannerlist );
-
-    # Import the SAVI code and initialise the SAVI library
-    if ( grep /^sophossavi$/, @scanners ) {
-        $SAVIinuse = 1;
-        #print STDERR "SAVI in use\n";
-        InitialiseSAVI();
-    }
-}
-
-sub InitialiseSAVI {
-
-    # Initialise Sophos SAVI library
-    Baruwa::Scanner::Log::DieLog("SAVI Perl module not found") unless eval 'require SAVI';
-
-    my $SAVIidedir = Baruwa::Scanner::Config::Value('sophoside');
-    $SAVIidedir = '/usr/local/Sophos/ide' unless $SAVIidedir;
-    my $SAVIlibdir = Baruwa::Scanner::Config::Value('sophoslib');
-    $SAVIlibdir = '/usr/local/Sophos/lib' unless $SAVIlibdir;
-
-    $ENV{'SAV_IDE'} = $SAVIidedir;
-    print "INFO:: Meaningless output that goes nowhere, to keep SAVI happy\n";
-    $SAVI = new SAVI();
-    Baruwa::Scanner::Log::DieLog( "SophosSAVI ERROR:: initializing savi: %s (%s)",
-        SAVI->error_string($SAVI), $SAVI )
-      unless ref $SAVI;
-    my $version = $SAVI->version();
-    Baruwa::Scanner::Log::DieLog( "SophosSAVI ERROR:: getting version: %s (%s)",
-        $SAVI->error_string($version), $version )
-      unless ref $version;
-    Baruwa::Scanner::Log::InfoLog(
-        "SophosSAVI %s (engine %d.%d) recognizing " . "%d viruses",
-        $version->string, $version->major, $version->minor, $version->count );
-    my ( $ide, $idecount );
-    $idecount = 0;
-
-    foreach $ide ( $version->ide_list ) {
-
-        #Baruwa::Scanner::Log::InfoLog("SophosSAVI IDE %s released %s",
-        #                          $ide->name, $ide->date);
-        $idecount++;
-    }
-    Baruwa::Scanner::Log::InfoLog( "SophosSAVI using %d IDE files", $idecount );
-
-    # I have removed "Mac" and "SafeMacDfHandling" from here as setting
-    # them gives an error.
-    my @options = qw(
-      FullSweep DynamicDecompression FullMacroSweep OLE2Handling
-      IgnoreTemplateBit VBA3Handling VBA5Handling OF95DecryptHandling
-      HelpHandling DecompressVBA5 Emulation PEHandling ExcelFormulaHandling
-      PowerPointMacroHandling PowerPointEmbeddedHandling ProjectHandling
-      ZipDecompression ArjDecompression RarDecompression UueDecompression
-      GZipDecompression TarDecompression CmzDecompression HqxDecompression
-      MbinDecompression !LoopBackEnabled
-      Lha SfxArchives MSCabinet TnefAttachmentHandling MSCompress
-      !DeleteAllMacros Vbe !ExecFileDisinfection VisioFileHandling
-      Mime ActiveMimeHandling !DelVBA5Project
-      ScrapObjectHandling SrpStreamHandling Office2001Handling
-      Upx PalmPilotHandling HqxDecompression
-      Pdf Rtf Html Elf WordB OutlookExpress
-    );
-    my $error = $SAVI->set( 'MaxRecursionDepth', 30, 1 );
-    Baruwa::Scanner::Log::DieLog(
-        "SophosSAVI ERROR:: setting MaxRecursionDepth:" . " %s", $error )
-      if defined $error;
-
-    foreach (@options) {
-        my $value = ( $_ =~ s/^!// ) ? 0 : 1;
-        $error = $SAVI->set( $_, $value );
-        Baruwa::Scanner::Log::WarnLog( "SophosSAVI ERROR:: Setting %s: %s",
-            $_, $error )
-          if defined $error;
-    }
-
-    ## Store the last modified time of the SAVI lib directory, so we can check
-    ## for major upgrades
-    my (@statresults);
-
-    #@statresults = stat($SAVIidedir);
-    #$SAVIidedirmtime = $statresults[9] or
-    # Baruwa::Scanner::Log::WarnLog("Failed to read mtime of IDE dir %s",$SAVIidedir);
-    @statresults     = stat($SAVIlibdir);
-    $SAVIlibdirmtime = $statresults[9]
-      or Baruwa::Scanner::Log::WarnLog( "Failed to read mtime of lib dir %s",
-        $SAVIlibdir );
-
-    #Baruwa::Scanner::Log::InfoLog("Watching modification date of %s and %s",
-    #                          $SAVIidedir, $SAVIlibdir);
-
-    # Build the hash of the size of all the watch files
-    my ( @watchglobs, $glob, @filelist, $file, $filecount );
-    @watchglobs = split( " ", Baruwa::Scanner::Config::Value('saviwatchfiles') );
-    $filecount = 0;
-    foreach $glob (@watchglobs) {
-        @filelist = map { m/(.*)/ } glob($glob);
-        foreach $file (@filelist) {
-            $SAVIwatchfiles{$file} = -s $file;
-            $filecount++;
-        }
-    }
-    Baruwa::Scanner::Log::DieLog( "None of the files matched by the \"Monitors "
-          . "For Sophos Updates\" patterns exist!" )
-      unless $filecount > 0;
-}
-
-# Are there new Sophos IDE files?
-# If so, abandon this child process altogether and start again.
-# This is called from the main WorkForHours() loop
-#
-# If the lib directory has been updated, then a major Sophos update has
-# happened. If the watch files have changed their size at all, or any
-# of them have disappeared, then an IDE updated has happened.
-# Normally just watch /u/l/S/ide/*.zip.
-#
-sub SAVIUpgraded {
-    my ( @result, $idemtime, $libmtime, $watch, $size );
-
-    # If we aren't even using SAVI, then obviously we don't want to restart
-    return 0 unless $SAVIinuse;
-
-    @result = stat( Baruwa::Scanner::Config::Value('sophoslib')
-          || '/usr/local/Sophos/lib' );
-    $libmtime = $result[9];
-
-    if ( $libmtime != $SAVIlibdirmtime ) {
-        Baruwa::Scanner::Log::InfoLog(
-            "Sophos library update detected, " . "resetting SAVI" );
-        return 1;
-    }
-
-    while ( ( $watch, $size ) = each %SAVIwatchfiles ) {
-        if ( $size != -s $watch ) {
-            Baruwa::Scanner::Log::InfoLog(
-                "Sophos update of $watch detected, " . "resetting SAVI" );
-            keys %SAVIwatchfiles;    # Necessary line to reset each()
-            return 1;
-        }
-    }
-    # No update detected
-    return 0;
-}
-
-# Constructor.
-sub new {
-    my $type = shift;
-    my $this = {};
-
-    bless $this, $type;
-    return $this;
 }
 
 # Do all the commercial virus checking in here.
@@ -915,11 +746,7 @@ sub TryOneCommercial {
         else {
             # In the child
             POSIX::setsid();
-            if ( $scanner eq 'sophossavi' ) {
-                SophosSAVI( $subdir, $disinfect );
-                exit;
-            }
-            elsif ( $scanner eq 'clamd' ) {
+            if ( $scanner eq 'clamd' ) {
                 ClamdScan( $subdir, $disinfect, $batch );
                 exit;
             }
@@ -990,72 +817,8 @@ sub TryOneCommercial {
     return 1;
 }
 
-# Use the Sophos SAVI library (already initialised) to scan the contents of
-# a directory. Outputs in a very simple format that ProcessSophosSAVIOutput()
-# expects. 3 output fields separated by ":: ".
-sub SophosSAVI {
-    my ( $dirname, $disinfect ) = @_;
-
-    my ( $dir, $child, $childname, $filename, $results, $virus );
-
-    $|     = 1;
-    $dir   = new DirHandle;
-    $child = new DirHandle;
-
-    $dir->open($dirname)
-      or Baruwa::Scanner::Log::DieLog( "Can't open directory %s for scanning, %s",
-        $dirname, $! );
-
-    # Find all the subdirectories
-    while ( $childname = $dir->read() ) {
-        next unless -d "$dirname/$childname";    # Only search subdirs
-        next if $childname eq '.' || $childname eq '..';
-
-        my $tmpchild = "$dirname/$childname";
-        $tmpchild =~ /^(.*)$/;
-        $tmpchild = $1;
-        $child->open($tmpchild)
-          or
-          Baruwa::Scanner::Log::DieLog( "Can't open directory %s for scanning, %s",
-            "$dirname/$childname", $! );
-
-        # Scan all the files in the subdirectory
-        while ( $filename = $child->read() ) {
-            next unless -f "$dirname/$childname/$filename";   # Only check files
-            my $tmpfile = "$dirname/$childname/$filename";
-            $tmpfile =~ /^(.*)$/;
-            $tmpfile = $1;
-            $results = $SAVI->scan($tmpfile);
-            unless ( ref $results ) {
-                print "ERROR:: "
-                  . $SAVI->error_string($results)
-                  . " ($results):: "
-                  . "$dirname/$childname/$filename\n";
-                next;
-            }
-            if ( $results->infected ) {
-                print "INFECTED::";
-                foreach $virus ( $results->viruses ) {
-                    print " $virus";
-                }
-                print ":: $dirname/$childname/$filename\n";
-            }
-            else {
-                print "CLEAN:: :: $dirname/$childname/$filename\n";
-            }
-        }
-        $child->close;
-    }
-    $dir->close;
-}
-
 # Initialise any state variables the Generic output parser uses
 sub InitGenericParser {
-    ;
-}
-
-# Initialise any state variables the Sophos SAVI output parser uses
-sub InitSophosSAVIParser {
     ;
 }
 
@@ -1318,72 +1081,6 @@ sub ProcessGenericOutput {
       "$report$notype was infected by $virusname\n";
     $types->{"$id"}{"$part"} .= "v";    # it's a real virus
     return 1;
-}
-
-sub ProcessSophosSAVIOutput {
-    my ( $line, $infections, $types, $BaseDir, $Name ) = @_;
-    my ( $logout, $keyword, $virusname, $filename );
-    my ( $dot, $id, $part, @rest, $report );
-
-    chomp $line;
-    $logout = $line;
-    $logout =~ s/\s{20,}/ /g;
-
-    #$logout =~ s/%/%%/g;
-
-    ( $keyword, $virusname, $filename ) = split( /:: /, $line, 3 );
-
-    if ( $keyword =~ /^error/i ) {
-        ( $dot, $id, $part, @rest ) = split( /\//, $filename );
-        $report = $Name . ': ' if $Name;
-
-        my $notype = substr( $part, 1 );
-        $logout =~ s/\Q$part\E/$notype/;
-
-        # Allow any error messages that are mentioned in the
-        # Allowed Sophos Error Messages option.
-        my ( $errorlist, @errorlist, @errorregexps, $choice );
-        $errorlist = Baruwa::Scanner::Config::Value('sophosallowederrors');
-        $errorlist =~ s/^\"(.+)\"$/$1/;    # Remove leading and trailing quotes
-        @errorlist = split( /\"\s*,\s*\"/, $errorlist );    # Split up the list
-        foreach $choice (@errorlist) {
-            push @errorregexps, quotemeta($choice) if $choice =~ /[^\s]/;
-        }
-        $errorlist = join( '|', @errorregexps );    # Turn into 1 big regexp
-
-        if ( $errorlist ne "" && $virusname =~ /$errorlist/ ) {
-            Baruwa::Scanner::Log::WarnLog( "Ignored SophosSAVI '%s' error in %s",
-                $virusname, $id );
-            return 0;
-        }
-        else {
-            Baruwa::Scanner::Log::InfoLog( "SophosSAVI::%s", $logout );
-            $infections->{"$id"}{"$part"} .=
-              "$report$notype caused an error: $virusname\n";
-            $types->{"$id"}{"$part"} .= "v";        # it's a real virus
-            return 1;
-        }
-    }
-    elsif ( $keyword =~ /^info/i ) {
-        return 0;
-    }
-    elsif ( $keyword =~ /^clean/i ) {
-        return 0;
-    }
-    else {
-        # Must be an infection reports
-        ( $dot, $id, $part, @rest ) = split( /\//, $filename );
-        my $notype = substr( $part, 1 );
-        $logout =~ s/\Q$part\E/$notype/;
-
-        Baruwa::Scanner::Log::InfoLog( "SophosSAVI::%s", $logout );
-
-        $report = $Name . ': ' if $Name;
-        $infections->{"$id"}{"$part"} .=
-          "$report$notype was infected by $virusname\n";
-        $types->{"$id"}{"$part"} .= "v";    # it's a real virus
-        return 1;
-    }
 }
 
 sub ProcessSophosOutput {
@@ -2463,11 +2160,6 @@ sub InstalledScanners {
         push @installed, $scannername unless $result;
     }
 
-    if ( eval 'require SAVI' ) {
-        foreach (@installed) {
-            s/^sophos$/sophossavi/i;
-        }
-    }
     if ( ClamdScan('ISITINSTALLED') eq 'CLAMDOK' ) {
 
         # If clamav is in the list, replace it with clamd, else add clamd

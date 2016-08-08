@@ -194,7 +194,7 @@ if ($Versions) {
       Sys::Syslog
       Time::HiRes
       Time::localtime/;
-    my @Optional = qw#SAVI.pm#;
+    my @Optional = ();
 
     my ($module, $s, $v, $m);
 
@@ -937,7 +937,7 @@ sub WorkForHours {
     # Setup the Sendmail and Sendmail2 variables if they aren't set yet
     Baruwa::Scanner::Mta::initialise();
     CheckQueuesAreTogether();    # Can only do this after reading conf file
-    Baruwa::Scanner::SweepViruses::initialise();    # Setup Sophos SAVI library
+    Baruwa::Scanner::SweepViruses::initialise();
     CreateProcessingDatabase();
 
     my $workarea = new Baruwa::Scanner::WorkArea;
@@ -978,16 +978,6 @@ sub WorkForHours {
             my $msgcount = scalar(keys %$msgs);
             my $msgss    = ($msgcount == 1) ? '' : 's';
             print STDERR "Have a batch of $msgcount message$msgss.\n";
-        }
-
-        # Bail out immediately if we are using the Sophos SAVI library and it
-        # has been updated since the last batch. This has to be done after the
-        # batch has been created since it may sit for minutes/hours in
-        # Baruwa::Scanner::MessageBatch::new.
-        if (Baruwa::Scanner::SweepViruses::SAVIUpgraded()) {
-            Baruwa::Scanner::Log::InfoLog("Sophos SAVI library has been "
-                  . "updated, killing this child");
-            last;
         }
 
         # Also bail out if the LDAP configuration serial number has changed.

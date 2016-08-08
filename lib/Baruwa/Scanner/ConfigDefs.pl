@@ -176,7 +176,6 @@ removeheaders			= removetheseheaders
 replacetnef			= usetnefcontents
 reqspamassassinscore		= requiredspamassassinscore
 sacache				= spamassassincachedatabasefile
-saviwatchfiles                  = monitorsforsophosupdates
 scanmail			= scanmessages
 scoreformat			= spamscorenumberformat
 secondlevellist                 = countrysubdomainslist
@@ -190,8 +189,6 @@ showscanner			= includescannernameinreports
 signalreadyscanned		= signmessagesalreadyprocessed
 signunscannedmessages		= markunscannedmessages
 sophosallowederrors		= allowedsophoserrormessages
-sophoside			= sophosidedir
-sophoslib			= sophoslibdir
 spamblacklist			= isdefinitelyspam
 spamdetail			= detailedspamreport
 sizemodifysubject		= sizemodifysubject
@@ -339,10 +336,7 @@ QuarantinePerms		0600
 RunAsUser		0
 RunAsGroup		0
 SACache			/var/lib/baruwa/scanner/SpamAssassin.cache.db
-SAVIWatchFiles		/usr/local/Sophos/ide/*.zip
 SophosAllowedErrors
-sophoside
-sophoslib
 spamassassintempdir	/var/spool/baruwa/SpamAssassin-Temp
 SpamAssassinUserStateDir
 SpamAssassinSiteRulesDir
