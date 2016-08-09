@@ -99,5 +99,13 @@ is($Baruwa::Scanner::Log::logsock, 'tcp');
         qr/Test log message/,
         qr/Test log message/
     );
+    $Baruwa::Scanner::Log::Banner = undef;
+    $Baruwa::Scanner::Log::LogType = 'syslog';
+    $Baruwa::Scanner::Log::WarningsOnly = 0;
+    stderr_like(
+        sub {Baruwa::Scanner::Log::Start('Andrew', 'info');},
+        qr/Trying to setlogsock/,
+        qr/Trying to setlogsock/
+    );
 }
 
