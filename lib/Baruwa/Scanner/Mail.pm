@@ -69,15 +69,3 @@ sub TellAbout {
     Baruwa::Scanner::Mta::KickMessage(\%OutQueues, \%Sendmail2);
 }
 
-# Constructor.
-# Takes dir => directory queue resides in
-sub new {
-    my $type = shift;
-    my $this = {};
-
-    #$this->{dir} = shift;
-
-    bless $this, $type;
-    return $this;
-}
-
