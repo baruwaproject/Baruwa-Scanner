@@ -34,10 +34,12 @@ my $conf     = "$Bin/data/etc/mail/baruwa/baruwa.conf";
 my $conf_rbl = "$Bin/data/etc/mail/baruwa/baruwa-rbl.conf";
 my $datadir  = "$Bin/data";
 create_config($from, $conf, $datadir);
-my @rbl_matches = ('^Spam List =$', '^Spam Domain List =$');
+my @rbl_matches =
+  ('^Spam List =$', '^Spam Domain List =$', '^Spam List Timeout = 10$');
 my @rbl_repls = (
     "Spam List = spamhaus-XBL spamhaus-ZEN spamcop.net HOSTKARMA-RBL",
-    "Spam Domain List = BARUWA-DBL HOSTKARMA-DBL SEM"
+    "Spam Domain List = BARUWA-DBL HOSTKARMA-DBL SEM",
+    "Spam List Timeout = 5"
 );
 update_config($conf, $conf_rbl, \@rbl_matches, \@rbl_repls);
 Baruwa::Scanner::Config::Read($conf, 0);
@@ -81,6 +83,20 @@ my $q        = Baruwa::Scanner::Config::Value('inqueuedir');
     is($hits,
         'spamhaus-XBL, spamcop.net, HOSTKARMA-RBL, BARUWA-DBL, HOSTKARMA-DBL, SEM'
     );
+    $rbl->mock(
+        resolve_name => sub {
+            my ($hostname) = @_;
+            if ($hostname =~ /\.baruwa\.net\./) {
+                while (1) {
+                    ;
+                }
+            }
+            return inet_aton('127.0.0.2');
+        }
+    );
+    ($num, $hits) = Baruwa::Scanner::RBLs::Checks($m);
+    is($num,  1);
+    is($hits, 'spamhaus-XBL');
     $m->{store}->Unlock();
 }
 
