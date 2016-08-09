@@ -188,7 +188,7 @@ if ($Versions) {
       Time::localtime/;
     my @Optional = ();
 
-    my ($module, $s, $v, $m);
+    my ($s, $v, $m);
 
     printf("Running on\n%s", `uname -a`);
     printf("This is %s", `cat /etc/system-release`) if -f "/etc/system-release";
@@ -196,14 +196,14 @@ if ($Versions) {
     print "\nThis is Baruwa version "
       . $Baruwa::Scanner::Config::BaruwaVersion . "\n";
     print "Module versions are:\n";
-    open STDERR, "> /dev/null";
-    foreach $module (@Modules) {
+    open STDERR, ">", "/dev/null";
+    foreach my $module (@Modules) {
         $s = "use $module; \$$module" . '::VERSION';
         $v = eval("$s") || "missing";
         print "$v\t$module\n" if $v ne "";
     }
     print "\nOptional module versions are:\n";
-    foreach $module (@Optional) {
+    foreach my $module (@Optional) {
         $m = $module;
         $m =~ s/\//::/g;
         $m =~ s/\.pm$//;
@@ -1242,9 +1242,9 @@ sub KillBaruwa {
     my $currentpid;
     my $pid_dir  = '/var/lib/baruwa/scanner';
     my $pid_file = "$pid_dir/baruwa-bs.pid";
-    open PID, "<$pid_file" or return;
-    $currentpid = <PID>;
-    close PID;
+    open (my $PID, "<", "$pid_file") or return;
+    $currentpid = <$PID>;
+    close $PID;
     $currentpid =~ m|(\d+)|;
     $currentpid = $1;
 
@@ -1351,9 +1351,9 @@ sub ForkDaemon {
 
             # Re-open the stdin, stdout and stderr file descriptors for
             # sendmail's benefit. Should stop it squawking!
-            open(STDIN,  "</dev/null");
-            open(STDOUT, ">/dev/null");
-            open(STDERR, ">/dev/null");
+            open(STDIN, "<", "/dev/null");
+            open(STDOUT, ">", "/dev/null");
+            open(STDERR, ">", "/dev/null");
 
             fork && exit 0;
 
