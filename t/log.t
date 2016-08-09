@@ -93,5 +93,11 @@ is($Baruwa::Scanner::Log::logsock, 'tcp');
         qr/Test log message/,
         qr/Test log message/
     );
+    $Baruwa::Scanner::Log::WarningsOnly = 0;
+    stderr_like(
+        sub {Baruwa::Scanner::Log::NoticeLog('Test log message');},
+        qr/Test log message/,
+        qr/Test log message/
+    );
 }
 
