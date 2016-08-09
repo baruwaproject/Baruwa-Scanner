@@ -83,7 +83,7 @@ sub Checks {
 
     # Bail out if there is nothing to do
     return (0, "") unless @slisttotry || @dlisttotry;
-    return (0, "") unless ($reverseip);
+    return (0, "") unless ($reverseip || @dlisttotry);
 
     $maxfailures =
       Baruwa::Scanner::Config::Value('maxspamlisttimeouts', $message);
@@ -119,7 +119,7 @@ sub Checks {
         # Do the actual tests
         my ($SpamName);
         foreach $SpamName (@slisttotry) {
-
+            next unless($reverseip);
             # Look up $reverseip in each of the spam domains we have
             print $pipe $SpamName . "\n";
             $RBLRetval = undef;
