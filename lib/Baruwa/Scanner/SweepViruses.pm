@@ -337,9 +337,10 @@ sub ScanBatch {
     $NumInfections = 0;
     $BaseDir       = $global::MS->{work}->{dir};
 
+    die "BaseDir is not defined" unless (defined $BaseDir);
     chdir $BaseDir or die "Cannot chdir $BaseDir for virus scanning, $!";
 
-    #print STDERR (($ScanType =~ /dis/i)?"Disinfecting":"Scanning") . " using ".
+    # print STDERR (($ScanType =~ /dis/i)?"Disinfecting":"Scanning") . " using ".
     #             "commercial virus scanners\n";
     $success =
       TryCommercial($batch, '.', $BaseDir, \%Reports, \%Types, \$NumInfections,
@@ -511,6 +512,7 @@ sub TryCommercial {
     #$scannerlist = Baruwa::Scanner::Config::Value('virusscanners');
     $scannerlist =~ tr/,//d;
     $scannerlist = "none" unless $scannerlist;    # Catch empty setting
+    # print STDERR "Scanners => $scannerlist\n";
     @scanners = split(" ", $scannerlist);
     $counter = 0;
 
