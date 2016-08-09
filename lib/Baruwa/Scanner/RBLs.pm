@@ -38,11 +38,11 @@ my %RBLsuccessqsum;         # current sum of failure flags
 my %RBLdead;                # has the RBL been killed
 
 # Setup all the class variables
-sub initialise {
-    %RBLsuccessqueue = ();
-    %RBLsuccessqsum  = ();
-    %RBLdead         = ();
-}
+# sub initialise {
+#     %RBLsuccessqueue = ();
+#     %RBLsuccessqsum  = ();
+#     %RBLdead         = ();
+# }
 
 # Do all the RBL checks for a message. Involves forking.
 # Return a comma-separated list of all the hits, suitable for putting
@@ -83,6 +83,7 @@ sub Checks {
 
     # Bail out if there is nothing to do
     return (0, "") unless @slisttotry || @dlisttotry;
+    return (0, "") unless ($reverseip);
 
     $maxfailures =
       Baruwa::Scanner::Config::Value('maxspamlisttimeouts', $message);
