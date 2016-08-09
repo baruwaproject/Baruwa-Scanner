@@ -35,7 +35,7 @@ my @files = ("$Bin/data/var/lock/Baruwa/test-lock");
 our @msgs = (
     '1bUUOQ-0000g4-C7', '1bUvRz-0001Mr-4W',
     '1bVCqk-0001rd-7G', '1bWglk-0003N7-5T',
-    '1bWiNO-0000Yw-Pc'
+    '1bWiNO-0000Yw-Pc', '1bX5iV-0001tJ-Px'
 );
 
 sub create_config {
