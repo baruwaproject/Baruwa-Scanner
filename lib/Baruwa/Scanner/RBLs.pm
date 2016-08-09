@@ -130,7 +130,7 @@ sub Checks {
 
             ($RBLName, $RBLRetval) =
               split('=', Baruwa::Scanner::Config::SpamLists($SpamName));
-            $RBLEntry = gethostbyname("$reverseip." . $RBLName);
+            $RBLEntry = resolve_name("$reverseip." . $RBLName);
             if ($RBLEntry) {
                 $RBLEntry = Socket::inet_ntoa($RBLEntry);
                 if (defined($RBLRetval) and ($RBLEntry eq $RBLRetval)) {
@@ -167,7 +167,7 @@ sub Checks {
             if (Baruwa::Scanner::Config::SpamLists($SpamName)) {
                 ($RBLName, $RBLRetval) =
                   split('=', Baruwa::Scanner::Config::SpamLists($SpamName));
-                $RBLEntry = gethostbyname("$senderdomain." . $RBLName);
+                $RBLEntry = resolve_name("$senderdomain." . $RBLName);
             }
             if ($RBLEntry) {
                 $RBLEntry = Socket::inet_ntoa($RBLEntry);
@@ -300,6 +300,11 @@ sub Checks {
     $temp = $temp + 0;
     $temp = 0 unless $HitList[0] =~ /[a-z]/i;
     return ($temp, join(', ', @HitList));
+}
+
+sub resolve_name {
+    my ($hostname) = @_;
+    return gethostbyname($hostname);
 }
 
 1;
