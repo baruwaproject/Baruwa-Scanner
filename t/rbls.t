@@ -3,7 +3,9 @@ use v5.10;
 use strict;
 use warnings;
 use FindBin '$Bin';
+use Socket qw(inet_aton);
 use Test::More qw(no_plan);
+use Test::MockModule;
 use Baruwa::Scanner();
 use Baruwa::Scanner::Mta();
 use Baruwa::Scanner::Queue();
@@ -55,19 +57,31 @@ my $q        = Baruwa::Scanner::Config::Value('inqueuedir');
         MTA        => $mta,
         Quarantine => $quar
     );
-    my $m     = _parse_msg($Test::Baruwa::Scanner::msgs[1]);
-    my ($num, $hits);
+    my $m = _parse_msg($Test::Baruwa::Scanner::msgs[1]);
+    my ($num, $hits, $queries);
     ($num, $hits) = Baruwa::Scanner::RBLs::Checks($m);
     is($num,  0);
     is($hits, '');
     Baruwa::Scanner::Config::Read($conf_rbl, 0);
+    my $rbl = Test::MockModule->new('Baruwa::Scanner::RBLs');
+    $rbl->mock(
+        resolve_name => sub {
+            my ($hostname) = @_;
+            return '' if ($hostname =~ /itsekiri\.rbl\.baruwa\.net\./);
+            return inet_aton('127.0.0.2');
+        }
+    );
     ($num, $hits) = Baruwa::Scanner::RBLs::Checks($m);
-    is($num,  0);
-    is($hits, '');
-    $m     = _parse_msg($Test::Baruwa::Scanner::msgs[5]);
+    is($num,  3);
+    is($hits, 'BARUWA-DBL, HOSTKARMA-DBL, SEM');
+    $m->{store}->Unlock();
+    $m = _parse_msg($Test::Baruwa::Scanner::msgs[5]);
     ($num, $hits) = Baruwa::Scanner::RBLs::Checks($m);
-    is($num,  0);
-    is($hits, '');
+    is($num, 6);
+    is($hits,
+        'spamhaus-XBL, spamcop.net, HOSTKARMA-RBL, BARUWA-DBL, HOSTKARMA-DBL, SEM'
+    );
+    $m->{store}->Unlock();
 }
 
 sub _parse_msg {
