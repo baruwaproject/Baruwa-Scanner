@@ -63,9 +63,6 @@ attachimagename			= SignatureImageFilename
 attachimageinternalname		= SignatureImageImgFilename
 attachimagetohtmlonly		= AttachImageToHTMLMessageOnly
 AttachmentCharset		= AttachmentEncodingCharset
-AttachZipMinSize		= AttachmentsMinTotalSizeToZip
-AttachZipName			= AttachmentsZipFilename
-AttachZipIgnore			= AttachmentExtensionsNotToZip
 bayesrebuild			= RebuildBayesEvery
 bayeswait			= WaitDuringBayesRebuild
 blacklistedishigh		= definitespamishighscoring
@@ -462,7 +459,6 @@ PublicKeyArchiveDir		#/var/spool/baruwa/keys
 quarantinedir			/var/spool/baruwa/quarantine
 
 [First,Number]
-AttachZipMinSize		100000
 HighRBLs			3
 HighSpamAssassinScore		10
 MaxAttachmentSize		-1
@@ -484,7 +480,6 @@ AttachmentCharset		UTF-8
 attachimageinternalname
 attachimagename
 AttachmentWarningFilename	VirusWarning.txt
-AttachZipName			MessageAttachments.zip
 cleanheader			Found to be clean
 ContentSubjectText		{Dangerous Content?}
 DefaultRenamePattern		__FILENAME__.disarmed
@@ -565,7 +560,6 @@ TagPhishingSubject	0	no	0 	yes	1	start	start	end	end
 UseSpamAssassin		1	no	0	yes	1
 UseWatermarking		1	no	0	yes	1
 VirusScan		1	no	0	yes	1
-ZipAttachments		0	no	0	yes	1
 
 [All,File]
 #FilenameRules		/etc/mail/baruwa/filename.rules.conf
@@ -582,7 +576,6 @@ adenyfilenames
 afilenamerules
 afiletyperules
 ArchiveMail
-AttachZipIgnore			.zip .rar .gz .tgz .mpg .mpe .mpeg .mp3 .rpm
 ClamdLockFile
 ClamdSocket 127.0.0.1
 FilenameRules

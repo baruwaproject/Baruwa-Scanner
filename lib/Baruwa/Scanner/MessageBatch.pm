@@ -607,20 +607,6 @@ sub Clean {
     }
 }
 
-# Zip up all the attachments in the messages, to save space on the
-# mail servers.
-sub ZipAttachments {
-    my $this = shift;
-    my ($id, $message);
-
-    while (($id, $message) = each %{$this->{messages}}) {
-        next if $message->{deleted} || $message->{dontdeliver};
-
-        #print STDERR "\nZipping attachments, message $id\n";
-        $message->ZipAttachments();
-    }
-}
-
 # Combine the virus and other reports and types for all the messages.
 # Might change this to do it at source later.
 sub CombineReports {

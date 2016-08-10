@@ -1086,10 +1086,6 @@ sub WorkForHours {
         $0 = 'Baruwa: cleaning messages';
         $batch->Clean();
 
-        # Zip up all the attachments to compress them
-        $0 = 'Baruwa: compressing attachments';
-        $batch->ZipAttachments();
-
         # Encapsulate the messages into message/rfc822 attachments as needed
         $batch->Encapsulate();
 
