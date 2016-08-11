@@ -32,17 +32,6 @@ use POSIX qw(:signal_h setsid);    # For Solaris 9 SIG bug workaround
 
 our $VERSION = '4.086000';
 
-# Attributes are
-#
-
-# Constructor.
-sub new {
-    my $type = shift;
-    my $this = {};
-
-    bless $this, $type;
-    return $this;
-}
 
 # Do all the non-commercial virus checking and rules systems in here
 sub ScanBatch {

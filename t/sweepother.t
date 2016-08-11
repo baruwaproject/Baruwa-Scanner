@@ -12,8 +12,8 @@ BEGIN {
 
 diag("Testing Baruwa::Scanner::SweepOther $Baruwa::Scanner::SweepOther::VERSION, Perl $], $^X");
 
-can_ok('Baruwa::Scanner::SweepOther', 'new');
+can_ok('Baruwa::Scanner::SweepOther', 'ScanBatch');
 
-my $s = new Baruwa::Scanner::SweepOther();
+can_ok('Baruwa::Scanner::SweepOther', 'CheckFileContentTypes');
 
-isa_ok($s, 'Baruwa::Scanner::SweepOther', '$s');
+can_ok('Baruwa::Scanner::SweepOther', 'CheckFileTypesRules');
