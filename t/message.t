@@ -52,6 +52,7 @@ my $msgid1 = $Test::Baruwa::Scanner::msgs[0];
 my $msgid2 = $Test::Baruwa::Scanner::msgs[4];
 my $msgid3 = $Test::Baruwa::Scanner::msgs[5];
 my $msgid4 = $Test::Baruwa::Scanner::msgs[3];
+my $msgid5 = $Test::Baruwa::Scanner::msgs[2];
 
 foreach (@Test::Baruwa::Scanner::msgs) {
     my $m = new Baruwa::Scanner::Message($_, $q->[0], 0);
@@ -139,13 +140,13 @@ is(scalar @{$msg->{touser}}, 0);
 is(scalar @{$msg->{todomain}}, 0);
 
 can_ok('Baruwa::Scanner::Message', 'QuarantineDOS');
-($msg, $entity) = _parse_msg($msgid4);
+($msg, $entity) = _parse_msg($msgid5);
 isnt(exists $msg->{quarantinedinfections}, 1);
-isnt(-f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid4/message", 1);
+isnt(-f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid5/message", 1);
 Baruwa::Scanner::Message::QuarantineDOS($msg);
 is(exists $msg->{quarantinedinfections}, 1);
 is($msg->{quarantinedinfections}, 1);
-is(-f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid4/message", 1);
+is(-f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid5/message", 1);
 
 remove_tree("$Bin/data/var/spool/baruwa/incoming", {keep_root => 1});
 remove_tree("$Bin/data/var/spool/baruwa/quarantine", {keep_root => 1});
