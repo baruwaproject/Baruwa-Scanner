@@ -158,12 +158,16 @@ is($linkurl, '');
 is($alarm,   0);
 
 foreach (
-    qw/andrew@baruwa.com mailto:andrew@baruwa.com file:\/\/\/home\/andrew\/testfile #baruwa-settings/
+    qw/andrew@baruwa.com mailto:andrew@baruwa.com file:\/\/\/home\/andrew\/testfile/
   ) {
     ($linkurl, $alarm) = Baruwa::Scanner::Message::CleanLinkURL($_);
     is($linkurl, '');
     is($alarm,   0);
 }
+
+($linkurl, $alarm) = Baruwa::Scanner::Message::CleanLinkURL('#baruwa-settings');
+is($linkurl, '');
+is($alarm,   0);
 
 ($linkurl, $alarm) = Baruwa::Scanner::Message::CleanLinkURL('baruwa.com.');
 is($linkurl, 'baruwa.com');
