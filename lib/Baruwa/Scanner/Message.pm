@@ -2860,9 +2860,7 @@ sub ExplodePartAndArchives {
             }
 
             $tarerror = "";
-            $tarerror =
-              0    # $this->UnpackTar($part, $explodeinto, $allowpasswords)
-              if $ziperror || $part =~ /(tar\.g?z|tgz)$/i;
+            $tarerror = 0 if $ziperror || $part =~ /(tar\.g?z|tgz)$/i;
 
             #print STDERR "In inner: \"$part\"\n";
             if ($ziperror eq "nonpassword" || $rarerror eq "nonpassword") {
@@ -3678,11 +3676,11 @@ sub MakeNameSafe {
 
 # Unpack a tar file into the named directory.
 # Return 1 if an error occurred, else 0.
-sub UnpackTar {
-    my ($this, $tarname, $explodeinto) = @_;
+# sub UnpackTar {
+#     my ($this, $tarname, $explodeinto) = @_;
 
-    return 1;    # Not yet implemented
-}
+#     return 1;    # Not yet implemented
+# }
 
 # Print the infection reports for this message
 sub PrintInfections {
