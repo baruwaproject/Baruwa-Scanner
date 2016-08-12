@@ -34,9 +34,6 @@ etc/mail/baruwa/reports/af/sender.content.report.txt
 etc/mail/baruwa/reports/af/sender.error.report.txt
 etc/mail/baruwa/reports/af/sender.filename.report.txt
 etc/mail/baruwa/reports/af/sender.size.report.txt
-etc/mail/baruwa/reports/af/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/af/sender.spam.report.txt
-etc/mail/baruwa/reports/af/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/af/sender.virus.report.txt
 etc/mail/baruwa/reports/af/stored.content.message.txt
 etc/mail/baruwa/reports/af/stored.filename.message.txt
@@ -59,9 +56,6 @@ etc/mail/baruwa/reports/ar/sender.content.report.txt
 etc/mail/baruwa/reports/ar/sender.error.report.txt
 etc/mail/baruwa/reports/ar/sender.filename.report.txt
 etc/mail/baruwa/reports/ar/sender.size.report.txt
-etc/mail/baruwa/reports/ar/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/ar/sender.spam.report.txt
-etc/mail/baruwa/reports/ar/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/ar/sender.virus.report.txt
 etc/mail/baruwa/reports/ar/stored.content.message.txt
 etc/mail/baruwa/reports/ar/stored.filename.message.txt
@@ -84,9 +78,6 @@ etc/mail/baruwa/reports/bg/sender.content.report.txt
 etc/mail/baruwa/reports/bg/sender.error.report.txt
 etc/mail/baruwa/reports/bg/sender.filename.report.txt
 etc/mail/baruwa/reports/bg/sender.size.report.txt
-etc/mail/baruwa/reports/bg/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/bg/sender.spam.report.txt
-etc/mail/baruwa/reports/bg/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/bg/sender.virus.report.txt
 etc/mail/baruwa/reports/bg/stored.content.message.txt
 etc/mail/baruwa/reports/bg/stored.filename.message.txt
@@ -109,9 +100,6 @@ etc/mail/baruwa/reports/ca/sender.content.report.txt
 etc/mail/baruwa/reports/ca/sender.error.report.txt
 etc/mail/baruwa/reports/ca/sender.filename.report.txt
 etc/mail/baruwa/reports/ca/sender.size.report.txt
-etc/mail/baruwa/reports/ca/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/ca/sender.spam.report.txt
-etc/mail/baruwa/reports/ca/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/ca/sender.virus.report.txt
 etc/mail/baruwa/reports/ca/stored.content.message.txt
 etc/mail/baruwa/reports/ca/stored.filename.message.txt
@@ -134,9 +122,6 @@ etc/mail/baruwa/reports/cs/sender.content.report.txt
 etc/mail/baruwa/reports/cs/sender.error.report.txt
 etc/mail/baruwa/reports/cs/sender.filename.report.txt
 etc/mail/baruwa/reports/cs/sender.size.report.txt
-etc/mail/baruwa/reports/cs/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/cs/sender.spam.report.txt
-etc/mail/baruwa/reports/cs/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/cs/sender.virus.report.txt
 etc/mail/baruwa/reports/cs/stored.content.message.txt
 etc/mail/baruwa/reports/cs/stored.filename.message.txt
@@ -159,9 +144,6 @@ etc/mail/baruwa/reports/da/sender.content.report.txt
 etc/mail/baruwa/reports/da/sender.error.report.txt
 etc/mail/baruwa/reports/da/sender.filename.report.txt
 etc/mail/baruwa/reports/da/sender.size.report.txt
-etc/mail/baruwa/reports/da/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/da/sender.spam.report.txt
-etc/mail/baruwa/reports/da/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/da/sender.virus.report.txt
 etc/mail/baruwa/reports/da/stored.content.message.txt
 etc/mail/baruwa/reports/da/stored.filename.message.txt
@@ -184,9 +166,6 @@ etc/mail/baruwa/reports/de/sender.content.report.txt
 etc/mail/baruwa/reports/de/sender.error.report.txt
 etc/mail/baruwa/reports/de/sender.filename.report.txt
 etc/mail/baruwa/reports/de/sender.size.report.txt
-etc/mail/baruwa/reports/de/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/de/sender.spam.report.txt
-etc/mail/baruwa/reports/de/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/de/sender.virus.report.txt
 etc/mail/baruwa/reports/de/stored.content.message.txt
 etc/mail/baruwa/reports/de/stored.filename.message.txt
@@ -209,9 +188,6 @@ etc/mail/baruwa/reports/el/sender.content.report.txt
 etc/mail/baruwa/reports/el/sender.error.report.txt
 etc/mail/baruwa/reports/el/sender.filename.report.txt
 etc/mail/baruwa/reports/el/sender.size.report.txt
-etc/mail/baruwa/reports/el/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/el/sender.spam.report.txt
-etc/mail/baruwa/reports/el/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/el/sender.virus.report.txt
 etc/mail/baruwa/reports/el/stored.content.message.txt
 etc/mail/baruwa/reports/el/stored.filename.message.txt
@@ -234,9 +210,6 @@ etc/mail/baruwa/reports/en/sender.content.report.txt
 etc/mail/baruwa/reports/en/sender.error.report.txt
 etc/mail/baruwa/reports/en/sender.filename.report.txt
 etc/mail/baruwa/reports/en/sender.size.report.txt
-etc/mail/baruwa/reports/en/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/en/sender.spam.report.txt
-etc/mail/baruwa/reports/en/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/en/sender.virus.report.txt
 etc/mail/baruwa/reports/en/stored.content.message.txt
 etc/mail/baruwa/reports/en/stored.filename.message.txt
@@ -259,9 +232,6 @@ etc/mail/baruwa/reports/es/sender.content.report.txt
 etc/mail/baruwa/reports/es/sender.error.report.txt
 etc/mail/baruwa/reports/es/sender.filename.report.txt
 etc/mail/baruwa/reports/es/sender.size.report.txt
-etc/mail/baruwa/reports/es/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/es/sender.spam.report.txt
-etc/mail/baruwa/reports/es/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/es/sender.virus.report.txt
 etc/mail/baruwa/reports/es/stored.content.message.txt
 etc/mail/baruwa/reports/es/stored.filename.message.txt
@@ -284,9 +254,6 @@ etc/mail/baruwa/reports/fa/sender.content.report.txt
 etc/mail/baruwa/reports/fa/sender.error.report.txt
 etc/mail/baruwa/reports/fa/sender.filename.report.txt
 etc/mail/baruwa/reports/fa/sender.size.report.txt
-etc/mail/baruwa/reports/fa/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/fa/sender.spam.report.txt
-etc/mail/baruwa/reports/fa/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/fa/sender.virus.report.txt
 etc/mail/baruwa/reports/fa/stored.content.message.txt
 etc/mail/baruwa/reports/fa/stored.filename.message.txt
@@ -309,9 +276,6 @@ etc/mail/baruwa/reports/fi/sender.content.report.txt
 etc/mail/baruwa/reports/fi/sender.error.report.txt
 etc/mail/baruwa/reports/fi/sender.filename.report.txt
 etc/mail/baruwa/reports/fi/sender.size.report.txt
-etc/mail/baruwa/reports/fi/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/fi/sender.spam.report.txt
-etc/mail/baruwa/reports/fi/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/fi/sender.virus.report.txt
 etc/mail/baruwa/reports/fi/stored.content.message.txt
 etc/mail/baruwa/reports/fi/stored.filename.message.txt
@@ -334,9 +298,6 @@ etc/mail/baruwa/reports/fr/sender.content.report.txt
 etc/mail/baruwa/reports/fr/sender.error.report.txt
 etc/mail/baruwa/reports/fr/sender.filename.report.txt
 etc/mail/baruwa/reports/fr/sender.size.report.txt
-etc/mail/baruwa/reports/fr/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/fr/sender.spam.report.txt
-etc/mail/baruwa/reports/fr/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/fr/sender.virus.report.txt
 etc/mail/baruwa/reports/fr/stored.content.message.txt
 etc/mail/baruwa/reports/fr/stored.filename.message.txt
@@ -359,9 +320,6 @@ etc/mail/baruwa/reports/he/sender.content.report.txt
 etc/mail/baruwa/reports/he/sender.error.report.txt
 etc/mail/baruwa/reports/he/sender.filename.report.txt
 etc/mail/baruwa/reports/he/sender.size.report.txt
-etc/mail/baruwa/reports/he/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/he/sender.spam.report.txt
-etc/mail/baruwa/reports/he/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/he/sender.virus.report.txt
 etc/mail/baruwa/reports/he/stored.content.message.txt
 etc/mail/baruwa/reports/he/stored.filename.message.txt
@@ -384,9 +342,6 @@ etc/mail/baruwa/reports/hi/sender.content.report.txt
 etc/mail/baruwa/reports/hi/sender.error.report.txt
 etc/mail/baruwa/reports/hi/sender.filename.report.txt
 etc/mail/baruwa/reports/hi/sender.size.report.txt
-etc/mail/baruwa/reports/hi/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/hi/sender.spam.report.txt
-etc/mail/baruwa/reports/hi/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/hi/sender.virus.report.txt
 etc/mail/baruwa/reports/hi/stored.content.message.txt
 etc/mail/baruwa/reports/hi/stored.filename.message.txt
@@ -409,9 +364,6 @@ etc/mail/baruwa/reports/hu/sender.content.report.txt
 etc/mail/baruwa/reports/hu/sender.error.report.txt
 etc/mail/baruwa/reports/hu/sender.filename.report.txt
 etc/mail/baruwa/reports/hu/sender.size.report.txt
-etc/mail/baruwa/reports/hu/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/hu/sender.spam.report.txt
-etc/mail/baruwa/reports/hu/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/hu/sender.virus.report.txt
 etc/mail/baruwa/reports/hu/stored.content.message.txt
 etc/mail/baruwa/reports/hu/stored.filename.message.txt
@@ -434,9 +386,6 @@ etc/mail/baruwa/reports/id/sender.content.report.txt
 etc/mail/baruwa/reports/id/sender.error.report.txt
 etc/mail/baruwa/reports/id/sender.filename.report.txt
 etc/mail/baruwa/reports/id/sender.size.report.txt
-etc/mail/baruwa/reports/id/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/id/sender.spam.report.txt
-etc/mail/baruwa/reports/id/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/id/sender.virus.report.txt
 etc/mail/baruwa/reports/id/stored.content.message.txt
 etc/mail/baruwa/reports/id/stored.filename.message.txt
@@ -459,9 +408,6 @@ etc/mail/baruwa/reports/it/sender.content.report.txt
 etc/mail/baruwa/reports/it/sender.error.report.txt
 etc/mail/baruwa/reports/it/sender.filename.report.txt
 etc/mail/baruwa/reports/it/sender.size.report.txt
-etc/mail/baruwa/reports/it/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/it/sender.spam.report.txt
-etc/mail/baruwa/reports/it/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/it/sender.virus.report.txt
 etc/mail/baruwa/reports/it/stored.content.message.txt
 etc/mail/baruwa/reports/it/stored.filename.message.txt
@@ -484,9 +430,6 @@ etc/mail/baruwa/reports/ja/sender.content.report.txt
 etc/mail/baruwa/reports/ja/sender.error.report.txt
 etc/mail/baruwa/reports/ja/sender.filename.report.txt
 etc/mail/baruwa/reports/ja/sender.size.report.txt
-etc/mail/baruwa/reports/ja/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/ja/sender.spam.report.txt
-etc/mail/baruwa/reports/ja/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/ja/sender.virus.report.txt
 etc/mail/baruwa/reports/ja/stored.content.message.txt
 etc/mail/baruwa/reports/ja/stored.filename.message.txt
@@ -509,9 +452,6 @@ etc/mail/baruwa/reports/ko/sender.content.report.txt
 etc/mail/baruwa/reports/ko/sender.error.report.txt
 etc/mail/baruwa/reports/ko/sender.filename.report.txt
 etc/mail/baruwa/reports/ko/sender.size.report.txt
-etc/mail/baruwa/reports/ko/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/ko/sender.spam.report.txt
-etc/mail/baruwa/reports/ko/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/ko/sender.virus.report.txt
 etc/mail/baruwa/reports/ko/stored.content.message.txt
 etc/mail/baruwa/reports/ko/stored.filename.message.txt
@@ -534,9 +474,6 @@ etc/mail/baruwa/reports/lv/sender.content.report.txt
 etc/mail/baruwa/reports/lv/sender.error.report.txt
 etc/mail/baruwa/reports/lv/sender.filename.report.txt
 etc/mail/baruwa/reports/lv/sender.size.report.txt
-etc/mail/baruwa/reports/lv/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/lv/sender.spam.report.txt
-etc/mail/baruwa/reports/lv/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/lv/sender.virus.report.txt
 etc/mail/baruwa/reports/lv/stored.content.message.txt
 etc/mail/baruwa/reports/lv/stored.filename.message.txt
@@ -559,9 +496,6 @@ etc/mail/baruwa/reports/nl/sender.content.report.txt
 etc/mail/baruwa/reports/nl/sender.error.report.txt
 etc/mail/baruwa/reports/nl/sender.filename.report.txt
 etc/mail/baruwa/reports/nl/sender.size.report.txt
-etc/mail/baruwa/reports/nl/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/nl/sender.spam.report.txt
-etc/mail/baruwa/reports/nl/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/nl/sender.virus.report.txt
 etc/mail/baruwa/reports/nl/stored.content.message.txt
 etc/mail/baruwa/reports/nl/stored.filename.message.txt
@@ -584,9 +518,6 @@ etc/mail/baruwa/reports/no/sender.content.report.txt
 etc/mail/baruwa/reports/no/sender.error.report.txt
 etc/mail/baruwa/reports/no/sender.filename.report.txt
 etc/mail/baruwa/reports/no/sender.size.report.txt
-etc/mail/baruwa/reports/no/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/no/sender.spam.report.txt
-etc/mail/baruwa/reports/no/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/no/sender.virus.report.txt
 etc/mail/baruwa/reports/no/stored.content.message.txt
 etc/mail/baruwa/reports/no/stored.filename.message.txt
@@ -609,9 +540,6 @@ etc/mail/baruwa/reports/pl/sender.content.report.txt
 etc/mail/baruwa/reports/pl/sender.error.report.txt
 etc/mail/baruwa/reports/pl/sender.filename.report.txt
 etc/mail/baruwa/reports/pl/sender.size.report.txt
-etc/mail/baruwa/reports/pl/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/pl/sender.spam.report.txt
-etc/mail/baruwa/reports/pl/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/pl/sender.virus.report.txt
 etc/mail/baruwa/reports/pl/stored.content.message.txt
 etc/mail/baruwa/reports/pl/stored.filename.message.txt
@@ -634,9 +562,6 @@ etc/mail/baruwa/reports/pt/sender.content.report.txt
 etc/mail/baruwa/reports/pt/sender.error.report.txt
 etc/mail/baruwa/reports/pt/sender.filename.report.txt
 etc/mail/baruwa/reports/pt/sender.size.report.txt
-etc/mail/baruwa/reports/pt/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/pt/sender.spam.report.txt
-etc/mail/baruwa/reports/pt/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/pt/sender.virus.report.txt
 etc/mail/baruwa/reports/pt/stored.content.message.txt
 etc/mail/baruwa/reports/pt/stored.filename.message.txt
@@ -659,9 +584,6 @@ etc/mail/baruwa/reports/ro/sender.content.report.txt
 etc/mail/baruwa/reports/ro/sender.error.report.txt
 etc/mail/baruwa/reports/ro/sender.filename.report.txt
 etc/mail/baruwa/reports/ro/sender.size.report.txt
-etc/mail/baruwa/reports/ro/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/ro/sender.spam.report.txt
-etc/mail/baruwa/reports/ro/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/ro/sender.virus.report.txt
 etc/mail/baruwa/reports/ro/stored.content.message.txt
 etc/mail/baruwa/reports/ro/stored.filename.message.txt
@@ -684,9 +606,6 @@ etc/mail/baruwa/reports/ru/sender.content.report.txt
 etc/mail/baruwa/reports/ru/sender.error.report.txt
 etc/mail/baruwa/reports/ru/sender.filename.report.txt
 etc/mail/baruwa/reports/ru/sender.size.report.txt
-etc/mail/baruwa/reports/ru/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/ru/sender.spam.report.txt
-etc/mail/baruwa/reports/ru/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/ru/sender.virus.report.txt
 etc/mail/baruwa/reports/ru/stored.content.message.txt
 etc/mail/baruwa/reports/ru/stored.filename.message.txt
@@ -709,9 +628,6 @@ etc/mail/baruwa/reports/se/sender.content.report.txt
 etc/mail/baruwa/reports/se/sender.error.report.txt
 etc/mail/baruwa/reports/se/sender.filename.report.txt
 etc/mail/baruwa/reports/se/sender.size.report.txt
-etc/mail/baruwa/reports/se/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/se/sender.spam.report.txt
-etc/mail/baruwa/reports/se/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/se/sender.virus.report.txt
 etc/mail/baruwa/reports/se/stored.content.message.txt
 etc/mail/baruwa/reports/se/stored.filename.message.txt
@@ -734,9 +650,6 @@ etc/mail/baruwa/reports/sk/sender.content.report.txt
 etc/mail/baruwa/reports/sk/sender.error.report.txt
 etc/mail/baruwa/reports/sk/sender.filename.report.txt
 etc/mail/baruwa/reports/sk/sender.size.report.txt
-etc/mail/baruwa/reports/sk/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/sk/sender.spam.report.txt
-etc/mail/baruwa/reports/sk/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/sk/sender.virus.report.txt
 etc/mail/baruwa/reports/sk/stored.content.message.txt
 etc/mail/baruwa/reports/sk/stored.filename.message.txt
@@ -759,9 +672,6 @@ etc/mail/baruwa/reports/sv/sender.content.report.txt
 etc/mail/baruwa/reports/sv/sender.error.report.txt
 etc/mail/baruwa/reports/sv/sender.filename.report.txt
 etc/mail/baruwa/reports/sv/sender.size.report.txt
-etc/mail/baruwa/reports/sv/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/sv/sender.spam.report.txt
-etc/mail/baruwa/reports/sv/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/sv/sender.virus.report.txt
 etc/mail/baruwa/reports/sv/stored.content.message.txt
 etc/mail/baruwa/reports/sv/stored.filename.message.txt
@@ -784,9 +694,6 @@ etc/mail/baruwa/reports/sw/sender.content.report.txt
 etc/mail/baruwa/reports/sw/sender.error.report.txt
 etc/mail/baruwa/reports/sw/sender.filename.report.txt
 etc/mail/baruwa/reports/sw/sender.size.report.txt
-etc/mail/baruwa/reports/sw/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/sw/sender.spam.report.txt
-etc/mail/baruwa/reports/sw/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/sw/sender.virus.report.txt
 etc/mail/baruwa/reports/sw/stored.content.message.txt
 etc/mail/baruwa/reports/sw/stored.filename.message.txt
@@ -809,9 +716,6 @@ etc/mail/baruwa/reports/th/sender.content.report.txt
 etc/mail/baruwa/reports/th/sender.error.report.txt
 etc/mail/baruwa/reports/th/sender.filename.report.txt
 etc/mail/baruwa/reports/th/sender.size.report.txt
-etc/mail/baruwa/reports/th/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/th/sender.spam.report.txt
-etc/mail/baruwa/reports/th/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/th/sender.virus.report.txt
 etc/mail/baruwa/reports/th/stored.content.message.txt
 etc/mail/baruwa/reports/th/stored.filename.message.txt
@@ -834,9 +738,6 @@ etc/mail/baruwa/reports/tr/sender.content.report.txt
 etc/mail/baruwa/reports/tr/sender.error.report.txt
 etc/mail/baruwa/reports/tr/sender.filename.report.txt
 etc/mail/baruwa/reports/tr/sender.size.report.txt
-etc/mail/baruwa/reports/tr/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/tr/sender.spam.report.txt
-etc/mail/baruwa/reports/tr/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/tr/sender.virus.report.txt
 etc/mail/baruwa/reports/tr/stored.content.message.txt
 etc/mail/baruwa/reports/tr/stored.filename.message.txt
@@ -859,9 +760,6 @@ etc/mail/baruwa/reports/uk/sender.content.report.txt
 etc/mail/baruwa/reports/uk/sender.error.report.txt
 etc/mail/baruwa/reports/uk/sender.filename.report.txt
 etc/mail/baruwa/reports/uk/sender.size.report.txt
-etc/mail/baruwa/reports/uk/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/uk/sender.spam.report.txt
-etc/mail/baruwa/reports/uk/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/uk/sender.virus.report.txt
 etc/mail/baruwa/reports/uk/stored.content.message.txt
 etc/mail/baruwa/reports/uk/stored.filename.message.txt
@@ -884,9 +782,6 @@ etc/mail/baruwa/reports/ur/sender.content.report.txt
 etc/mail/baruwa/reports/ur/sender.error.report.txt
 etc/mail/baruwa/reports/ur/sender.filename.report.txt
 etc/mail/baruwa/reports/ur/sender.size.report.txt
-etc/mail/baruwa/reports/ur/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/ur/sender.spam.report.txt
-etc/mail/baruwa/reports/ur/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/ur/sender.virus.report.txt
 etc/mail/baruwa/reports/ur/stored.content.message.txt
 etc/mail/baruwa/reports/ur/stored.filename.message.txt
@@ -909,9 +804,6 @@ etc/mail/baruwa/reports/vi/sender.content.report.txt
 etc/mail/baruwa/reports/vi/sender.error.report.txt
 etc/mail/baruwa/reports/vi/sender.filename.report.txt
 etc/mail/baruwa/reports/vi/sender.size.report.txt
-etc/mail/baruwa/reports/vi/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/vi/sender.spam.report.txt
-etc/mail/baruwa/reports/vi/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/vi/sender.virus.report.txt
 etc/mail/baruwa/reports/vi/stored.content.message.txt
 etc/mail/baruwa/reports/vi/stored.filename.message.txt
@@ -934,9 +826,6 @@ etc/mail/baruwa/reports/xh/sender.content.report.txt
 etc/mail/baruwa/reports/xh/sender.error.report.txt
 etc/mail/baruwa/reports/xh/sender.filename.report.txt
 etc/mail/baruwa/reports/xh/sender.size.report.txt
-etc/mail/baruwa/reports/xh/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/xh/sender.spam.report.txt
-etc/mail/baruwa/reports/xh/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/xh/sender.virus.report.txt
 etc/mail/baruwa/reports/xh/stored.content.message.txt
 etc/mail/baruwa/reports/xh/stored.filename.message.txt
@@ -959,9 +848,6 @@ etc/mail/baruwa/reports/zh/sender.content.report.txt
 etc/mail/baruwa/reports/zh/sender.error.report.txt
 etc/mail/baruwa/reports/zh/sender.filename.report.txt
 etc/mail/baruwa/reports/zh/sender.size.report.txt
-etc/mail/baruwa/reports/zh/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/zh/sender.spam.report.txt
-etc/mail/baruwa/reports/zh/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/zh/sender.virus.report.txt
 etc/mail/baruwa/reports/zh/stored.content.message.txt
 etc/mail/baruwa/reports/zh/stored.filename.message.txt
@@ -984,9 +870,6 @@ etc/mail/baruwa/reports/zu/sender.content.report.txt
 etc/mail/baruwa/reports/zu/sender.error.report.txt
 etc/mail/baruwa/reports/zu/sender.filename.report.txt
 etc/mail/baruwa/reports/zu/sender.size.report.txt
-etc/mail/baruwa/reports/zu/sender.spam.rbl.report.txt
-etc/mail/baruwa/reports/zu/sender.spam.report.txt
-etc/mail/baruwa/reports/zu/sender.spam.sa.report.txt
 etc/mail/baruwa/reports/zu/sender.virus.report.txt
 etc/mail/baruwa/reports/zu/stored.content.message.txt
 etc/mail/baruwa/reports/zu/stored.filename.message.txt
