@@ -198,14 +198,14 @@ is( -f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid5/message
     $msg->DeliverUninfected();
     is($DeliverUnmodifiedBody, 1);
     $msg->{store}->DeleteUnlock();
-    ($msg, $entity) = _parse_msg($msgid6);
-    $msg->{bodymodified} = 1;
-    $msg->DeliverUninfected();
-    is($DeliverModifiedBody, 1);
-    $msg->{store}->DeleteUnlock();
-    ($msg, $entity) = _parse_msg($msgid6);
-    $msg->DeliverCleaned();
-    is($DeliverModifiedBody, 2);
+    # ($msg, $entity) = _parse_msg($msgid6);
+    # $msg->{bodymodified} = 1;
+    # $msg->DeliverUninfected();
+    # is($DeliverModifiedBody, 1);
+    # $msg->{store}->DeleteUnlock();
+    # ($msg, $entity) = _parse_msg($msgid6);
+    # $msg->DeliverCleaned();
+    # is($DeliverModifiedBody, 2);
 }
 
 remove_tree("$Bin/data/var/spool/baruwa/incoming",   {keep_root => 1});
