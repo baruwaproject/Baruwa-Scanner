@@ -3687,89 +3687,89 @@ sub UnpackTar {
 # Try to parse all the text bits of each message, looking to see if they
 # can be parsed into files which might be infected.
 # I then throw these sections back to the MIME parser.
-sub ExplodePart {
-    my ($this, $explodeinto) = @_;
+# sub ExplodePart {
+#     my ($this, $explodeinto) = @_;
 
-    my ($dir, $file, $part, @parts);
+#     my ($dir, $file, $part, @parts);
 
-    $dir  = new DirHandle;
-    $file = new FileHandle;
+#     $dir  = new DirHandle;
+#     $file = new FileHandle;
 
-    $dir->open($explodeinto);
-    @parts = $dir->read();
-    $dir->close();
+#     $dir->open($explodeinto);
+#     @parts = $dir->read();
+#     $dir->close();
 
-    my ($linenum, $foundheader, $prevline, $line, $position, $prevpos,
-        $nextpos);
-    foreach $part (@parts) {
+#     my ($linenum, $foundheader, $prevline, $line, $position, $prevpos,
+#         $nextpos);
+#     foreach $part (@parts) {
 
-        #print STDERR "Reading $part\n";
-        # Allow for leading type indicator character.
-        next unless $part =~ /^.msg.*txt/;
+#         #print STDERR "Reading $part\n";
+#         # Allow for leading type indicator character.
+#         next unless $part =~ /^.msg.*txt/;
 
-        # Try and find hidden messages in the text files
-        #print STDERR "About to read $explodeinto/$part\n";
-        $file->open("$explodeinto/$part") or next;
+#         # Try and find hidden messages in the text files
+#         #print STDERR "About to read $explodeinto/$part\n";
+#         $file->open("$explodeinto/$part") or next;
 
-        # Try reading the first few lines to see if they look like mail headers
-        $linenum     = 0;
-        $foundheader = 0;
-        $prevline    = "";
-        $prevpos     = 0;
-        $nextpos     = 0;
-        $line        = undef;
+#         # Try reading the first few lines to see if they look like mail headers
+#         $linenum     = 0;
+#         $foundheader = 0;
+#         $prevline    = "";
+#         $prevpos     = 0;
+#         $nextpos     = 0;
+#         $line        = undef;
 
-        for ($linenum = 0; $linenum < 30; $linenum++) {
+#         for ($linenum = 0; $linenum < 30; $linenum++) {
 
-            #$position = $file->getpos();
-            $line = <$file>;
-            last unless defined $line;
-            $nextpos += length $line;
+#             #$position = $file->getpos();
+#             $line = <$file>;
+#             last unless defined $line;
+#             $nextpos += length $line;
 
-            # Must have 2 lines of header
-            if (   $prevline =~ /^[^:\s]+: /
-                && $line =~ /(^\s+)|(^[^:]+ )|(^\s+.*=)/) {
+#             # Must have 2 lines of header
+#             if (   $prevline =~ /^[^:\s]+: /
+#                 && $line =~ /(^\s+)|(^[^:]+ )|(^\s+.*=)/) {
 
-          #print STDERR "Found header start at \"$prevline\"\n and \"$line\"\n";
-                $foundheader = 1;
-                last;
-            }
-            $prevline = $line;
-            $prevpos  = $position;
-            $position = $nextpos;
-        }
+#           #print STDERR "Found header start at \"$prevline\"\n and \"$line\"\n";
+#                 $foundheader = 1;
+#                 last;
+#             }
+#             $prevline = $line;
+#             $prevpos  = $position;
+#             $position = $nextpos;
+#         }
 
-        unless ($foundheader) {
-            $file->close();
-            next;
-        }
+#         unless ($foundheader) {
+#             $file->close();
+#             next;
+#         }
 
-        # Rewind to the start of the header
-        #$file->setpos($prevpos);
-        seek $file, $prevpos, 0;
+#         # Rewind to the start of the header
+#         #$file->setpos($prevpos);
+#         seek $file, $prevpos, 0;
 
-        #print STDERR "First line is \"" . <$file> . "\"\n";
+#         #print STDERR "First line is \"" . <$file> . "\"\n";
 
-        # Setup everything for the MIME parser
-        my $parser = MIME::Parser->new;
-        my $filer  = Baruwa::Scanner::FileInto->new($explodeinto);
+#         # Setup everything for the MIME parser
+#         my $parser = MIME::Parser->new;
+#         my $filer  = Baruwa::Scanner::FileInto->new($explodeinto);
 
-        # Over-ride the default default character set handler so it does it
-        # much better than the MIME-tools default handling.
-        MIME::WordDecoder->default->handler('*' => \&WordDecoderKeep7Bit);
+#         # Over-ride the default default character set handler so it does it
+#         # much better than the MIME-tools default handling.
+#         MIME::WordDecoder->default->handler('*' => \&WordDecoderKeep7Bit);
 
-        #print STDERR "Exploding message " . $this->{id} . " into " .
-        #             $explodeinto . "\n";
-        $parser->filer($filer);
-        $parser->extract_uuencode(1);       # uue is off by default
-        $parser->output_to_core('NONE');    # everything into files
+#         #print STDERR "Exploding message " . $this->{id} . " into " .
+#         #             $explodeinto . "\n";
+#         $parser->filer($filer);
+#         $parser->extract_uuencode(1);       # uue is off by default
+#         $parser->output_to_core('NONE');    # everything into files
 
-        # Do the actual parsing
-        my $entity = eval {$parser->parse($file)};
+#         # Do the actual parsing
+#         my $entity = eval {$parser->parse($file)};
 
-        $file->close;
-    }
-}
+#         $file->close;
+#     }
+# }
 
 # Print the infection reports for this message
 sub PrintInfections {
