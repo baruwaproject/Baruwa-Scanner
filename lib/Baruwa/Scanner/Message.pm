@@ -1578,67 +1578,6 @@ sub HandleSpamNotify {
         $!);
 }
 
-sub RejectMessage {
-    my $this = shift;
-
-    my ($from,     $to,   %tolist,    $subject,  $date,            $hostname);
-    my ($emailmsg, $line, $messagefh, $filename, $localpostmaster, $id);
-    my ($postmastername);
-
-    $from = $this->{from};
-
-    # Don't ever send a message to "" or "<>"
-    return if $from eq "" || $from eq "<>";
-
-    # Setup other variables they can use in the message template
-    $id              = $this->{id};
-    $localpostmaster = Baruwa::Scanner::Config::Value('localpostmaster', $this);
-    $postmastername  = Baruwa::Scanner::Config::LanguageValue($this, 'baruwa');
-    $hostname        = Baruwa::Scanner::Config::Value('hostname', $this);
-    $subject         = $this->{subject};
-    $date = $this->{datestring};    # scalar localtime;
-    foreach $to (@{$this->{to}}) {
-        $tolist{$to} = 1;
-    }
-    $to = join(', ', sort keys %tolist);
-
-    # Work out which of the 3 spam reports to send them.
-    $filename = Baruwa::Scanner::Config::Value('rejectionreport', $this);
-    Baruwa::Scanner::Log::NoticeLog("Reject message %s from %s with report %s",
-        $id, $from, $filename);
-    return if $filename eq "";
-
-    #print STDERR "Rejecting message $id with $filename\n";
-    $messagefh = new FileHandle;
-    $messagefh->open($filename)
-      or Baruwa::Scanner::Log::WarnLog("Cannot open message file %s, %s",
-        $filename, $!);
-    $emailmsg = "X-Baruwa-Rejected: yes\n";
-
-    while (<$messagefh>) {
-        chomp;
-        s#"#\\"#g;
-        s#@#\\@#g;
-
-        # Boring untainting again...
-        /(.*)/;
-        $line = eval "\"$1\"";
-        $emailmsg .= Baruwa::Scanner::Config::DoPercentVars($line) . "\n";
-    }
-    $messagefh->close();
-
-    #print STDERR "Rejection is:\n-----SNIP-----\n$emailmsg-----SNIP-----\n";
-    # Send the message to the spam sender, but ensure the envelope
-    # sender address is "<>" so that it can't be bounced.
-    $global::MS->{mta}->SendMessageString($this, $emailmsg, '<>')
-      or Baruwa::Scanner::Log::WarnLog(
-        "Could not send rejection report for %s, %s",
-        $id, $!);
-    $this->{deleted}     = 1;
-    $this->{dontdeliver} = 1;
-
-}
-
 # Like encapsulating and sending a message to the recipient, take the
 
 # Deliver a message that doesn't want to be touched at all in any way.

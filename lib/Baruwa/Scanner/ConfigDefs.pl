@@ -396,7 +396,6 @@ LookForUU		0	no	0	yes	1
 MultipleHeaders		append	append	append	replace	replace	add	add
 NameModifySubject	start	no	0	yes	1	start	start	end	end
 NoticeFullHeaders	1	no	0	yes	1
-RejectMessage		0	no	0	yes	1
 ScannedModifySubject	0	no	0	yes	1	start	start	end	end
 SendNotices		1	no	0	yes	1
 SignAlreadyScanned	0	no	0	yes	1
@@ -433,7 +432,6 @@ inlinetextsig		/etc/mail/baruwa/reports/en/inline.sig.txt
 inlinetextwarning	/etc/mail/baruwa/reports/en/inline.warning.txt
 languagestrings
 recipientspamreport	/etc/mail/baruwa/reports/en/recipient.spam.report.txt
-rejectionreport		/etc/mail/baruwa/reports/en/message.rejection.report.txt
 sendercontentreport 	/etc/mail/baruwa/reports/en/sender.content.report.txt
 sendererrorreport 	/etc/mail/baruwa/reports/en/sender.error.report.txt
 senderfilenamereport	/etc/mail/baruwa/reports/en/sender.filename.report.txt

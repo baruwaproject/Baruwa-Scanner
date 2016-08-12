@@ -314,24 +314,6 @@ sub HandleHam {
     #print STDERR "Finished handling ham\n\n";
 }
 
-# Reject messages that come from people we want to reject. Send nice report
-# instead.
-# 2009-12-04 Changed from an "All" to a "First" match rule. Much more useful.
-sub RejectMessages {
-    my $this = shift;
-    my ($id, $message);
-
-    while (($id, $message) = each %{$this->{messages}}) {
-
-        # Skip deleted and non-spam messages
-        next if $message->{deleted};
-
-        #print STDERR "May reject message $id\n";
-        $message->RejectMessage()
-          if Baruwa::Scanner::Config::Value('rejectmessage', $message);
-    }
-}
-
 # Return true if all the messages in the batch are deleted!
 # Return false otherwise.
 sub Empty {

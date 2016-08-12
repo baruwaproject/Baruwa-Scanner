@@ -991,9 +991,6 @@ sub WorkForHours {
         # Archive untouched incoming messages to directories
         $batch->ArchiveToFilesystem();
 
-        # Do this first as it is very cheap indeed. Reject unwanted messages.
-        $batch->RejectMessages();
-
         # 20090730 Moved from below as it's a very early check.
         # Deliver all the messages we are not scanning at all,
         # and mark them for deletion.
