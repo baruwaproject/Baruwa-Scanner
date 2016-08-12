@@ -50,14 +50,16 @@ $global::MS = new Baruwa::Scanner(
     Quarantine => $quar
 );
 
-my $msgid1 = $Test::Baruwa::Scanner::msgs[0];
-my $msgid2 = $Test::Baruwa::Scanner::msgs[4];
-my $msgid3 = $Test::Baruwa::Scanner::msgs[5];
-my $msgid4 = $Test::Baruwa::Scanner::msgs[3];
-my $msgid5 = $Test::Baruwa::Scanner::msgs[2];
-my $msgid6 = $Test::Baruwa::Scanner::msgs[1];
+my @msgs = @Test::Baruwa::Scanner::msgs;
 
-foreach (@Test::Baruwa::Scanner::msgs) {
+my $msgid1 = $msgs[0];
+my $msgid2 = $msgs[4];
+my $msgid3 = $msgs[5];
+my $msgid4 = $msgs[3];
+my $msgid5 = $msgs[2];
+my $msgid6 = $msgs[1];
+
+foreach (@msgs) {
     my $lmsgid = $_;
     my $m = new Baruwa::Scanner::Message($_, $q->[0], 0);
     isa_ok($m, 'Baruwa::Scanner::Message', '$m');
@@ -197,15 +199,17 @@ is( -f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid5/message
     ($msg, $entity) = _parse_msg($msgid6);
     $msg->DeliverUninfected();
     is($DeliverUnmodifiedBody, 1);
-    $msg->{store}->DeleteUnlock();
+    $msg->{store}->Unlock();
     ($msg, $entity) = _parse_msg($msgid6);
     $msg->{bodymodified} = 1;
     $msg->DeliverUninfected();
     is($DeliverModifiedBody, 1);
-    $msg->{store}->DeleteUnlock();
-    # ($msg, $entity) = _parse_msg($msgid6);
-    # $msg->DeliverCleaned();
-    # is($DeliverModifiedBody, 2);
+    $msg->{store}->Unlock();
+    can_ok('Baruwa::Scanner::Message', 'DeliverCleaned');
+    ($msg, $entity) = _parse_msg($msgid6);
+    $msg->DeliverCleaned();
+    is($DeliverModifiedBody, 2);
+    $msg->{store}->Unlock();
 }
 
 remove_tree("$Bin/data/var/spool/baruwa/incoming",   {keep_root => 1});
@@ -259,7 +263,7 @@ sub _parse_msg {
     my $m = new Baruwa::Scanner::Message($msgid, $q->[0], 0);
     my $dir = "$workarea->{dir}/$msgid";
     remove_tree($dir, {keep_root => 0});
-    mkdir "$dir", 0777 or die "could not create work dir";
+    mkdir "$dir", 0777 or die "could not create work dir: $dir $!";
     my $parser = MIME::Parser->new;
     my $filer  = Baruwa::Scanner::FileInto->new($dir);
     MIME::WordDecoder->default->handler(
