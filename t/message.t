@@ -2,6 +2,7 @@
 use v5.10;
 use strict;
 use warnings;
+use Test::Output;
 use FindBin '$Bin';
 use Test::More qw(no_plan);
 use File::Path qw(remove_tree);
@@ -28,14 +29,17 @@ make_test_dirs();
 
 can_ok('Baruwa::Scanner::Message', 'new');
 
-my $conf = "$Bin/data/etc/mail/baruwa/baruwa.conf";
+my $from          = "$Bin/configs/template.conf";
+my $conf          = "$Bin/data/etc/mail/baruwa/baruwa.conf";
+my $datadir       = "$Bin/data";
+create_config($from, $conf, $datadir);
 Baruwa::Scanner::Config::Read($conf, 0);
 my $workarea = new Baruwa::Scanner::WorkArea;
 my $inqueue =
   new Baruwa::Scanner::Queue(@{Baruwa::Scanner::Config::Value('inqueuedir')});
 my $mta  = new Baruwa::Scanner::Mta;
 my $quar = new Baruwa::Scanner::Quarantine;
-my $q   = Baruwa::Scanner::Config::Value('inqueuedir');
+my $q    = Baruwa::Scanner::Config::Value('inqueuedir');
 
 $global::MS = new Baruwa::Scanner(
     WorkArea   => $workarea,
@@ -44,11 +48,114 @@ $global::MS = new Baruwa::Scanner(
     Quarantine => $quar
 );
 
+my $msgid1 = $Test::Baruwa::Scanner::msgs[0];
+my $msgid2 = $Test::Baruwa::Scanner::msgs[4];
+my $msgid3 = $Test::Baruwa::Scanner::msgs[5];
+
 foreach (@Test::Baruwa::Scanner::msgs) {
     my $m = new Baruwa::Scanner::Message($_, $q->[0], 0);
     isa_ok($m, 'Baruwa::Scanner::Message', '$m');
     my $f = new Baruwa::Scanner::Message($_, $q->[0], 0);
     is($f, undef, 'Test locking of a message');
+
+    can_ok('Baruwa::Scanner::Message', 'PrintInfections');
+    stderr_like(
+        sub {Baruwa::Scanner::Message::PrintInfections($m);},
+        qr/All reports for/,
+        qr/All reports for/
+    );
+
+    can_ok('Baruwa::Scanner::Message', 'DropFromBatch');
+    isnt(exists $m->{deleted},      1);
+    isnt(exists $m->{gonefromdisk}, 1);
+    isnt(exists $m->{abandoned},    1);
+    Baruwa::Scanner::Message::DropFromBatch($m);
+    is($m->{deleted},      1);
+    is($m->{gonefromdisk}, 1);
+    is($m->{abandoned},    1);
 }
 
+can_ok('Baruwa::Scanner::Message', 'CountParts');
+
+my ($msg, $entity);
+
+_count_parts($msgid1, 0);
+_count_parts($msgid2, 2);
+
+can_ok('Baruwa::Scanner::Message', 'DeliverModifiedBody');
+
+isnt(-f "$Bin/data/var/spool/exim/input/$msgid1-D", 1);
+isnt(-f "$Bin/data/var/spool/exim/input/$msgid1-D", 1);
+
+($msg, $entity) = _parse_msg($msgid1);
+
+$msg->DeliverModifiedBody('cleanheader');
+
+is(-f "$Bin/data/var/spool/exim/input/$msgid1-D", 1);
+is(-f "$Bin/data/var/spool/exim/input/$msgid1-H", 1);
+
+can_ok('Baruwa::Scanner::Message', 'DeliverUnmodifiedBody');
+isnt(-f "$Bin/data/var/spool/exim/input/$msgid2-D", 1);
+isnt(-f "$Bin/data/var/spool/exim/input/$msgid2-H", 1);
+($msg, $entity) = _parse_msg($msgid2);
+$msg->DeliverUnmodifiedBody('cleanheader');
+is(-f "$Bin/data/var/spool/exim/input/$msgid2-D", 1);
+is(-f "$Bin/data/var/spool/exim/input/$msgid2-H", 1);
+
+($msg, $entity) = _parse_msg($msgid3);
+
+can_ok('Baruwa::Scanner::Message', 'ArchiveToFilesystem');
+my $todaydir = $msg->{datenumber};
+isnt(-f "$Bin/data/var/lib/baruwa/archive/$todaydir/$msgid3-D", 1);
+isnt(-f "$Bin/data/var/lib/baruwa/archive/$todaydir/$msgid3-H", 1);
+$msg->ArchiveToFilesystem();
+is(-f "$Bin/data/var/lib/baruwa/archive/$todaydir/$msgid3-D", 1);
+is(-f "$Bin/data/var/lib/baruwa/archive/$todaydir/$msgid3-H", 1);
+
+can_ok('Baruwa::Scanner::Message', 'AppendToMbox');
+isnt(-f "$Bin/data/var/lib/baruwa/archive/mbox", 1);
+isnt(-f "$Bin/data/var/lib/baruwa/archive/mbox", 1);
+$msg->AppendToMbox("$Bin/data/var/lib/baruwa/archive/mbox");
+is(-f "$Bin/data/var/lib/baruwa/archive/mbox", 1);
+is(-f "$Bin/data/var/lib/baruwa/archive/mbox", 1);
+
+can_ok('Baruwa::Scanner::Message', 'DeleteMessage');
+isnt($msg->{deleted},   1);
+isnt($msg->{abandoned}, 0);
+$msg->DeleteMessage();
+is($msg->{deleted},   1);
+is($msg->{abandoned}, 0);
+
 remove_tree("$Bin/data/var/spool/baruwa/incoming", {keep_root => 1});
+
+sub _count_parts {
+    my ($msgid, $num) = @_;
+    ($msg, $entity) = _parse_msg($msgid);
+    is(Baruwa::Scanner::Message::CountParts($entity), $num);
+    Baruwa::Scanner::Message::DropFromBatch($msg);
+}
+
+sub _parse_msg {
+    my ($msgid) = @_;
+    my $m = new Baruwa::Scanner::Message($msgid, $q->[0], 0);
+    my $dir = "$workarea->{dir}/$msgid";
+    remove_tree($dir, {keep_root => 0});
+    mkdir "$dir", 0777 or die "could not create work dir";
+    my $parser = MIME::Parser->new;
+    my $filer  = Baruwa::Scanner::FileInto->new($dir);
+    MIME::WordDecoder->default->handler(
+        '*' => \&Baruwa::Scanner::Message::WordDecoderKeep7Bit);
+    $parser->filer($filer);
+    $parser->extract_uuencode(1);
+    $parser->output_to_core(0);
+    my $handle = IO::File->new_tmpfile;
+    binmode($handle);
+    is($m->{store}->Lock(), 1);
+    $m->WriteHeaderFile();
+    $m->{store}->ReadMessageHandle($m, $handle);
+    $parser->max_parts(200 * 3);
+    my $entity = eval {$parser->parse($handle)};
+    close($handle);
+    $m->{entity} = $entity;
+    return ($m, $entity);
+}
