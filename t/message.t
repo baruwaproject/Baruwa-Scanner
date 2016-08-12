@@ -29,9 +29,9 @@ make_test_dirs();
 
 can_ok('Baruwa::Scanner::Message', 'new');
 
-my $from          = "$Bin/configs/template.conf";
-my $conf          = "$Bin/data/etc/mail/baruwa/baruwa.conf";
-my $datadir       = "$Bin/data";
+my $from    = "$Bin/configs/template.conf";
+my $conf    = "$Bin/data/etc/mail/baruwa/baruwa.conf";
+my $datadir = "$Bin/data";
 create_config($from, $conf, $datadir);
 Baruwa::Scanner::Config::Read($conf, 0);
 my $workarea = new Baruwa::Scanner::WorkArea;
@@ -51,6 +51,7 @@ $global::MS = new Baruwa::Scanner(
 my $msgid1 = $Test::Baruwa::Scanner::msgs[0];
 my $msgid2 = $Test::Baruwa::Scanner::msgs[4];
 my $msgid3 = $Test::Baruwa::Scanner::msgs[5];
+my $msgid4 = $Test::Baruwa::Scanner::msgs[3];
 
 foreach (@Test::Baruwa::Scanner::msgs) {
     my $m = new Baruwa::Scanner::Message($_, $q->[0], 0);
@@ -65,6 +66,7 @@ foreach (@Test::Baruwa::Scanner::msgs) {
         qr/All reports for/
     );
 
+    # print STDERR "STRUP=> $m->{needsstripping}\n";
     can_ok('Baruwa::Scanner::Message', 'DropFromBatch');
     isnt(exists $m->{deleted},      1);
     isnt(exists $m->{gonefromdisk}, 1);
@@ -108,16 +110,16 @@ can_ok('Baruwa::Scanner::Message', 'ArchiveToFilesystem');
 my $todaydir = $msg->{datenumber};
 isnt(-f "$Bin/data/var/lib/baruwa/archive/$todaydir/$msgid3-D", 1);
 isnt(-f "$Bin/data/var/lib/baruwa/archive/$todaydir/$msgid3-H", 1);
-$msg->ArchiveToFilesystem();
+is($msg->ArchiveToFilesystem(),                               1);
 is(-f "$Bin/data/var/lib/baruwa/archive/$todaydir/$msgid3-D", 1);
 is(-f "$Bin/data/var/lib/baruwa/archive/$todaydir/$msgid3-H", 1);
 
 can_ok('Baruwa::Scanner::Message', 'AppendToMbox');
-isnt(-f "$Bin/data/var/lib/baruwa/archive/mbox", 1);
-isnt(-f "$Bin/data/var/lib/baruwa/archive/mbox", 1);
-$msg->AppendToMbox("$Bin/data/var/lib/baruwa/archive/mbox");
-is(-f "$Bin/data/var/lib/baruwa/archive/mbox", 1);
-is(-f "$Bin/data/var/lib/baruwa/archive/mbox", 1);
+isnt(-f "$Bin/data/var/lib/baruwa/archive/mboxes/mbox", 1);
+isnt(-f "$Bin/data/var/lib/baruwa/archive/mboxes/mbox", 1);
+$msg->AppendToMbox("$Bin/data/var/lib/baruwa/archive/mboxes/mbox");
+is(-f "$Bin/data/var/lib/baruwa/archive/mboxes/mbox", 1);
+is(-f "$Bin/data/var/lib/baruwa/archive/mboxes/mbox", 1);
 
 can_ok('Baruwa::Scanner::Message', 'DeleteMessage');
 isnt($msg->{deleted},   1);
@@ -126,7 +128,59 @@ $msg->DeleteMessage();
 is($msg->{deleted},   1);
 is($msg->{abandoned}, 0);
 
+can_ok('Baruwa::Scanner::Message', 'DeleteAllRecipients');
+($msg, $entity) = _parse_msg($msgid4);
+isnt($msg->{to}, ());
+isnt($msg->{touser}, ());
+isnt($msg->{todomain}, ());
+Baruwa::Scanner::Message::DeleteAllRecipients($msg);
+is(scalar @{$msg->{to}}, 0);
+is(scalar @{$msg->{touser}}, 0);
+is(scalar @{$msg->{todomain}}, 0);
+
+can_ok('Baruwa::Scanner::Message', 'QuarantineDOS');
+($msg, $entity) = _parse_msg($msgid4);
+isnt(exists $msg->{quarantinedinfections}, 1);
+isnt(-f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid4/message", 1);
+Baruwa::Scanner::Message::QuarantineDOS($msg);
+is(exists $msg->{quarantinedinfections}, 1);
+is($msg->{quarantinedinfections}, 1);
+is(-f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid4/message", 1);
+
 remove_tree("$Bin/data/var/spool/baruwa/incoming", {keep_root => 1});
+remove_tree("$Bin/data/var/spool/baruwa/quarantine", {keep_root => 1});
+
+can_ok('Baruwa::Scanner::Message', 'CleanLinkURL');
+my ($linkurl, $alarm);
+
+($linkurl, $alarm) = Baruwa::Scanner::Message::CleanLinkURL('');
+is($linkurl, '');
+is($alarm,   0);
+
+foreach (
+    qw/andrew@baruwa.com mailto:andrew@baruwa.com file:\/\/\/home\/andrew\/testfile #baruwa-settings/
+  ) {
+    ($linkurl, $alarm) = Baruwa::Scanner::Message::CleanLinkURL($_);
+    is($linkurl, '');
+    is($alarm,   0);
+}
+
+($linkurl, $alarm) = Baruwa::Scanner::Message::CleanLinkURL('baruwa.com.');
+is($linkurl, 'baruwa.com');
+is($alarm,   0);
+
+foreach (
+    qw/http:\/\/www.baruwa.com http:\/\/www.baruwa.com:80 https:\/\/www.baruwa.com ftp:\/\/www.baruwa.com webcal:\/\/www.baruwa.com/
+  ) {
+    ($linkurl, $alarm) = Baruwa::Scanner::Message::CleanLinkURL($_);
+    is($linkurl, 'www.baruwa.com');
+    is($alarm,   0);
+}
+
+($linkurl, $alarm) =
+  Baruwa::Scanner::Message::CleanLinkURL('javascript:window.show();');
+is($linkurl, 'JavaScript');
+is($alarm,   0);
 
 sub _count_parts {
     my ($msgid, $num) = @_;
