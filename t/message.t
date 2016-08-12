@@ -212,7 +212,20 @@ is( -f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid5/message
     $msg->{store}->Unlock();
 }
 
-remove_tree("$Bin/data/var/spool/baruwa/incoming",   {keep_root => 1});
+can_ok('Baruwa::Scanner::Message', 'DeleteFile');
+$workarea->ClearAll();
+my $m = new Baruwa::Scanner::Message($msgid6, $q->[0], 0);
+my $dir = "$workarea->{dir}/$msgid6";
+unless (-e "$dir") {
+    mkdir "$dir", 0777 or die "could not create work dir: $dir => $!";
+}
+$m->WriteHeaderFile();
+$m->Explode();
+is(-f "$workarea->{dir}/1bUvRz-0001Mr-4W/nkudzu.doc", 1);
+$msg->DeleteFile('nkudzu.doc');
+isnt(-f "$workarea->{dir}/1bUvRz-0001Mr-4W/nkudzu.doc", 1);
+
+$workarea->ClearAll();
 remove_tree("$Bin/data/var/spool/baruwa/quarantine", {keep_root => 1});
 
 can_ok('Baruwa::Scanner::Message', 'CleanLinkURL');
