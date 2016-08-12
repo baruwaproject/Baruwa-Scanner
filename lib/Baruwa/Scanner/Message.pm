@@ -1162,24 +1162,24 @@ sub HandleHamAndSpam {
                     $action =~ s/forward\s*|header\s*//g;
                     if ($action =~ /\@/) {
 
-                 # Remove the address from the list of @{$this->{archiveplaces}}
+                        # Remove the address from the list of @{$this->{archiveplaces}}
                         my @places;
                         foreach (@{$this->{archiveplaces}}) {
                             push @places, $_ unless /^$action$/i;
                         }
                         $this->{archiveplaces} = \@places;
 
-#print STDERR "Removed $action from archiveplaces to give " . join(',',@places) . "\n";
+                        # print STDERR "Removed $action from archiveplaces to give " . join(',',@places) . "\n";
                     } elsif ($action =~ /\"([^\"]+)\"/) {
 
-               # Remove the header from the list of @{$this->{extraspamheaders}}
+                        # Remove the header from the list of @{$this->{extraspamheaders}}
                         my @headers;
                         foreach (@{$this->{extraspamheaders}}) {
                             push @headers, $_ unless /^$action$/i;
                         }
                         $this->{extraspamheaders} = \@headers;
 
-#print STDERR "Removed $action from extraspamheaders to give " . join(',',@headers) . "\n";
+                        # print STDERR "Removed $action from extraspamheaders to give " . join(',',@headers) . "\n";
                     } elsif ($action =~ /^custom\((.*)\)/) {
 
                         # Call the "no" custom action
@@ -1230,11 +1230,11 @@ sub HandleHamAndSpam {
                             $1);
                     } else {
 
-               # It's some other action
-               #print STDERR "Adding action $action\n";
-               # Support store-nonspam etc.
-               #$action =~ s/^store\W(\w+).*$/store-$1/;
-               #print STDERR "Adding action $action after cleaning up stores\n";
+                        # It's some other action
+                        # print STDERR "Adding action $action\n";
+                        # Support store-nonspam etc.
+                        # $action =~ s/^store\W(\w+).*$/store-$1/;
+                        # print STDERR "Adding action $action after cleaning up stores\n";
                         $actions{$action} = 1;
                         $lintoptions{$action} = 1 unless $action =~ /-\//;
                     }
@@ -1258,7 +1258,7 @@ sub HandleHamAndSpam {
     delete $lintoptions{'store'};
     delete $lintoptions{'store-nonspam'};
     delete $lintoptions{'store-spam'};
-    delete $lintoptions{'bounce'};
+    # delete $lintoptions{'bounce'};
     delete $lintoptions{'forward'};
     delete $lintoptions{'striphtml'};
     delete $lintoptions{'attachment'};
@@ -1347,34 +1347,14 @@ sub HandleHamAndSpam {
             $this->{id}, join(',', keys %actions))
           if $HamSpam eq 'spam' && Baruwa::Scanner::Config::Value('logspam');
 
-    # Mark the message so it won't get cleaned up or delivered, but just dropped
-    #print STDERR "Setting DontDeliver for " . $this->{id} . "\n";
+        # Mark the message so it won't get cleaned up or delivered, but just dropped
+        # print STDERR "Setting DontDeliver for " . $this->{id} . "\n";
         $this->{dontdeliver} = 1;
 
         # Optimisation courtesy of Yavor.Trapkov@wipo.int
         $this->{deleted} = 1 if (keys %actions) == 1 && $actions{'delete'};
         ## Mark the message as deleted, so it won't get delivered
         #$this->{deleted} = 1;
-    }
-
-    # All delivery will now happen correctly.
-
-    # Bounce a message back to the sender if they want that
-    if ($actions{'bounce'}) {
-        if ($HamSpam eq 'nonspam') {
-            Baruwa::Scanner::Log::WarnLog(
-                "Does not make sense to bounce non-spam");
-        } else {
-
-    #Baruwa::Scanner::Log::WarnLog('The "bounce" Spam Action no longer exists');
-            if ($this->{ishigh}) {
-                Baruwa::Scanner::Log::NoticeLog(
-                    "Will not bounce high-scoring spam");
-            } else {
-                $this->HandleSpamBounce()
-                  if Baruwa::Scanner::Config::Value('enablespambounce', $this);
-            }
-        }
     }
 
     # Notify the recipient if they want that
@@ -1504,185 +1484,6 @@ sub HandleHamAndSpam {
     # If they want to encapsulate the message in an RFC822 part,
     # then tag it so we can do this later.
     $this->{needsencapsulating} = 1 if $actions{'attachment'};
-}
-
-# We want to send a message back to the sender saying that their junk
-# email has been rejected by our site.
-# Send a message back to the sender which has the local postmaster as
-# the header sender, but <> as the envelope sender. This means it
-# cannot bounce.
-# Now have 3 different message file settings:
-# 1. Is spam according to RBL's
-# 2. Is spam according to SpamAssassin
-# 3. Is spam according to both
-sub HandleSpamBounce {
-    my $this = shift;
-
-    my ($from, $to, $subject, $date, $spamreport, $longspamreport, $hostname);
-    my ($emailmsg, $line, $messagefh, $filename, $localpostmaster, $id);
-    my ($postmastername);
-
-    $from = $this->{from};
-
-    # Don't ever send a message to "" or "<>"
-    return if $from eq "" || $from eq "<>";
-
-    # Do we want to send the sender a warning at all?
-    # If nosenderprecedence is set to non-blank and contains this
-    # message precedence header, then just return.
-    my (@preclist, $prec, $precedence, $header);
-    @preclist =
-      split(" ",
-        lc(Baruwa::Scanner::Config::Value('nosenderprecedence', $this)));
-    $precedence = "";
-    foreach $header (@{$this->{headers}}) {
-        $precedence = lc($1) if $header =~ /^precedence:\s+(\S+)/i;
-    }
-    if (@preclist && $precedence ne "") {
-        foreach $prec (@preclist) {
-            if ($precedence eq $prec) {
-                Baruwa::Scanner::Log::InfoLog(
-                    "Skipping sender of precedence %s", $precedence);
-                return;
-            }
-        }
-    }
-
-    # Setup other variables they can use in the message template
-    $id = $this->{id};
-
-    #$to = join(', ', @{$this->{to}});
-    $localpostmaster = Baruwa::Scanner::Config::Value('localpostmaster', $this);
-    $postmastername = Baruwa::Scanner::Config::LanguageValue($this, 'baruwa');
-    $hostname = Baruwa::Scanner::Config::Value('hostname', $this);
-    $subject = $this->{subject};
-    $date           = $this->{datestring};     # scalar localtime;
-    $spamreport     = $this->{spamreport};
-    $longspamreport = $this->{salongreport};
-
-    #print STDERR "longspamreport = \"$longspamreport\"\n";
-    my (%tolist);
-    foreach $to (@{$this->{to}}) {
-        $tolist{$to} = 1;
-    }
-    $to = join(', ', sort keys %tolist);
-
-    # Delete everything in brackets after the SA report, if it exists
-    $spamreport =~ s/(spamassassin)[^(]*\([^)]*\)/$1/i;
-
-    # Work out which of the 3 spam reports to send them.
-    $filename = "";
-    if ($this->{isrblspam} && !$this->{issaspam}) {
-        $filename =
-          Baruwa::Scanner::Config::Value('senderrblspamreport', $this);
-        Baruwa::Scanner::Log::NoticeLog("Spam Actions: (RBL) Bounce to %s",
-            $from)
-          if Baruwa::Scanner::Config::Value('logspam');
-    } elsif ($this->{issaspam} && !$this->{isrblspam}) {
-        $filename = Baruwa::Scanner::Config::Value('sendersaspamreport', $this);
-        Baruwa::Scanner::Log::NoticeLog(
-            "Spam Actions: (SpamAssassin) Bounce to %s", $from)
-          if Baruwa::Scanner::Config::Value('logspam');
-    }
-    if ($filename eq "") {
-        $filename =
-          Baruwa::Scanner::Config::Value('senderbothspamreport', $this);
-        Baruwa::Scanner::Log::NoticeLog(
-            "Spam Actions: (RBL,SpamAssassin) Bounce to %s", $from)
-          if Baruwa::Scanner::Config::Value('logspam');
-    }
-
-    $messagefh = new FileHandle;
-    $messagefh->open($filename)
-      or Baruwa::Scanner::Log::WarnLog("Cannot open message file %s, %s",
-        $filename, $!);
-    $emailmsg = "X-Baruwa-Bounce: yes\n";
-    while (<$messagefh>) {
-        chomp;
-        s#"#\\"#g;
-        s#@#\\@#g;
-
-        # Boring untainting again...
-        /(.*)/;
-
-        # Bug fix by Martin Hepworth
-        $line = eval "\"$1\"";
-        $emailmsg .= Baruwa::Scanner::Config::DoPercentVars($line) . "\n";
-    }
-    $messagefh->close();
-
-    if (Baruwa::Scanner::Config::Value('bouncespamasattachment', $this)) {
-        $this->HandleSpamBounceAttachment($emailmsg);
-    } else {
-
-        # Send the message to the spam sender, but ensure the envelope
-        # sender address is "<>" so that it can't be bounced.
-        $global::MS->{mta}->SendMessageString($this, $emailmsg, '<>')
-          or
-          Baruwa::Scanner::Log::WarnLog("Could not send sender spam bounce, %s",
-            $!);
-    }
-}
-
-# Like encapsulating and sending a message to the recipient, take the
-# passed text as the text and headers of an email message and attach
-# the original message as an rfc/822 attachment.
-sub HandleSpamBounceAttachment {
-    my ($this, $plaintext) = @_;
-
-    my $parser      = MIME::Parser->new;
-    my $explodeinto = $global::MS->{work}->{dir} . '/' . $this->{id};
-
-    #print STDERR "Extracting spam bounce message into $explodeinto\n";
-    my $filer = Baruwa::Scanner::FileInto->new($explodeinto);
-    $parser->filer($filer);
-
-    my $bounce = eval {$parser->parse_data(\$plaintext)};
-    if (!$bounce) {
-        Baruwa::Scanner::Log::WarnLog("Cannot parse spam bounce report, %s",
-            $!);
-        return;
-    }
-
-    #print STDERR "Successfully parsed bounce report\n";
-
-    # Now make it multipart and push the report into a child
-    $bounce->make_multipart('report');
-
-    # Now turn the original message into a string and attach it
-    my (@original);
-
-    #my $original = $this->{entity}->stringify;
-    @original = $global::MS->{mta}->OriginalMsgHeaders($this, "\n");
-    push(@original, "\n");
-    $this->{store}->ReadBody(\@original,
-        Baruwa::Scanner::Config::Value('maxspamassassinsize'));
-
-    $bounce->add_part(
-        MIME::Entity->build(
-            Type        => 'message/rfc822',
-            Disposition => 'attachment',
-            Top         => 0,
-            'X-Mailer'  => undef,
-            Data        => \@original
-        )
-    );
-
-    # Prune all the dead branches off the tree
-    PruneEntityTree($bounce);
-
-    # Stringify the message and send it -- this could be VERY large!
-    my $bouncetext = $bounce->stringify;
-
-    #print STDERR "Spam bounce message is this:\n$bouncetext";
-    if ($bouncetext) {
-        $global::MS->{mta}->SendMessageString($this, $bouncetext, '<>')
-          or Baruwa::Scanner::Log::WarnLog(
-            "Could not send sender spam bounce attachment, %s", $!);
-    } else {
-        Baruwa::Scanner::Log::WarnLog(
-            "Failed to create sender spam bounce attachment, %s", $!);
-    }
 }
 
 # We want to send a message to the recipient saying that their spam

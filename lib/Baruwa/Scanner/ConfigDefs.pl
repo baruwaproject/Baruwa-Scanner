@@ -178,10 +178,7 @@ scoreformat			= spamscorenumberformat
 secondlevellist                 = countrysubdomainslist
 sendercontentreport		= senderbadcontentreport
 senderfilenamereport		= senderbadfilenamereport
-senderrblspamreport		= senderspamlistreport
-sendersaspamreport		= senderspamassassinreport
 sendersizereport		= sendersizereport
-senderbothspamreport		= senderspamreport
 showscanner			= includescannernameinreports
 signalreadyscanned		= signmessagesalreadyprocessed
 signunscannedmessages		= markunscannedmessages
@@ -440,10 +437,7 @@ rejectionreport		/etc/mail/baruwa/reports/en/message.rejection.report.txt
 sendercontentreport 	/etc/mail/baruwa/reports/en/sender.content.report.txt
 sendererrorreport 	/etc/mail/baruwa/reports/en/sender.error.report.txt
 senderfilenamereport	/etc/mail/baruwa/reports/en/sender.filename.report.txt
-SenderRBLSpamReport	/etc/mail/baruwa/reports/en/sender.spam.rbl.report.txt
-SenderSASpamReport	/etc/mail/baruwa/reports/en/sender.spam.sa.report.txt
 SenderSizeReport	/etc/mail/baruwa/reports/en/sender.size.report.txt
-SenderBothSpamReport	/etc/mail/baruwa/reports/en/sender.spam.report.txt
 sendervirusreport 	/etc/mail/baruwa/reports/en/sender.virus.report.txt
 StoredContentMessage	/etc/mail/baruwa/reports/en/stored.content.message.txt
 StoredFilenameMessage	/etc/mail/baruwa/reports/en/stored.filename.message.txt
