@@ -2,8 +2,10 @@
 use v5.10;
 use strict;
 use warnings;
+use Digest::MD5;
 use Test::Output;
 use FindBin '$Bin';
+use Test::MockModule;
 use Test::More qw(no_plan);
 use File::Path qw(remove_tree);
 use Baruwa::Scanner();
@@ -53,8 +55,10 @@ my $msgid2 = $Test::Baruwa::Scanner::msgs[4];
 my $msgid3 = $Test::Baruwa::Scanner::msgs[5];
 my $msgid4 = $Test::Baruwa::Scanner::msgs[3];
 my $msgid5 = $Test::Baruwa::Scanner::msgs[2];
+my $msgid6 = $Test::Baruwa::Scanner::msgs[1];
 
 foreach (@Test::Baruwa::Scanner::msgs) {
+    my $lmsgid = $_;
     my $m = new Baruwa::Scanner::Message($_, $q->[0], 0);
     isa_ok($m, 'Baruwa::Scanner::Message', '$m');
     my $f = new Baruwa::Scanner::Message($_, $q->[0], 0);
@@ -65,6 +69,30 @@ foreach (@Test::Baruwa::Scanner::msgs) {
         sub {Baruwa::Scanner::Message::PrintInfections($m);},
         qr/All reports for/,
         qr/All reports for/
+    );
+
+    my $mshmackey = Baruwa::Scanner::Config::Value('mshmac',      $m);
+    my $mshamcexp = Baruwa::Scanner::Config::Value('mshmacvalid', $m);
+    my $date      = time();
+    my $expiry    = time() + $mshamcexp;
+    can_ok('Baruwa::Scanner::Message', 'createHMAC');
+    my $hash =
+      Baruwa::Scanner::Message::createHMAC($expiry,
+        $m->{fromuser} . "\@" . $m->{fromdomain},
+        $date, $mshmackey, $lmsgid);
+    is( Digest::MD5::md5_base64(
+            join("\$\%", $expiry, $date, $mshmackey, $lmsgid)
+          ) eq $hash,
+        1
+    );
+    my $check = "$expiry\@$hash";
+    $date = time();
+    can_ok('Baruwa::Scanner::Message', 'checkHMAC');
+    is( Baruwa::Scanner::Message::checkHMAC(
+            $check, $m->{fromuser} . "\@" . $m->{fromdomain},
+            $date, $mshmackey, $lmsgid
+        ),
+        1
     );
 
     # print STDERR "STRUP=> $m->{needsstripping}\n";
@@ -131,24 +159,54 @@ is($msg->{abandoned}, 0);
 
 can_ok('Baruwa::Scanner::Message', 'DeleteAllRecipients');
 ($msg, $entity) = _parse_msg($msgid4);
-isnt($msg->{to}, ());
-isnt($msg->{touser}, ());
-isnt($msg->{todomain}, ());
+isnt(scalar @{$msg->{to}},       0);
+isnt(scalar @{$msg->{touser}},   0);
+isnt(scalar @{$msg->{todomain}}, 0);
 Baruwa::Scanner::Message::DeleteAllRecipients($msg);
-is(scalar @{$msg->{to}}, 0);
-is(scalar @{$msg->{touser}}, 0);
+is(scalar @{$msg->{to}},       0);
+is(scalar @{$msg->{touser}},   0);
 is(scalar @{$msg->{todomain}}, 0);
 
 can_ok('Baruwa::Scanner::Message', 'QuarantineDOS');
 ($msg, $entity) = _parse_msg($msgid5);
 isnt(exists $msg->{quarantinedinfections}, 1);
-isnt(-f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid5/message", 1);
+isnt(
+    -f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid5/message",
+    1
+);
 Baruwa::Scanner::Message::QuarantineDOS($msg);
 is(exists $msg->{quarantinedinfections}, 1);
-is($msg->{quarantinedinfections}, 1);
-is(-f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid5/message", 1);
+is($msg->{quarantinedinfections},        1);
+is( -f "$Bin/data/var/spool/baruwa/quarantine/$msg->{datenumber}/$msgid5/message",
+    1
+);
 
-remove_tree("$Bin/data/var/spool/baruwa/incoming", {keep_root => 1});
+{
+    can_ok('Baruwa::Scanner::Message', 'DeliverUninfected');
+    my $mod                 = Test::MockModule->new('Baruwa::Scanner::Message');
+    my $DeliverModifiedBody = 0;
+    my $DeliverUnmodifiedBody = 0;
+    $mod->mock(
+        DeliverModifiedBody => sub {
+            $DeliverModifiedBody++;
+        },
+        DeliverUnmodifiedBody => sub {
+            $DeliverUnmodifiedBody++;
+        }
+    );
+    ($msg, $entity) = _parse_msg($msgid6);
+    $msg->DeliverUninfected();
+    is($DeliverUnmodifiedBody, 1);
+    ($msg, $entity) = _parse_msg($msgid6);
+    $msg->{bodymodified} = 1;
+    $msg->DeliverUninfected();
+    is($DeliverModifiedBody, 1);
+    ($msg, $entity) = _parse_msg($msgid6);
+    $msg->DeliverCleaned();
+    is($DeliverModifiedBody, 2);
+}
+
+remove_tree("$Bin/data/var/spool/baruwa/incoming",   {keep_root => 1});
 remove_tree("$Bin/data/var/spool/baruwa/quarantine", {keep_root => 1});
 
 can_ok('Baruwa::Scanner::Message', 'CleanLinkURL');
