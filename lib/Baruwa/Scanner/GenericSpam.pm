@@ -37,21 +37,6 @@ our $VERSION = '4.086000';
 my @GSsuccessqueue;    # queue of failure history
 my $GSsuccessqsum;     # current sum of history queue
 
-sub initialise {
-
-    # Initialise the class variables
-    @GSsuccessqueue = ();
-    $GSsuccessqsum  = 0;
-}
-
-# Constructor.
-sub new {
-    my $type = shift;
-    my $this = {};
-
-    bless $this, $type;
-    return $this;
-}
 
 # Do the Generic Spam checks on the passed in message
 sub Checks {
