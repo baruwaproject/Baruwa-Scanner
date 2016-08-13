@@ -12,6 +12,6 @@ BEGIN {
 
 diag("Testing Baruwa::Scanner::GenericSpam $Baruwa::Scanner::GenericSpam::VERSION, Perl $], $^X");
 
-my $g = new Baruwa::Scanner::GenericSpam();
+can_ok('Baruwa::Scanner::GenericSpam', 'Checks');
 
-isa_ok($g, 'Baruwa::Scanner::GenericSpam', '$g');
+can_ok('Baruwa::Scanner::GenericSpam', 'GSForkAndTest');
