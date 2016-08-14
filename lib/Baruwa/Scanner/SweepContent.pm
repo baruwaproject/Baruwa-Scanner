@@ -30,17 +30,6 @@ use DirHandle;
 
 our $VERSION = '4.086000';
 
-# Attributes are
-#
-
-# Constructor.
-sub new {
-    my $type = shift;
-    my $this = {};
-
-    bless $this, $type;
-    return $this;
-}
 
 # Do all the message content scanning in here
 sub ScanBatch {

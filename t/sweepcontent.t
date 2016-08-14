@@ -12,8 +12,26 @@ BEGIN {
 
 diag("Testing Baruwa::Scanner::SweepContent $Baruwa::Scanner::SweepContent::VERSION, Perl $], $^X");
 
-can_ok('Baruwa::Scanner::SweepContent', 'new');
+can_ok('Baruwa::Scanner::SweepContent', 'ScanBatch');
 
-my $s = new Baruwa::Scanner::SweepContent();
+can_ok('Baruwa::Scanner::SweepContent', 'FixMaliciousSubjects');
 
-isa_ok($s, 'Baruwa::Scanner::SweepContent', '$s');
+can_ok('Baruwa::Scanner::SweepContent', 'CheckAttachmentSizes');
+
+can_ok('Baruwa::Scanner::SweepContent', 'FindPartialMessage');
+
+can_ok('Baruwa::Scanner::SweepContent', 'LastEntity');
+
+can_ok('Baruwa::Scanner::SweepContent', 'FindHTMLExploits');
+
+can_ok('Baruwa::Scanner::SweepContent', 'SearchHTMLBody');
+
+can_ok('Baruwa::Scanner::SweepContent', 'FindExternalBody');
+
+can_ok('Baruwa::Scanner::SweepContent', 'EncryptionStatus');
+
+can_ok('Baruwa::Scanner::SweepContent', 'ExtractPublicKeys');
+
+can_ok('Baruwa::Scanner::SweepContent', 'SavePublicKey');
+
+can_ok('Baruwa::Scanner::SweepContent', 'FixSubstringBoundaries');
