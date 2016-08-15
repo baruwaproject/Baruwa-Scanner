@@ -30,20 +30,6 @@ use POSIX qw(:signal_h setsid);    # For Solaris 9 SIG bug workaround
 
 our $VERSION = '4.086000';
 
-# Attributes are
-#
-
-# Constructor.
-sub new {
-    my $type = shift;
-    my $this = {};
-
-    #$this->{dir} = shift;
-
-    bless $this, $type;
-    return $this;
-}
-
 # Look through an entity to find Doc files. Recursive.
 sub FindDocFiles {
     my ($entity, $parent, $already) = @_;

@@ -24,12 +24,6 @@ diag(
 
 make_test_dirs();
 
-can_ok('Baruwa::Scanner::Antiword', 'new');
-
-my $a = new Baruwa::Scanner::Antiword();
-
-isa_ok($a, 'Baruwa::Scanner::Antiword', '$a');
-
 my $from          = "$Bin/configs/template.conf";
 my $conf          = "$Bin/data/etc/mail/baruwa/baruwa.conf";
 my $conf_antiword = "$Bin/data/etc/mail/baruwa/baruwa-antiword.conf";
@@ -60,6 +54,7 @@ $global::MS = new Baruwa::Scanner(
     Quarantine => $quar
 );
 
+can_ok('Baruwa::Scanner::Antiword', 'FindDocFiles');
 my %nullhash = ();
 my $msgid    = $Test::Baruwa::Scanner::msgs[1];
 my $m        = new Baruwa::Scanner::Message($msgid, $q->[0], 0);
@@ -78,6 +73,7 @@ SKIP: {
     @anti     = split(/\s+/, Baruwa::Scanner::Config::Value('antiword'));
     $antiword = $anti[0];
     skip('Antiword is required to run this test', $len) unless (-f $antiword);
+    can_ok('Baruwa::Scanner::Antiword', 'RunAntiword');
     while (($docfile, $parent) = each %$docfiles) {
         is(Baruwa::Scanner::Antiword::RunAntiword($dir, $docfile, $parent, $m),
             1);
