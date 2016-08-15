@@ -28,7 +28,7 @@ no strict 'subs';    # Allow bare words for parameter %'s
 use MIME::Head;
 use DirHandle;
 use HTML::TokeParser;
-use POSIX qw(:signal_h setsid);    # For Solaris 9 SIG bug workaround
+use POSIX qw(:signal_h setsid);
 
 our $VERSION = '4.086000';
 
@@ -454,13 +454,6 @@ sub CheckFileContentTypes {
             $PipeReturn = $?;
             $pid        = 0;    # 2.54
             alarm 0;
-
-            # Workaround for bug in perl shipped with Solaris 9,
-            # it doesn't unblock the SIGALRM after handling it.
-            eval {
-                my $unblockset = POSIX::SigSet->new(SIGALRM);
-                sigprocmask( SIG_UNBLOCK, $unblockset ) or die "Could not unblock alarm: $!\n";
-            };
         } else {
             # In the child
             POSIX::setsid();
@@ -543,14 +536,6 @@ sub CheckFileContentTypes {
             $PipeReturn = $?;
             $pid        = 0;    # 2.54
             alarm 0;
-
-            # Workaround for bug in perl shipped with Solaris 9,
-            # it doesn't unblock the SIGALRM after handling it.
-            eval {
-                my $unblockset = POSIX::SigSet->new(SIGALRM);
-                sigprocmask( SIG_UNBLOCK, $unblockset )
-                  or die "Could not unblock alarm: $!\n";
-            };
         }
         else {
             # In the child

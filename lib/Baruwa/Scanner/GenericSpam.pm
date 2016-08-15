@@ -26,7 +26,7 @@ use strict 'refs';
 no strict 'subs';    # Allow bare words for parameter %'s
 
 use IO qw(Pipe);
-use POSIX qw(:signal_h);    # For Solaris 9 SIG bug workaround
+use POSIX qw(:signal_h);
 
 our $VERSION = '4.086000';
 
@@ -157,14 +157,6 @@ sub GSForkAndTest {
         $GSsuccessqsum = 0 if $GSsuccessqsum < 0;
     };
     alarm 0;
-
-    # Workaround for bug in perl shipped with Solaris 9,
-    # it doesn't unblock the SIGALRM after handling it.
-    eval {
-        my $unblockset = POSIX::SigSet->new(SIGALRM);
-        sigprocmask(SIG_UNBLOCK, $unblockset)
-          or die "Could not unblock alarm: $!\n";
-    };
 
     # Note to self: I only close the KID in the parent, not in the child.
 

@@ -3010,14 +3010,6 @@ sub SafePipe {
 
             $pid = 0;    # 2.54
             alarm 0;
-
-            # Workaround for bug in perl shipped with Solaris 9,
-            # it doesn't unblock the SIGALRM after handling it.
-            eval {
-                my $unblockset = POSIX::SigSet->new(SIGALRM);
-                sigprocmask(SIG_UNBLOCK, $unblockset)
-                  or die "Could not unblock alarm: $!\n";
-            };
         } else {
 
             # In the child
@@ -6694,14 +6686,6 @@ sub DisarmHTMLEntity {
         $pid = 0;
     };
     alarm 0;
-
-    # Workaround for bug in perl shipped with Solaris 9,
-    # it doesn't unblock the SIGALRM after handling it.
-    eval {
-        my $unblockset = POSIX::SigSet->new(SIGALRM);
-        sigprocmask(SIG_UNBLOCK, $unblockset)
-          or die "Could not unblock alarm: $!\n";
-    };
 
    # If pid != 0 then it failed so we have to kill the child and mark it somehow
    #print STDERR "pid==$pid\n";

@@ -25,7 +25,7 @@ use strict 'vars';
 use strict 'refs';
 no strict 'subs';    # Allow bare words for parameter %'s
 
-use POSIX qw(:signal_h setsid);    # For Solaris 9 SIG bug workaround
+use POSIX qw(:signal_h setsid);
 use DirHandle;
 use IO::Socket::INET;
 use IO::Socket::UNIX;
@@ -753,14 +753,6 @@ sub TryOneCommercial {
             $PipeReturn = $?;
             $pid        = 0;    # 2.54
             alarm 0;
-
-            # Workaround for bug in perl shipped with Solaris 9,
-            # it doesn't unblock the SIGALRM after handling it.
-            eval {
-                my $unblockset = POSIX::SigSet->new(SIGALRM);
-                sigprocmask(SIG_UNBLOCK, $unblockset)
-                  or die "Could not unblock alarm: $!\n";
-            };
         } else {
 
             # In the child

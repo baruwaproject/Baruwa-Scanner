@@ -28,7 +28,7 @@ no strict 'subs';    # Allow bare words for parameter %'s
 #use English; # Needed for $PERL_VERSION to work in all versions of Perl
 
 use IO qw(Pipe);
-use POSIX qw(:signal_h);    # For Solaris 9 SIG bug workaround
+use POSIX qw(:signal_h);
 use DBI;
 use DBD::SQLite;
 use Digest::MD5;
@@ -909,14 +909,6 @@ sub SAForkAndTest {
         $SAsuccessqsum = 0 if $SAsuccessqsum < 0;
     };
     alarm 0;
-
-    # Workaround for bug in perl shipped with Solaris 9,
-    # it doesn't unblock the SIGALRM after handling it.
-    eval {
-        my $unblockset = POSIX::SigSet->new(SIGALRM);
-        sigprocmask(SIG_UNBLOCK, $unblockset)
-          or die "Could not unblock alarm: $!\n";
-    };
 
     # Construct the hit-list including the score we got.
     my ($longHitList);
