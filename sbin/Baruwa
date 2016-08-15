@@ -318,21 +318,9 @@ $NotConfigured++
   if Baruwa::Scanner::Config::QuickPeek($ConfFile, '%web-site%', 'notifldap')
   eq "www.your-organisation.com";
 if ($NotConfigured == 3) {
-
-    # Set them all to be something sensible
-    my $domain_name = hostname_long;
-    $domain_name =~ s/^[^.]+\.//;
-    my $header_domain = $domain_name;
-    $header_domain =~ tr/./_/;    # So as not to kill Symantec's broken scanner
-
-    Baruwa::Scanner::Config::SetPercent('org-name',      $header_domain);
-    Baruwa::Scanner::Config::SetPercent('org-long-name', $domain_name);
-    Baruwa::Scanner::Config::SetPercent('web-site',      'www.' . $domain_name);
+    print STDERR "Please configure the '%org-name%', '%org-long-name%', %web-site%' options\n";
+    exit 1;
 }
-
-# Set an indication of the version number for rules.
-Baruwa::Scanner::Config::SetPercent('version',
-    $Baruwa::Scanner::Config::BaruwaVersion);
 
 # Load the MTA modules we need
 my ($MTAmod, $MTADSmod);

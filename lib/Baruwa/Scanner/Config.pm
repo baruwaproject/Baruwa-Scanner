@@ -800,14 +800,6 @@ sub DoPercentVars {
 }
 
 #
-# Set one of the %percentvars%.
-#
-sub SetPercent {
-    my ($percent, $value) = @_;
-    $PercentVars{$percent} = $value;
-}
-
-#
 # Hack quickly through the config file looking for a keyword.
 # Cannot use Baruwa::Scanner::Log here at all, as it hasn't started yet.
 #
