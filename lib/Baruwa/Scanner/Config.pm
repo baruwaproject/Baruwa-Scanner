@@ -246,7 +246,7 @@ sub Value {
 
     #print STDERR "*** 5 $name\n" if $name eq 'languagestrings';
 
-#return '/etc/mail/baruwa/reports/cz/languages.conf' if $name eq 'languagestrings';
+    # return '/etc/mail/baruwa/reports/cz/languages.conf' if $name eq 'languagestrings';
     my ($directiona, $iporaddra, $regexp2a, $valuea, @results);
     if ($category =~ /first/i) {
 
@@ -258,9 +258,9 @@ sub Value {
 
         #print STDERR "$name first-match rule\n";
 
-# If there is no ruleset either, then return the default
-#print STDERR "There are rules for languagestrings\n" if $name eq 'languagestrings';
-#return '/etc/mail/baruwa/reports/cz/languages.conf' if $name eq 'languagestrings';
+        # If there is no ruleset either, then return the default
+        # print STDERR "There are rules for languagestrings\n" if $name eq 'languagestrings';
+        # return '/etc/mail/baruwa/reports/cz/languages.conf' if $name eq 'languagestrings';
         return $Defaults{$name} unless $RuleScalars{$name};
 
         foreach $rule (@{$rulelist}) {
@@ -409,7 +409,7 @@ sub GetClientHostname {
 sub FirstMatchValue {
     my ($direction, $iporaddr, $regexp2, $value, $name, $msg, $tooverride) = @_;
 
-#print STDERR "Params are: $direction, $iporaddr, $regexp2, $value, $name, $msg, $tooverride\n";
+    # print STDERR "Params are: $direction, $iporaddr, $regexp2, $value, $name, $msg, $tooverride\n";
     my ($regexp, $misses, $to);
 
     # Pre-compile $regexp2 and include case-insensitivity flag
@@ -486,14 +486,14 @@ sub FirstMatchValue {
             }
         } elsif ($direction =~ /f/) {
 
-         # It's a numeric ip-number-based rule
-         # Can only check these with From:, not To: addresses
-         # Match against the SMTP Client IP address
-         #print STDERR "Matching IP " . $msg->{clientip} . " against $regexp\n";
+            # It's a numeric ip-number-based rule
+            # Can only check these with From:, not To: addresses
+            # Match against the SMTP Client IP address
+            # print STDERR "Matching IP " . $msg->{clientip} . " against $regexp\n";
             if ($regexp =~ /\d+\\\.\d+\\\.\d+\\\.\d+\)*$/) {
 
-           # It's a complete IPv4 address so it's a total string match, not a re
-           #print STDERR "Got a match\n";
+                # It's a complete IPv4 address so it's a total string match, not a re
+                # print STDERR "Got a match\n";
                 return $value if $msg->{clientip} =~ /^$regexp$/;
             } else {
 
