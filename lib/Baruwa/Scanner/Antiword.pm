@@ -67,6 +67,7 @@ sub FindDocFiles {
         # print STDERR "Calling FindDocFiles $part\n";
         my $newones = FindDocFiles($part, $entity, \%empty);
         while (($k, $v) = each %$newones) {
+
             # print STDERR "Adding children $k --> $v\n";
             $already->{$k} = $v;
         }
@@ -125,9 +126,10 @@ sub RunAntiword {
     };
     alarm 0;                    # 2.53
 
-    # Note to self: I only close the $kid in the parent, not in the child.
-
     # Catch failures other than the alarm
+    Baruwa::Scanner::Log::DieLog(
+        "Antiword doc decoder returned a non zero exit")
+      if ($PipeReturn);
     Baruwa::Scanner::Log::DieLog(
         "Antiword doc decoder failed with real error: $@")
       if $@ and $@ !~ /Command Timed Out/;
