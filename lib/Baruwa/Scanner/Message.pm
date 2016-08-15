@@ -548,11 +548,10 @@ sub WriteHeaderFile {
 # the message.
 sub IsSpam {
     my $this = shift;
-    my ($includesaheader, $iswhitelisted, $usegsscanner, $mshmacreport);
+    my ($includesaheader, $iswhitelisted, $mshmacreport);
 
     my $spamheader    = "";
     my $rblspamheader = "";
-    my $gsreport      = "";
     my $saspamheader  = "";
     my $RBLsaysspam   = 0;
     my $rblcounter    = 0;
@@ -588,9 +587,6 @@ sub IsSpam {
     # Work out if they always want the SA header
     $includesaheader =
       Baruwa::Scanner::Config::Value('includespamheader', $this);
-
-    # If they want the GS scanner then we must carry on too
-    $usegsscanner = Baruwa::Scanner::Config::Value('gsscanner', $this);
 
     # Do the whitelist check before the blacklist check.
     # If anyone whitelists it, then everyone gets the message.
@@ -701,7 +697,7 @@ sub IsSpam {
             $this->{spamwhitelisted} = 1;
 
             # whitelisted and doesn't want SA header so get out
-            return 0 unless $includesaheader || $usegsscanner;
+            return 0 unless $includesaheader;
         }
     } else {
 
@@ -773,29 +769,6 @@ sub IsSpam {
         $this->{ishigh}    = 1 if $rblcounter >= $highrblthreshold;
     }
 
-    # rblspamheader is useful start to spamreport if RBLsaysspam.
-
-    # Do the Custom Spam Checker
-    my ($gsscore);
-
-    #print STDERR "In Message.pm about to look at gsscanner\n";
-    if ($usegsscanner) {
-
-        #print STDERR "In Message.pm about to run gsscanner\n";
-        ($gsscore, $gsreport) = Baruwa::Scanner::GenericSpam::Checks($this);
-
-        #print STDERR "In Message.pm we got $gsscore, $gsreport\n";
-        $this->{gshits}   = $gsscore;
-        $this->{gsreport} = $gsreport;
-        $this->{sascore} += $gsscore;    # Add the score
-        Baruwa::Scanner::Log::InfoLog(
-            "Custom Spam Scanner for message %s from %s "
-              . "(%s) to %s report is %s %s",
-            $this->{id}, $this->{clientip},
-            $this->{from}, $todomain, $gsscore, $gsreport)
-          if $LogSpam && ($gsscore != 0 || $gsreport ne "");
-    }
-
     # Don't do the SA checks if they have said no.
     unless (Baruwa::Scanner::Config::Value('usespamassassin', $this)) {
         $this->{spamwhitelisted} = $iswhitelisted;
@@ -818,9 +791,6 @@ sub IsSpam {
         $this->{spamreport} .= ', ' if $this->{spamreport};
         $this->{spamreport} .= $rblspamheader if $rblspamheader;
         $this->{spamreport} .= ', ' if $this->{spamreport} && $rblspamheader;
-        $this->{spamreport} .= $gsscore + 0.0 if $gsscore != 0;
-        $this->{spamreport} .= ', ' if $this->{spamreport} && $gsscore != 0;
-        $this->{spamreport} .= $gsreport if $gsreport ne "";
         $this->{spamreport} = $this->ReflowHeader(
             Baruwa::Scanner::Config::Value('spamheader', $this),
             $this->{spamreport});
@@ -844,9 +814,6 @@ sub IsSpam {
         $this->{spamreport} .= ', ' if $this->{spamreport};
         $this->{spamreport} .= $rblspamheader if $rblspamheader;
         $this->{spamreport} .= ', ' if $this->{spamreport} && $rblspamheader;
-        $this->{spamreport} .= $gsscore + 0.0 if $gsscore != 0;
-        $this->{spamreport} .= ', ' if $this->{spamreport} && $gsscore != 0;
-        $this->{spamreport} .= $gsreport if $gsreport ne "";
         $this->{spamreport} = $this->ReflowHeader(
             Baruwa::Scanner::Config::Value('spamheader', $this),
             $this->{spamreport});
@@ -921,12 +888,7 @@ sub IsSpam {
         $this->{spamreport} .= ', ' if $this->{spamreport};
         $this->{spamreport} .= $rblspamheader if $rblspamheader;
         $this->{spamreport} .= ', ' if $this->{spamreport} && $rblspamheader;
-        $this->{spamreport} .= $gsscore + 0.0 if $gsscore != 0;
-        $this->{spamreport} .= ', ' if $this->{spamreport} && $gsscore != 0;
-        $this->{spamreport} .= $gsreport if $gsreport ne "";
-
         if ($SAsaysspam || $includesaheader) {
-            $this->{spamreport} .= ', ' if $this->{spamreport} && $gsreport;
             $this->{spamreport} .= $saheader if $saheader ne "";
         }
     } else {
@@ -941,10 +903,6 @@ sub IsSpam {
         $this->{spamreport} .= ', ' if $this->{spamreport};
         $this->{spamreport} .= $rblspamheader if $rblspamheader;
         $this->{spamreport} .= ', ' if $this->{spamreport} && $rblspamheader;
-        $this->{spamreport} .= $gsscore + 0.0 if $gsscore != 0;
-        $this->{spamreport} .= ', ' if $this->{spamreport} && $gsscore != 0;
-        $this->{spamreport} .= $gsreport if $gsreport ne "";
-        $this->{spamreport} .= ', ' if $this->{spamreport} && $gsreport;
         $this->{spamreport} .= $saheader if $saheader ne "";
     }
 

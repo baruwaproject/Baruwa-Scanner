@@ -903,7 +903,6 @@ lib/Baruwa/Scanner/ConfigSQL.pm
 lib/Baruwa/Scanner/CustomConfig.pm
 lib/Baruwa/Scanner/EximDiskStore.pm
 lib/Baruwa/Scanner/FileInto.pm
-lib/Baruwa/Scanner/GenericSpam.pm
 lib/Baruwa/Scanner/Lock.pm
 lib/Baruwa/Scanner/Log.pm
 lib/Baruwa/Scanner/Mail.pm
@@ -942,7 +941,6 @@ t/config.t
 t/configs/no-db.conf
 t/configs/template.conf
 t/eximdiskstore.t
-t/genericspam.t
 t/lib/Test/Baruwa/Scanner.pm
 t/lock.t
 t/log.t

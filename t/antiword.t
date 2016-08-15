@@ -108,7 +108,6 @@ TODO: {
     $config->mock(
         Value => sub {
             my ($opt, $msg) = @_;
-            print STDERR "I was called with $opt\n";
             if ($opt eq 'antiword') {
                 return '/usr/bin/yesx';
             } else {

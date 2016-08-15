@@ -96,9 +96,6 @@ envtoheader			= EnvelopeToHeader
 findphishing			= FindPhishingFraud
 fprotd6port			= FpscandPort
 getipfromheader			= ReadIPAddressFromReceivedHeader
-gsscanner			= UseCustomSpamScanner
-gstimeout			= CustomSpamScannerTimeout
-gstimeoutlen			= CustomSpamScannertimeouthistory
 hamactions                      = nonspamactions
 hideworkdir			= hideincomingworkdir
 hideworkdirinnotice		= hideincomingworkdirinnotices
@@ -131,8 +128,6 @@ lookforuu			= finduuencodedfiles
 maxattachmentsize		= maximumattachmentsize
 maxdirtybytes			= maxunsafebytesperscan
 maxdirtymessages		= maxunsafemessagesperscan
-maxgssize			= maxcustomspamscannersize
-maxgstimeouts			= maxcustomspamscannertimeouts
 maxmessagesize			= maximummessagesize
 maxparts			= maximumattachmentspermessage
 maxunscannedbytes		= maxunscannedbytesperscan
@@ -279,15 +274,11 @@ ClamdPort 3310
 CriticalQueueSize		800
 FileTimeout			20
 fprotd6port			10200
-GSTimeout			20
-GSTimeoutLen			20
 GunzipTimeout			50
 MaxUnscannedBytes		100000000
 MaxUnscannedMessages		30
 MaxDirtyBytes			50000000
 MaxDirtyMessages		30
-MaxGSSize			20000
-MaxGSTimeouts			10
 MaxSpamAssassinTimeouts		10
 ProcDBAttempts			6
 QueueScanInterval		6
@@ -378,7 +369,6 @@ deliverymethod		batch	batch	batch	queue	queue
 DisarmModifySubject	start	no	0	yes	1	start	start	end	end
 EnableSpamBounce	0	no	0	yes	1
 findarchivesbycontent	1	no	0	yes	1
-gsscanner		0	no	0	yes	1
 HideWorkDir		1	no	0	yes	1
 HideWorkDirInNotice	0	no	0	yes	1
 HighSpamModifySubject	start	no	0	yes	1	start	start	end	end

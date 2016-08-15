@@ -359,13 +359,12 @@ sub Checks {
 
     my ($dfhandle,    $SAReqHits, $HighScoreVal);
     my ($dfilename,   $dfile,     @WholeMessage, $SAResult, $SAHitList);
-    my ($HighScoring, $SAScore,   $maxsize, $SAReport, $GSHits);
+    my ($HighScoring, $SAScore,   $maxsize, $SAReport);
     my $GotFromCache = undef;    # Did the result come from the cache?
     $SAReqHits =
       Baruwa::Scanner::Config::Value('reqspamassassinscore', $message) + 0.0;
     $HighScoreVal =
       Baruwa::Scanner::Config::Value('highspamassassinscore', $message);
-    $GSHits = $message->{gshits} || 0.0;
 
     # Bail out and fake a miss if too many consecutive SA checks failed
     my $maxfailures = Baruwa::Scanner::Config::Value('maxspamassassintimeouts');
@@ -613,7 +612,7 @@ sub Checks {
 
             # calculate SAResult and HighScoring from actual message
             ($SAResult, $HighScoring) =
-              SATest_spam($message, $GSHits, $SAScore);
+              SATest_spam($message, $SAScore);
 
             # Log the fact we got it from the cache. Must not add the "cached"
             # word on the front here or it will be put into the cache itself!
@@ -642,7 +641,7 @@ sub Checks {
             # print STDERR "Check 1, report template = \"" .
             #      $Baruwa::Scanner::SA::SAspamtest->{conf}->{report_template} . "\"\n";
             ($SAResult, $HighScoring, $SAHitList, $SAScore, $SAReport) =
-              SAForkAndTest($GSHits, $Baruwa::Scanner::SA::SAspamtest,
+              SAForkAndTest($Baruwa::Scanner::SA::SAspamtest,
                 \@WholeMessage, $message);
 
             # Log the fact we didn't get it from the cache. Must not add the
@@ -689,7 +688,7 @@ sub Checks {
         # print STDERR "Check 1, report template = \"" .
         #      $Baruwa::Scanner::SA::SAspamtest->{conf}->{report_template} . "\"\n";
         ($SAResult, $HighScoring, $SAHitList, $SAScore, $SAReport) =
-          SAForkAndTest($GSHits, $Baruwa::Scanner::SA::SAspamtest,
+          SAForkAndTest($Baruwa::Scanner::SA::SAspamtest,
             \@WholeMessage, $message);
 
         #Baruwa::Scanner::Log::WarnLog("Done SAForkAndTest");
@@ -811,7 +810,7 @@ sub AddVirusStats {
 # of the SpamAssassin checks, which occasionally take a *very* long time to
 # terminate due to regular expression backtracking and other nasties.
 sub SAForkAndTest {
-    my ($GSHits, $Test, $Mail, $Message) = @_;
+    my ($Test, $Mail, $Message) = @_;
     my ($pipe);
     my ($SAHitList, $SAHits, $SAReqHits, $IsItSpam, $IsItHighScore, $AutoLearn);
     my ($HighScoreVal, $pid2delete, $IncludeScores, $SAReport, $queuelength);
@@ -1023,7 +1022,7 @@ sub SAForkAndTest {
     Baruwa::Scanner::Log::DebugLog("SpamAssassin returned $PipeReturn");
 
     #print STDERR "Check 3, is \"" . $Test->{conf}->{report_template} . "\"\n";
-    ($IsItSpam, $IsItHighScore) = SATest_spam($Message, $GSHits, $SAHits);
+    ($IsItSpam, $IsItHighScore) = SATest_spam($Message, $SAHits);
 
     return ($IsItSpam, $IsItHighScore, $SAHitList, $SAHits, $SAReport);
 }
@@ -1032,12 +1031,12 @@ sub SAForkAndTest {
 # Subroutine to calculate whether the mail is SPAM or not
 #
 sub SATest_spam {
-    my ($Message, $GSHits, $SAHits) = @_;
+    my ($Message, $SAHits) = @_;
     my ($IsItSpam, $IsItHighScore) = (0, 0);
 
     my $SAReqHits =
       0.0 + Baruwa::Scanner::Config::Value('reqspamassassinscore', $Message);
-    if ($SAHits && ($SAHits + $GSHits >= $SAReqHits)) {
+    if ($SAHits && ($SAHits >= $SAReqHits)) {
         $IsItSpam = 1;
     }
 
@@ -1045,7 +1044,7 @@ sub SATest_spam {
       0.0 + Baruwa::Scanner::Config::Value('highspamassassinscore', $Message);
     if (   $SAHits
         && $HighScoreVal > 0
-        && ($SAHits + $GSHits >= $HighScoreVal)) {
+        && ($SAHits >= $HighScoreVal)) {
         $IsItHighScore = 1;
     }
 
@@ -1053,7 +1052,7 @@ sub SATest_spam {
 }
 
 sub SATest {
-    my ($GSHits, $Test, $Mail, $Message) = @_;
+    my ($Test, $Mail, $Message) = @_;
     my ($SAHitList, $SAHits, $SAReqHits, $IsItSpam, $IsItHighScore, $AutoLearn);
     my ($HighScoreVal, $pid2delete, $IncludeScores, $SAReport, $queuelength);
     my $PipeReturn = 0;
@@ -1114,7 +1113,7 @@ sub SATest {
     # SpamAssassin is known to play with the umask
     umask 0077;    # Safety net
 
-    if ($SAHits && ($SAHits + $GSHits >= $SAReqHits)) {
+    if ($SAHits && ($SAHits >= $SAReqHits)) {
         $IsItSpam = 1;
     } else {
         $IsItSpam = 0;
@@ -1123,7 +1122,7 @@ sub SATest {
       Baruwa::Scanner::Config::Value('highspamassassinscore', $Message);
     if (   $SAHits
         && $HighScoreVal > 0
-        && ($SAHits + $GSHits >= $HighScoreVal)) {
+        && ($SAHits >= $HighScoreVal)) {
         $IsItHighScore = 1;
     } else {
         $IsItHighScore = 0;
