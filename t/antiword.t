@@ -3,6 +3,8 @@ use v5.10;
 use strict;
 use warnings;
 use File::Which;
+use Test::Exception;
+use Test::MockModule;
 use FindBin '$Bin';
 use Test::More qw(no_plan);
 use Baruwa::Scanner();
@@ -77,5 +79,41 @@ SKIP: {
     while (($docfile, $parent) = each %$docfiles) {
         is(Baruwa::Scanner::Antiword::RunAntiword($dir, $docfile, $parent, $m),
             1);
+    }
+}
+
+{
+    my ($docfile, $parent, $len);
+    my $config = Test::MockModule->new('Baruwa::Scanner::Config');
+    $config->mock(
+        Value => sub {
+            my ($opt, $msg) = @_;
+            if ($opt eq 'antiword') {
+                return '/bin/sleep 3;';
+            } else {
+                return 2;
+            }
+        }
+    );
+    while (($docfile, $parent) = each %$docfiles) {
+        is(Baruwa::Scanner::Antiword::RunAntiword($dir, $docfile, $parent, $m),
+            0);
+    }
+    $config->mock(
+        Value => sub {
+            my ($opt, $msg) = @_;
+            if ($opt eq 'antiword') {
+                return '/usr/bin/yesx';
+            } else {
+                return 2;
+            }
+        }
+    );
+    while (($docfile, $parent) = each %$docfiles) {
+        throws_ok {
+            Baruwa::Scanner::Antiword::RunAntiword($dir, $docfile, $parent, $m)
+        }
+        qr/Antiword doc decoder returned a non zero exit/,
+          'Throws error if antiword does not exist';
     }
 }
