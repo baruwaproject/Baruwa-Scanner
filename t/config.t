@@ -156,6 +156,7 @@ $global::MS = new Baruwa::Scanner(
     $m->{clienthostnamenocheck} = '192.168.1.1';
     is(Baruwa::Scanner::Config::GetClientHostname($m, 'h'), '192.168.1.1');
     is(Baruwa::Scanner::Config::GetClientHostname($m, 'H'), '192.168.1.1');
+    $m->{store}->Unlock();
 }
 
 can_ok('Baruwa::Scanner::Config', 'FirstMatchValue');
@@ -213,6 +214,7 @@ can_ok('Baruwa::Scanner::Config', 'FirstMatchValue');
         ),
         $value
     );
+    $m->{store}->Unlock();
 
     $iporaddr            = 'd';
     $direction           = 'v';
@@ -284,6 +286,7 @@ can_ok('Baruwa::Scanner::Config', 'FirstMatchValue');
             );
         }
     }
+    $m->{store}->Unlock();
 
     $iporaddr            = 'c';
     $direction           = 'v';
@@ -321,6 +324,7 @@ can_ok('Baruwa::Scanner::Config', 'FirstMatchValue');
             'CoNfIgFoUnDnOtHiNg'
         );
     }
+    $m->{store}->Unlock();
 }
 
 can_ok('Baruwa::Scanner::Config', 'initialise');

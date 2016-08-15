@@ -800,52 +800,6 @@ sub DoPercentVars {
 }
 
 #
-# Read all the CustomConfig.pm files in the Custom Config Dir
-#
-sub initialise {
-    my ($dir) = @_;
-
-    my ($dirh, $filename, $fullfile);
-
-    $dirh = new DirHandle;
-    unless ($dirh->open($dir)) {
-        Baruwa::Scanner::Log::WarnLog(
-            "Could not read Custom Functions directory %s", $dir);
-        return;
-    }
-
-    while (defined($filename = $dirh->read)) {
-
-        # Only process files ending with .pm or .pl
-        # Skip all dot files and rpmnew files
-        next
-          if $filename =~ /^\./
-          || $filename =~ /\.(rpmnew|dpkg-dist|dpkg-new|dpkg-old)$/i;
-        unless ($filename =~ /\.p[lm]$/i) {
-            Baruwa::Scanner::Log::NoticeLog(
-                "Skipping Custom Function file %s as its name does not end in .pm or .pl",
-                $filename
-            );
-            next;
-        }
-        $fullfile = "$dir/$filename";
-        $fullfile =~ /^(.*)$/;    # Simple untaint
-        $fullfile = $1;
-        next unless -f $fullfile and -s $fullfile;
-        eval {require $fullfile;};
-        if ($@) {
-            Baruwa::Scanner::Log::WarnLog(
-                "Could not use Custom Function code %s, "
-                  . "it could not be \"require\"d. Make sure "
-                  . "the last line is \"1;\" and the module "
-                  . "is correct with perl -wc (Error: %s)",
-                $fullfile, $@
-            );
-        }
-    }
-}
-
-#
 # Set one of the %percentvars%.
 #
 sub SetPercent {
@@ -1219,24 +1173,6 @@ sub ReadPhishingWhitelist {
       && !Baruwa::Scanner::Config::Value('findphishing');
     my $cdb = CDB_File->TIEHASH($filename);
     return \$cdb;
-}
-
-# Give all the user's custom functions a chance to clear up
-# and neatly shutdown, log totals, close databases, etc.
-sub EndCustomFunctions {
-    my ($custom, $key, $param, $fn);
-    foreach $key (keys %CustomFunctions) {
-        $custom = $CustomFunctions{$key};
-        next unless $custom;
-        $param = $CustomFunctionsParams{$key};
-        Baruwa::Scanner::Log::InfoLog(
-            "Config: calling custom end function %s%s",
-            $custom, $param);
-        $fn = 'Baruwa::Scanner::CustomConfig::End' . $custom . $param;
-        no strict 'refs';
-        eval($fn);
-        use strict 'refs';
-    }
 }
 
 # Read the list of second-level domains. We don't check top-level domains

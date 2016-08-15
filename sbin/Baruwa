@@ -374,10 +374,6 @@ if ($WantLintOnly || $WantLintLiteOnly) {
     print STDERR "Error: Attempt to create locks in $lockdir failed!\n"
       if ($clr >> 8) != 0;
 
-    # Read the directory containing all the custom code
-    Baruwa::Scanner::Config::initialise(
-        Baruwa::Scanner::Config::QuickPeek($ConfFile, 'customfunctionsdir'));
-
     # Read the configuration file properly
     print STDERR "\n";
     Baruwa::Scanner::Config::Read($ConfFile, $WantLintOnly);
@@ -554,7 +550,6 @@ and that Baruwa is finding them correctly via its virus.scanners.conf.
 EOWarn
 
     $workarea->Destroy();
-    Baruwa::Scanner::Config::EndCustomFunctions();
     Baruwa::Scanner::Config::DisconnectLDAP();
     Baruwa::Scanner::Log::Stop();
     unlink "/tmp/MSLint.body.$$";
@@ -827,8 +822,8 @@ for (;;) {
                 );
             }
 
-       # Clean up after the dying process in case it left a mess.
-       # If they change the work dir they really will have to stop and re-start.
+            # Clean up after the dying process in case it left a mess.
+            # If they change the work dir they really will have to stop and re-start.
             rmtree("$WorkDir/$dying_pid", 0, 1) if -d "$WorkDir/$dying_pid";
 
             #
@@ -894,10 +889,6 @@ sub WorkForHours {
 
     #$SIG{'CHLD'}  = \&Reaper; # Addition by Bart Jan Buijs
     $SIG{'TERM'} = 'DEFAULT';
-
-    # Read the directory containing all the custom code
-    Baruwa::Scanner::Config::initialise(
-        Baruwa::Scanner::Config::QuickPeek($ConfFile, 'customfunctionsdir'));
 
     # Read the configuration file properly
     Baruwa::Scanner::Config::Read($ConfFile, 0);
@@ -1137,7 +1128,7 @@ sub WorkForHours {
         $0 = 'Baruwa: finishing batch';
         $batch->LastLookup();
 
-     #print STDERR "\n\n3 times are $StartTime " . time . " $RestartTime\n\n\n";
+        # print STDERR "\n\n3 times are $StartTime " . time . " $RestartTime\n\n\n";
 
         # Only do 1 batch if debugging
         last if $Debug;
@@ -1147,9 +1138,6 @@ sub WorkForHours {
 
     # Destroy the incoming work dir
     $global::MS->{work}->Destroy();
-
-    # Close down all the user's custom functions
-    Baruwa::Scanner::Config::EndCustomFunctions();
 
     # Tear down any LDAP connection
     Baruwa::Scanner::Config::DisconnectLDAP();
@@ -1189,9 +1177,6 @@ sub ExitChild {
     # Decrement the counters in the Processing Attempts Database
     $global::MS->{batch}->DecrementProcDB()
       if $global::MS && $global::MS->{batch};
-
-    # Close down all the user's custom functions
-    Baruwa::Scanner::Config::EndCustomFunctions();
 
     # Shut down the Processing Attempts Database
     $Baruwa::Scanner::ProcDBH->disconnect() if $Baruwa::Scanner::ProcDBH;
