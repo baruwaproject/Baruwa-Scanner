@@ -1113,8 +1113,8 @@ sub WorkForHours {
         # Look up a configuration parameter as the last thing we do so that the
         # lookup operation can have side-effects such as logging stats about the
         # message.
-        $0 = 'Baruwa: finishing batch';
-        $batch->LastLookup();
+        # $0 = 'Baruwa: finishing batch';
+        # $batch->LastLookup();
 
         # print STDERR "\n\n3 times are $StartTime " . time . " $RestartTime\n\n\n";
 

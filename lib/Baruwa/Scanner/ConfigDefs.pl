@@ -116,8 +116,6 @@ inqueuedir			= incomingqueuedir
 ipverheader			= ipprotocolversionheader
 isareply			= dontsignhtmlifheadersexist
 keepspamarchiveclean		= keepspamarchiveclean
-lastafterbatch			= alwayslookeduplastafterbatch
-lastlookup			= alwayslookeduplast
 listsascores                    = includescoresinspamassassinreport
 logdelivery			= logdeliveryandnondelivery
 loghtmltags			= logdangeroushtmltags
@@ -300,7 +298,6 @@ qmailintdhashnumber		1
 # filename containing a list of directories.
 [Simple,Other]
 cachetiming		1800,300,10800,172800,600
-CustomFunctionsDir	/usr/share/Baruwa/CustomFunctions
 FileCommand		/usr/bin/file
 getipfromheader		0
 GunzipCommand		/bin/gunzip
@@ -374,8 +371,6 @@ HideWorkDirInNotice	0	no	0	yes	1
 HighSpamModifySubject	start	no	0	yes	1	start	start	end	end
 IncludeSpamHeader	0	no	0	yes	1
 KeepSpamArchiveClean	0	no	0	yes	1
-LastAfterBatch		0	no	0	yes	1
-LastLookup		0	no	0	yes	1
 ListSAScores		1	no	0	yes	1
 #LoadSpamAssassin	0	no	0	yes	1
 LogHTMLTags		0	no	0	yes	1

@@ -61,7 +61,6 @@ my (%NFilenameRules,  %NFiletypeRules);
 my (%AFilenameRules,  %AFiletypeRules);
 my (%LanguageStrings, %YesNoItoE, %YesNoEtoI, %HardCodedDefaults);
 my (%RuleScalars,     %Defaults, $DefaultAddressRegexp, $DefaultVirusRegexp);
-my (%CustomFunctions, %CustomFunctionsParams);
 my (%PercentVars);    # For putting substituted variables in all settings
 my ($RequireLDAPDone);
 
@@ -75,9 +74,6 @@ $RequireLDAPDone = 0;    # Have we done the "require Net::LDAP"?
 %StaticScalars = ();     # Need to work out defaults for sendmail2 somewhere!
 
 %RuleScalars = ();       # These are the ones created from rulesets
-
-%CustomFunctions       = ();    # These are names of user-written functions
-%CustomFunctionsParams = ();    # and their parameters passed to Init and End
 
 # This is what the RuleToRegexp function produces when given
 # either "*@*" or "default".
@@ -114,20 +110,6 @@ $DefaultVirusRegexp   = '.*';
 #     return \%EtoI;
 # }
 
-# sub SetCustomFunction {
-#     my ($func, $value) = @_;
-#     if (defined $value) {
-#         $CustomFunctions{$func} = $value;
-#     } else {
-#         delete $CustomFunctions{$func};
-#     }
-# }
-
-# sub GetCustomFunction {
-#     my ($func) = @_;
-#     return $CustomFunctions{$func};
-# }
-
 # Tiny little accessor function to force a configuration variable to be a
 # value. The opposite of Value(). Useful in baruwa --lint.
 sub SetValue {
@@ -156,28 +138,6 @@ sub Value {
 
     # Make this as fast as possible in simple situations
     return $StaticScalars{$name} if exists $StaticScalars{$name};
-
-    # User custom-written functions are easy to spot too
-    $funcname = $CustomFunctions{$name};
-    if ($funcname) {
-        my $param = "";
-        $funcname = 'Baruwa::Scanner::CustomConfig::' . $funcname;
-        no strict 'refs';
-        if ($param = $CustomFunctionsParams{$name}) {
-            $param =~ s/^\(//;    # Trim the brackets
-            $param =~ s/\)$//;
-            $param =~ s/\"//g;    # and quotes
-            my @params = split(/,/, $param);
-            $result =
-              &$funcname($msg, \@params);    # Call with a ref-->list of params
-        } else {
-            $result = &$funcname($msg);
-        }
-        use strict 'refs';
-
-        #print STDERR "It was a CF\n" if $name eq 'spamwhitelist';
-        return $result;
-    }
 
     #print STDERR "*** 2 $name\n" if $name eq 'languagestrings';
 
@@ -1070,37 +1030,6 @@ sub Read {
     $PhishingWhitelist = ReadPhishingWhitelist(Value('phishingwhitelist'));
     $PhishingBlacklist = ReadPhishingBlacklist(Value('phishingblacklist'));
 
-    # Call all the user's custom initialisation functions
-    my ($key, $param, $custom, $fn);
-    foreach $key (keys %CustomFunctions) {
-        $custom = $CustomFunctions{$key};
-        next unless $custom;
-        $param = $CustomFunctionsParams{$key};
-        Baruwa::Scanner::Log::InfoLog(
-            "Config: calling custom init function %s%s",
-            $custom, $param);
-        $fn =
-            'Baruwa::Scanner::CustomConfig::Init'
-          . $custom
-          . $param . '('
-          . $WantLintOnly . ')';
-        no strict 'refs';
-        eval($fn);
-        if ($@) {
-            Baruwa::Scanner::Log::WarnLog(
-                "Could not use Custom Function code %s, "
-                  . "it could not be \"eval\"ed. Make sure "
-                  . "the module "
-                  . "is correct with perl -wc (Error: %s)",
-                $fn, $@
-            );
-
-            $StaticScalars{$key} =
-              $Defaults{$key};    # Over-ride if function broken
-        }
-        use strict 'refs';
-    }
-
     # Read the list of second-level country domain codes that exist
     %Baruwa::Scanner::Config::SecondLevelDomainExists = ();
     ReadCountryDomainList(Baruwa::Scanner::Config::Value('secondlevellist'))
@@ -1399,13 +1328,12 @@ sub ReadFiletypeRules {
     # Do the default filename list if there is one
     $namelist = $Defaults{$keyword};
 
-# print STDERR "Filetype-rules: default keyword is $keyword, filename is $namelist\n";
+    # print STDERR "Filetype-rules: default keyword is $keyword, filename is $namelist\n";
     if (defined $namelist) {
         foreach $filename (split(" ", $namelist)) {
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-
-      #print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
+            # print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
         }
     }
 
@@ -1423,8 +1351,8 @@ sub ReadFiletypeRules {
               split(/\0/, $namelist, 4);
         }
 
-   # print STDERR "Filename rules are $direction $iporaddr $regexp $namelist\n";
-   # Each value in the list can itself be a list of filename-rules files
+        # print STDERR "Filename rules are $direction $iporaddr $regexp $namelist\n";
+        # Each value in the list can itself be a list of filename-rules files
         foreach $filename (split(" ", $namelist)) {
 
             # Skip this allow/deny filename if we've read it already
@@ -1433,8 +1361,7 @@ sub ReadFiletypeRules {
 
             # This builds a hash of filename-->ref-to-list-of-rules
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-
-     # print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
+            # print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
         }
     }
 }
@@ -1455,8 +1382,7 @@ sub ReadLanguageStrings {
         foreach $filename (split(" ", $namelist)) {
             $donefile{"$filename"} = 1;
             $LanguageStrings{$filename} = ReadOneLanguageStringsFile($filename);
-
-    #print STDERR "Storing: $filename is " . $LanguageStrings{$filename} . "\n";
+            # print STDERR "Storing: $filename is " . $LanguageStrings{$filename} . "\n";
         }
     }
 
@@ -1483,9 +1409,6 @@ sub ReadLanguageStrings {
             # This builds a hash of filename-->ref-to-list-of-rules
             #print STDERR "Reading Language Strings file $filename\n";
             $LanguageStrings{$filename} = ReadOneLanguageStringsFile($filename);
-
-          #print STDERR "Storing: $filename is " . $LanguageStrings{$filename} .
-          #             "\n";
         }
     }
 
@@ -1503,9 +1426,6 @@ sub ReadLanguageStrings {
             # This builds a hash of filename-->ref-to-list-of-rules
             #print STDERR "Reading Language Strings file $filename\n";
             $LanguageStrings{$filename} = ReadOneLanguageStringsFile($filename);
-
-          #print STDERR "Storing: $filename is " . $LanguageStrings{$filename} .
-          #             "\n";
         }
     }
 }
@@ -1864,19 +1784,6 @@ sub ReadDefinitions {
     return %hash;
 }
 
-# Print out the translation table referred to by the hash-ref passed in.
-# sub PrintDefinitions {
-#     my (%hash) = @_;
-#     my ( $key, $value );
-
-#     #print STDERR "\nHere is a definitions file:\n";
-#     while ( ( $key, $value ) = each %hash ) {
-#         #print STDERR "$key\t\t$value\n";
-#     }
-
-#     #print STDERR "End of definition file.\n\n";
-# }
-
 # Tiny access function:
 # Return the value of a virus scanner command
 sub ScannerCmds {
@@ -2161,8 +2068,6 @@ sub ReadData {
 
                 # Setup LDAP Connection
                 ($LDAP, $LDAPserver, $LDAPbase, $LDAPsite) = ConnectLDAP();
-
-         # print STDERR "Made LDAP connection to $LDAP, $LDAPbase, $LDAPsite\n";
                 ReadConfBasicLDAP($LDAP, $LDAPbase, $LDAPsite) if $LDAP;
             }
 
@@ -2204,9 +2109,6 @@ sub ReadData {
             Baruwa::Scanner::Log::WarnLog(
                 "Unrecognised keyword \"%s\" at line %d",
                 ItoE($leftover), $LineNos{$leftover});
-
-            #print STDERR "Unrecognised keyword \"" . ItoE($leftover) .
-            #             "\" at line " . $LineNos{$leftover} . "\n";
         }
         Baruwa::Scanner::Log::WarnLog("Warning: syntax errors in %s.",
             $filename);
@@ -3003,22 +2905,6 @@ sub ReadYesNoValue {
     $isrules = 1 if $LDAP && $first =~ /customi[sz]e|\.RuleSet$/; # LDAP ruleset
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;    # DB or LDAP ruleset
 
-    # It might be a function name
-    if ($first =~ /^&/) {
-        $first =~ s/^&//;
-        $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
-        $CustomFunctions{$keyword} =~ s/\(.*//;
-        $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
-        return;
-    } else {
-
-      # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ($nodefaults eq 'nodefaults') {
-            delete $CustomFunctions{$keyword};
-            delete $CustomFunctionsParams{$keyword};
-        }
-    }
-
     delete $RuleScalars{$keyword};
     delete $StaticScalars{$keyword};
 
@@ -3111,22 +2997,6 @@ sub ReadFileValue {
     $isrules = 1 if $LDAP && $first =~ /customi[sz]e|\.RuleSet$/; # LDAP ruleset
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;    # DB or LDAP ruleset
 
-    # It might be a function name
-    if ($first =~ /^&/) {
-        $first =~ s/^&//;
-        $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
-        $CustomFunctions{$keyword} =~ s/\(.*//;
-        $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
-        return;
-    } else {
-
-      # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ($nodefaults eq 'nodefaults') {
-            delete $CustomFunctions{$keyword};
-            delete $CustomFunctionsParams{$keyword};
-        }
-    }
-
     delete $RuleScalars{$keyword};
     delete $StaticScalars{$keyword};
 
@@ -3202,22 +3072,6 @@ sub ReadCommandValue {
     $isrules = 1 if $LDAP && $first =~ /\.RuleSet$/;       # LDAP ruleset
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;   # DB or LDAP ruleset
 
-    # It might be a function name
-    if ($first =~ /^&/) {
-        $first =~ s/^&//;
-        $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
-        $CustomFunctions{$keyword} =~ s/\(.*//;
-        $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
-        return;
-    } else {
-
-      # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ($nodefaults eq 'nodefaults') {
-            delete $CustomFunctions{$keyword};
-            delete $CustomFunctionsParams{$keyword};
-        }
-    }
-
     delete $RuleScalars{$keyword};
     delete $StaticScalars{$keyword};
 
@@ -3288,22 +3142,6 @@ sub ReadDirValue {
     $isrules = 1 if -f $first;    # Rules are files
     $isrules = 1 if $LDAP && $first =~ /customi[sz]e|\.RuleSet$/; # LDAP ruleset
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;    # DB or LDAP ruleset
-
-    # It might be a function name
-    if ($first =~ /^&/) {
-        $first =~ s/^&//;
-        $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
-        $CustomFunctions{$keyword} =~ s/\(.*//;
-        $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
-        return;
-    } else {
-
-      # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ($nodefaults eq 'nodefaults') {
-            delete $CustomFunctions{$keyword};
-            delete $CustomFunctionsParams{$keyword};
-        }
-    }
 
     delete $RuleScalars{$keyword};
     delete $StaticScalars{$keyword};
@@ -3377,22 +3215,6 @@ sub ReadNumberValue {
       ;    # Rules aren't all digits or ._- followed by optional multiplier
     $isrules = 1 if $LDAP && $first =~ /customi[sz]e|\.RuleSet$/; # LDAP ruleset
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;    # DB or LDAP ruleset
-
-    # It might be a function name
-    if ($first =~ /^&/) {
-        $first =~ s/^&//;
-        $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
-        $CustomFunctions{$keyword} =~ s/\(.*//;
-        $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
-        return;
-    } else {
-
-      # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ($nodefaults eq 'nodefaults') {
-            delete $CustomFunctions{$keyword};
-            delete $CustomFunctionsParams{$keyword};
-        }
-    }
 
     delete $RuleScalars{$keyword};
     delete $StaticScalars{$keyword};
@@ -3468,22 +3290,6 @@ sub ReadOtherValue {
       && -f $first;    # Rules are filenames
     $isrules = 1 if $LDAP && $first =~ /customi[sz]e|\.RuleSet$/; # LDAP ruleset
     $isrules = 1 if $first =~ /customi[sz]e|\.RuleSet$/;    # DB or LDAP ruleset
-
-    # It might be a function name
-    if ($first =~ /^&/) {
-        $first =~ s/^&//;
-        $CustomFunctionsParams{$keyword} = $CustomFunctions{$keyword} = $first;
-        $CustomFunctions{$keyword} =~ s/\(.*//;
-        $CustomFunctionsParams{$keyword} =~ s/^[^\(]+//;
-        return;
-    } else {
-
-      # Do not delete the Custom Function if it's defined from a RulesetFunction
-        unless ($nodefaults eq 'nodefaults') {
-            delete $CustomFunctions{$keyword};
-            delete $CustomFunctionsParams{$keyword};
-        }
-    }
 
     delete $RuleScalars{$keyword};
     delete $StaticScalars{$keyword};
@@ -3587,12 +3393,7 @@ sub PrintNonDefaults {
         $fixed  = PrintFixedWidth($external, 35);
         $fixed2 = PrintFixedWidth($default,  15);
         $actual =~ s/\n/\\n/g;
-        if ($CustomFunctions{$key}) {
-
-            # It's a Custom Function
-            $Output{$external} =
-              "$fixed$fixed2" . "FUNCTION:" . $CustomFunctions{$key};
-        } elsif ($RuleScalars{$key}) {
+        if ($RuleScalars{$key}) {
 
             # It's a ruleset
             $Output{$external} = "$fixed$fixed2" . "RULESET:Default=$actual";
@@ -3694,16 +3495,6 @@ sub LDAPFetchSerial {
     Baruwa::Scanner::Log::DebugLog("LDAP configuration serial number is %s",
         $serial);
     return $serial;
-}
-
-# Call the CustomAction hook for custom spam actions
-sub CallCustomAction {
-    my ($message, $yn, $flag) = @_;
-
-    eval {Baruwa::Scanner::CustomConfig::CustomAction($message, $yn, $flag);};
-    if ($@) {
-        Baruwa::Scanner::Log::WarnLog('Calling CustomAction returned %s', $@);
-    }
 }
 
 # read the post configuration file

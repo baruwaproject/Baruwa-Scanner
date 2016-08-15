@@ -327,12 +327,6 @@ can_ok('Baruwa::Scanner::Config', 'FirstMatchValue');
     $m->{store}->Unlock();
 }
 
-can_ok('Baruwa::Scanner::Config', 'initialise');
-
-can_ok('Baruwa::Scanner::Config', 'SetPercent');
-
-can_ok('Baruwa::Scanner::Config', 'EndCustomFunctions');
-
 can_ok('Baruwa::Scanner::Config', 'NFilenameRulesValue');
 
 can_ok('Baruwa::Scanner::Config', 'AFilenameRulesValue');
@@ -352,8 +346,6 @@ can_ok('Baruwa::Scanner::Config', 'DisconnectLDAP');
 can_ok('Baruwa::Scanner::Config', 'LDAPUpdated');
 
 can_ok('Baruwa::Scanner::Config', 'LDAPFetchSerial');
-
-can_ok('Baruwa::Scanner::Config', 'CallCustomAction');
 
 sub _parse_msg {
     my ($msgid) = @_;

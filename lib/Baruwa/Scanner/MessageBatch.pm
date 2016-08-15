@@ -1047,33 +1047,6 @@ sub AddVirusInfoToCache {
     }
 }
 
-# This simply evaluates a known configuration parameter for every message
-# in the batch, whether it has been deleted or not. This solely exists so
-# that the lookup can be a Custom Function that has "side-effects" such
-# as logging data about the message.
-sub LastLookup {
-    my $this  = shift;
-    my $start = time;
-    my ($id, $message);
-    while (($id, $message) = each %{$this->{messages}}) {
-        Baruwa::Scanner::Config::Value('lastlookup', $message);
-    }
-
-    unless (Baruwa::Scanner::Config::IsSimpleValue('lastlookup')
-        && !Baruwa::Scanner::Config::Value('lastlookup')) {
-        Baruwa::Scanner::Log::InfoLog(
-            "\"Always Looked Up Last\" took %.2f seconds",
-            time - $start + 0.0)
-          if Baruwa::Scanner::Config::Value('logspeed') =~ /1/;
-    }
-
-    # Lookup one remaining value after end of batch
-    # Putting in $this is against the rules as it isn't a message,
-    # but it doesn't actually cause any problems and gives MailWatch
-    # a way of getting hold of the batch statistics.
-    Baruwa::Scanner::Config::Value('lastafterbatch', $this);
-}
-
 sub CreateEicarBatch {
     my $batch = shift;
 

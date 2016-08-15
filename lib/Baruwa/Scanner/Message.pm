@@ -1017,10 +1017,6 @@ sub HandleHamAndSpam {
 
         # Allow for store-nonspam, etc.
         #$action =~ s/^store\W(\w+).*$/store-$1/;
-        if ($action =~ /^custom\((.*)\)/) {
-            Baruwa::Scanner::Config::CallCustomAction($this, 'yes', $1);
-            $action = 'custom';
-        }
 
         $lintoptions{$action} = 1 unless $action =~ /-\//;
 
@@ -1138,11 +1134,6 @@ sub HandleHamAndSpam {
                         $this->{extraspamheaders} = \@headers;
 
                         # print STDERR "Removed $action from extraspamheaders to give " . join(',',@headers) . "\n";
-                    } elsif ($action =~ /^custom\((.*)\)/) {
-
-                        # Call the "no" custom action
-                        Baruwa::Scanner::Config::CallCustomAction($this, 'no',
-                            $1);
                     } else {
 
                         #print STDERR "Removed $action from actions list\n";
@@ -1181,11 +1172,6 @@ sub HandleHamAndSpam {
                         ) unless $action =~ /:/;
 
                         #delete $lintoptions{$action};
-                    } elsif ($action =~ /^custom\((.*)\)/) {
-
-                        # Call the "no" custom action
-                        Baruwa::Scanner::Config::CallCustomAction($this, 'yes',
-                            $1);
                     } else {
 
                         # It's some other action
@@ -1222,7 +1208,6 @@ sub HandleHamAndSpam {
     delete $lintoptions{'attachment'};
     delete $lintoptions{'notify'};
     delete $lintoptions{'header'};
-    delete $lintoptions{'custom'};
     my $lintstring = join(' ', keys %lintoptions);
 
     if ($lintstring ne '') {
