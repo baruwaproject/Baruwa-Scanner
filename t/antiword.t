@@ -120,7 +120,6 @@ TODO: {
     $log->mock(
         DieLog => sub {
             my ($msg) = @_;
-            print STDERR "MSG:=> $msg\n";
             $called++;
         }
     );
