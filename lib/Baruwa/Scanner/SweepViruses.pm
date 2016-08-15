@@ -464,8 +464,8 @@ sub MergeReports {
 
         while (($attachment, $text) = each %$reports) {
 
-# print STDERR "\tattachment \"$attachment\" has text \"$text\"\n";
-# print STDERR "\tEntity of \"$attachment\" is \"" . $message->{file2entity} . "\"\n";
+            # print STDERR "\tattachment \"$attachment\" has text \"$text\"\n";
+            # print STDERR "\tEntity of \"$attachment\" is \"" . $message->{file2entity} . "\"\n";
             next unless $text;
 
             # Sanitise the reports a bit
@@ -1050,9 +1050,9 @@ sub ProcessClamAVModOutput {
             return "0 $id $virusname";
         }
 
-   # Only log the whole message if no attachment has been logged
-   # print STDERR "Part = \"$part\"\n";
-   # print STDERR "Logged(\"$id\") = \"" . $ClamAVAlreadyLogged{"$id"} . "\"\n";
+       # Only log the whole message if no attachment has been logged
+       # print STDERR "Part = \"$part\"\n";
+       # print STDERR "Logged(\"$id\") = \"" . $ClamAVAlreadyLogged{"$id"} . "\"\n";
 
         $report = $Name . ': ' if $Name;
         if ($part eq '') {
