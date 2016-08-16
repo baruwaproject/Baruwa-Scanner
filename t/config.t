@@ -79,7 +79,7 @@ is( Baruwa::Scanner::Config::ScannerCmds('sophos'),
 );
 
 can_ok('Baruwa::Scanner::Config', 'LanguageValue');
-is(Baruwa::Scanner::Config::LanguageValue(undef, 'baruwa'), 'Baruwa');
+is(Baruwa::Scanner::Config::LanguageValue(undef, 'baruwa'), 'BaruwaTest');
 
 can_ok('Baruwa::Scanner::Config', 'PrintFixedWidth');
 is(Baruwa::Scanner::Config::PrintFixedWidth('TEST', 6), 'TEST  ');
@@ -328,16 +328,80 @@ can_ok('Baruwa::Scanner::Config', 'FirstMatchValue');
 }
 
 can_ok('Baruwa::Scanner::Config', 'NFilenameRulesValue');
+{
+    my $msgid = $Test::Baruwa::Scanner::msgs[1];
+    my $m     = _parse_msg($msgid);
+    my $ref   = Baruwa::Scanner::Config::NFilenameRulesValue($m);
+    like($ref->[0], qr/Very long filename/);
+    $m->{store}->Unlock();
+}
 
 can_ok('Baruwa::Scanner::Config', 'AFilenameRulesValue');
+{
+    my $msgid = $Test::Baruwa::Scanner::msgs[1];
+    my $m     = _parse_msg($msgid);
+    my $ref   = Baruwa::Scanner::Config::AFilenameRulesValue($m);
+    like($ref->[0], qr/Very long filename/);
+    $m->{store}->Unlock();
+}
 
 can_ok('Baruwa::Scanner::Config', 'FilenameRulesValue');
+{
+    my $msgid = $Test::Baruwa::Scanner::msgs[1];
+    my $m     = _parse_msg($msgid);
+    foreach my $key (qw/filenamerules afilenamerules/) {
+        my %FilenameRules;
+        my $ref =
+          Baruwa::Scanner::Config::FilenameRulesValue($m, \%FilenameRules,
+            $key);
+        my $list = Baruwa::Scanner::Config::Value($key, $m);
+        my @filenamelist = split(" ", $list);
+        foreach my $file (@filenamelist) {
+            is(exists $FilenameRules{$file}, 1);
+            is($FilenameRules{$file}[0],     $ref->[0]);
+        }
+        undef %FilenameRules;
+    }
+    $m->{store}->Unlock();
+}
 
 can_ok('Baruwa::Scanner::Config', 'NFiletypeRulesValue');
+{
+    my $msgid = $Test::Baruwa::Scanner::msgs[1];
+    my $m     = _parse_msg($msgid);
+    my $ref   = Baruwa::Scanner::Config::NFiletypeRulesValue($m);
+    like($ref->[4], qr/No self-extracting archives/);
+    $m->{store}->Unlock();
+}
 
 can_ok('Baruwa::Scanner::Config', 'AFiletypeRulesValue');
+{
+    my $msgid = $Test::Baruwa::Scanner::msgs[1];
+    my $m     = _parse_msg($msgid);
+    my $ref   = Baruwa::Scanner::Config::AFiletypeRulesValue($m);
+    like($ref->[4], qr/No self-extracting archives/);
+    $m->{store}->Unlock();
+}
 
 can_ok('Baruwa::Scanner::Config', 'FiletypeRulesValue');
+{
+    my $msgid = $Test::Baruwa::Scanner::msgs[1];
+    my $m     = _parse_msg($msgid);
+    foreach my $key (qw/filetyperules afiletyperules/) {
+        my %FiletypeRules;
+        my $ref =
+          Baruwa::Scanner::Config::FiletypeRulesValue($m, \%FiletypeRules,
+            $key);
+        my $list = Baruwa::Scanner::Config::Value($key, $m);
+        my @filetypelist = split(" ", $list);
+        foreach my $file (@filetypelist) {
+            is(exists $FiletypeRules{$file}, 1);
+            is($FiletypeRules{$file}[0],     $ref->[0]);
+        }
+        undef %FiletypeRules;
+    }
+    $m->{store}->Unlock();
+}
 
 can_ok('Baruwa::Scanner::Config', 'ReadConfBasicLDAP');
 
