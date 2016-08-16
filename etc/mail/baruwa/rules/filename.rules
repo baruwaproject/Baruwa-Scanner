@@ -1,2 +1,2 @@
-From:		127.0.0.1	/etc/mail/baruwa/filename.rules.allowall.conf
-FromOrTo:	default		/etc/mail/baruwa/filename.rules.conf
+From:		127.0.0.1	%etc-dir%/filename.rules.allowall.conf
+FromOrTo:	default		%etc-dir%/filename.rules.conf
