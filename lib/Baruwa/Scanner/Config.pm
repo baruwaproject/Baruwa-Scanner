@@ -666,10 +666,9 @@ sub AllMatchesValue {
                 $name
             );
         } else {
-
-        # It's a hostname or domain name and it's a "From:" match on {clientip}.
-        # Convert $msg->{clientip} into a hostname
-        # print STDERR "Clientip = " . $msg->{clientip} . " and hostname = ";
+            # It's a hostname or domain name and it's a "From:" match on {clientip}.
+            # Convert $msg->{clientip} into a hostname
+            # print STDERR "Clientip = " . $msg->{clientip} . " and hostname = ";
             my $fromname = GetClientHostname($msg, $iporaddr);
             $fromname = '.' . $fromname
               if $fromname && $fromname ne "_SPOOFED_";
@@ -987,20 +986,24 @@ sub Read {
     # We will have to construct a list of allow/deny rules from the list of
     # matching filenames. We need to build a hash mapping filename to a list
     # of rules.
+    # print STDERR "Start reading filenamerules rules files\n";
     ReadFilenameRules('filenamerules',  \%NFilenameRules);
+    # print STDERR "Finished reading filenamerules rules files\n";
+    # print STDERR "Start reading afilenamerules rules files\n";
     ReadFilenameRules('afilenamerules', \%AFilenameRules);
-
-    #print STDERR "Finished reading filename rules files\n";
+    # print STDERR "Finished reading afilenamerules rules files\n";
 
     # Read all the filetype rules. The "Value" of filetyperules is a list
     # of filenames, each of which contains a list of allow/deny rules.
     # We will have to construct a list of allow/deny rules from the list of
     # matching filenames. We need to build a hash mapping filename to a list
     # of rules.
+    # print STDERR "Start reading filetyperules rules files\n";
     ReadFiletypeRules('filetyperules',  \%NFiletypeRules);
+    # print STDERR "Finished reading filetyperules rules files\n";
+    # print STDERR "Start reading afiletyperules rules files\n";
     ReadFiletypeRules('afiletyperules', \%AFiletypeRules);
-
-    #print STDERR "Finished reading filename rules files\n";
+    # print STDERR "Finished reading afiletyperules rules files\n";
 
     # Read all the language strings to provide multi-lingual output of
     # all data that goes to the end user.
@@ -1161,7 +1164,7 @@ sub FilenameRulesValue {
 
     # Now construct a list containing the concatenation of all the allow-deny
     # rules
-    #print STDERR "Filename rulesets are " . join(', ', @filenamelist) . "\n";
+    # print STDERR "Filename rulesets are " . join(', ', @filenamelist) . "\n";
     foreach $file (@filenamelist) {
         if (!exists($Rules->{$file})) {
             next unless $Rules->{$file} = ReadOneFilenameRulesFile($file);
@@ -1173,7 +1176,7 @@ sub FilenameRulesValue {
         push @totallist, @{$listref} if defined $listref;
     }
 
-    #print STDERR "Filename rules for message are\n" . join("\n",@totallist) .
+    # print STDERR "Filename rules for message are\n" . join("\n",@totallist) .
     #             "Filename rules for message ends.\n";
     return \@totallist;
 }
@@ -1256,9 +1259,11 @@ sub ReadFilenameRules {
     );
 
     # Do the static filename list if there is one
+    # print STDERR "KEYWORD => $keyword\n";
     $namelist = $StaticScalars{$keyword};
     if (defined($namelist)) {
         foreach $filename (split(" ", $namelist)) {
+            # print STDERR "FILE=>$filename\n";
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
         }
@@ -1269,6 +1274,7 @@ sub ReadFilenameRules {
 
     if (defined $namelist) {
         foreach $filename (split(" ", $namelist)) {
+            # print STDERR "DEFAULT FILE=>$filename\n";
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
         }
@@ -1313,15 +1319,16 @@ sub ReadFiletypeRules {
     #print STDERR "About to read in all the possible filetype rules\n";
 
     # Do the static filename list if there is one
+    # print STDERR "KEYWORD => $keyword\n";
     $namelist = $StaticScalars{$keyword};
 
-  # print STDERR "Filetype-rules: keyword is $keyword, filename is $namelist\n";
+    # print STDERR "Filetype-rules: keyword is $keyword, filename is $namelist\n";
     if (defined($namelist)) {
         foreach $filename (split(" ", $namelist)) {
+            # print STDERR "FILE=>$filename\n";
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
-
-     # print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
+            # print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
         }
     }
 
@@ -1331,6 +1338,7 @@ sub ReadFiletypeRules {
     # print STDERR "Filetype-rules: default keyword is $keyword, filename is $namelist\n";
     if (defined $namelist) {
         foreach $filename (split(" ", $namelist)) {
+            # print STDERR "DEFAULT FILE=>$filename\n";
             $donefile{"$filename"} = 1;
             $Rules->{$filename} = ReadOneFilenameRulesFile($filename);
             # print STDERR "Storing: $filename is " . $FiletypeRules{$filename} . "\n";
@@ -1941,7 +1949,7 @@ sub ReadConfFile {
         ($origkey, $value) = ($1, $2);
 
         $baruwatmpvalue = $value;
-
+        # print STDERR "ORIG: $origkey => $value\n";
         # Allow %var% = value lines
         $value =~ s/\%([^%]+)\%/$PercentVars{lc($1)}/g;
         $value =~ s/\$\{?(\w+)\}?/$ENV{$1}/g;
@@ -1953,9 +1961,10 @@ sub ReadConfFile {
 
         $key = lc($origkey);
         $key =~ s/[^a-z0-9]//g;    # Leave numbers and letters only
-
+        # print STDERR "LC: $key => $value\n";
         # Translate the value to the internal (shorter) version of it
         $key = EtoI($key);
+        # print STDERR "ETOI: $key => $value\n";
 
         if ($key eq "") {
 
@@ -1963,6 +1972,7 @@ sub ReadConfFile {
             $ErrorReport .= "Error in line $linecounter of $filename, "
               . "line does not make sense. ";
             $ErrorsSeen = 1;
+            # print STDERR "Error => $ErrorReport\n";
         } else {
             $File{$key} = $value;
 
@@ -2011,7 +2021,7 @@ sub ReadData {
     while (<DATA>) {
         chomp;
 
-        #print STDERR "In ReadData, data is '$_'\n";
+        # print STDERR "In ReadData, data is '$_'\n";
         s/#.*$//;
         s/^\s+//;
         s/\s+$//;
@@ -2020,7 +2030,7 @@ sub ReadData {
         $line = $_;
 
         # Handle section headings
-        #print STDERR "In processing of $category, $type\n";
+        # print STDERR "In processing of $category, $type\n";
         if ($line =~ s/^\[(.*)\]$/$1/) {
             $line = lc($line);
             ($category, $type) = split(/\s*,\s*/, $line, 2);
@@ -2089,8 +2099,7 @@ sub ReadData {
         } elsif ($type =~ /number/i) {
             ProcessNumber($line, $category, $nodefaults);
         } else {
-
-        # print STDERR "line is $line category $category\n" if $line =~ /tnef/i;
+            # print STDERR "line is $line category $category\n"; #if $line =~ /tnef/i;
             ProcessOther($line, $category, $nodefaults);
         }
 
@@ -2104,8 +2113,9 @@ sub ReadData {
     if (@leftovers) {
         Baruwa::Scanner::Log::WarnLog("Syntax error(s) in configuration file:");
 
-        #print STDERR "Syntax error(s) in configuration file:\n";
+        # print STDERR "Syntax error(s) in configuration file:\n";
         foreach $leftover (sort @leftovers) {
+            # print STDERR "Unrecognised keyword \"".ItoE($leftover)."\" at line ".$LineNos{$leftover}."\n";
             Baruwa::Scanner::Log::WarnLog(
                 "Unrecognised keyword \"%s\" at line %d",
                 ItoE($leftover), $LineNos{$leftover});
@@ -2598,7 +2608,7 @@ sub ReadRuleset {
     # It is a normal filename ruleset.
     #
     my ($rulesfh, $errors, $linecounter, $default, $error);
-
+    # print STDERR "RS: Opening $rulesfilename\n";
     $rulesfh = new FileHandle;
     $rulesfh->open("<$rulesfilename")
       or Baruwa::Scanner::Log::WarnLog('Cannot open ruleset file %s, %s',
@@ -2614,7 +2624,7 @@ sub ReadRuleset {
         ($error, $default) = Store1Rule($_, $rulesfilename, $linecounter,
             $rulesettype, $RuleScalars{$keyword}, %values);
 
-        #print STDERR "Store1Rule returned $error, $default\n";
+        # print STDERR "Store1Rule returned $error, $default\n" if (defined($error));
         if (defined($default)) {
             $default =~ s/\s+/-/g if $keyword =~ /header$/i && $default =~ /:$/;
             $Defaults{$keyword} = $default;
@@ -2625,7 +2635,8 @@ sub ReadRuleset {
     # Unlock and close rules file
     flock($rulesfh, $LOCK_UN);
     $rulesfh->close();
-
+    # print STDERR "RS: Closing $rulesfilename\n";
+    # print STDERR "RS: Read @{$RuleScalars{$keyword}}\n";
     Baruwa::Scanner::Log::WarnLog("Found syntax errors in %s.", $rulesfilename)
       if $errors;
 }
@@ -3296,7 +3307,7 @@ sub ReadOtherValue {
 
     if ($isrules && $keyword ne 'inqueuedir') {
 
-        #print STDERR "Config: $keyword has a ruleset $isrules\n";
+        # print STDERR "Config: $keyword has a ruleset $isrules => $RulesAllowed\n";
         if (!$RulesAllowed) {
             Baruwa::Scanner::Log::WarnLog(
                 "Value of %s cannot be a ruleset, only a " . "simple value",
@@ -3304,6 +3315,7 @@ sub ReadOtherValue {
         }
 
         # Read the ruleset here
+        # print STDERR "Reading ruleset: $keyword, $first 'other', $nodefaults\n";
         ReadRuleset($keyword, $first, 'other', $nodefaults);
     } else {
 
@@ -3333,19 +3345,23 @@ sub ProcessOther {
     my ($keyword, $default);
 
     ($keyword, $default) = split(" ", $line, 2);    # Allow spaces in it
+    # print STDERR "PO: $keyword => $default => $category\n";
     $keyword                     = lc($keyword);
     $KeywordCategory{$keyword}   = $category;
     $KeywordType{$keyword}       = 'other';
     $HardCodedDefaults{$keyword} = $default;
 
-    if (exists $File{$keyword}) {                   # ne "") {
+    if (exists $File{$keyword}) {
+        # print STDERR "KE: $keyword:$category => $File{$keyword}\n";
         ReadOtherValue($keyword, ($category !~ /simple/i), $nodefaults);
         unless (exists $Defaults{$keyword}) {
             $default =~ s/\s+/-/g if $keyword =~ /header$/i && $default =~ /:$/;
             $Defaults{$keyword} = $default;
+            # print STDERR "SD: $keyword => $Defaults{$keyword}\n";
         }
         KeywordDone($keyword);
     } else {
+        # print STDERR "KDNE: $keyword\n";
         $default =~ s/\s+/-/g if $keyword =~ /header$/i && $default =~ /:$/;
         $StaticScalars{$keyword} = $default unless $nodefaults;
     }
