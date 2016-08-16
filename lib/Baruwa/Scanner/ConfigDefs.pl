@@ -42,12 +42,6 @@ __DATA__
 
 AFilenameRules                  = ArchivesFilenameRules
 AFiletypeRules                  = ArchivesFiletypeRules
-aallowfilenames                 = ArchivesAllowFilenames
-adenyfilemimetypes              = ArchivesDenyFileMIMETypes
-adenyfiletypes                  = ArchivesDenyFiletypes
-aallowfilemimetypes             = ArchivesAllowFileMIMETypes
-aallowfiletypes                 = ArchivesAllowFiletypes
-adenyfilenames                  = ArchivesDenyFilenames
 addenvfrom			= AddEnvelopeFromHeader
 addenvto			= AddEnvelopeToHeader
 addmshmac			= AddWatermark
@@ -544,12 +538,6 @@ VirusScan		1	no	0	yes	1
 [All,Other]
 # This is the other stuff that came up in the search that I haven't
 # figured out what to do with yet...
-aallowfilenames
-adenyfilemimetypes
-adenyfiletypes
-aallowfilemimetypes
-aallowfiletypes
-adenyfilenames
 afilenamerules
 afiletyperules
 ArchiveMail
@@ -567,10 +555,4 @@ SilentViruses			HTML-IFrame All-Viruses
 SpamDomainList
 webbugblacklist
 webbugwhitelist
-allowfilenames
-denyfilemimetypes
-denyfiletypes
-allowfilemimetypes
-allowfiletypes
-denyfilenames
 saactions

@@ -53,8 +53,8 @@ sub ScanBatch {
     # Return the number of infections/problems you found.
     # Can play with the MIME headers of a message using $mime.
 
-    my ( $NumInfections, $BaseDir );
-    my ( $TypeIndicator, $ArchivesAre, @ArchivesAre );
+    my ($NumInfections, $BaseDir);
+    my ($TypeIndicator, $ArchivesAre);
 
     $NumInfections = 0;
     $BaseDir       = $global::MS->{work}->{dir};
@@ -168,66 +168,6 @@ sub ScanBatch {
             # And make it a filename suffix if they didn't read the instructions!
             my $RenamePattern = Baruwa::Scanner::Config::Value( 'defaultrenamepattern', $message );
             $RenamePattern = '__FILENAME__' . $RenamePattern unless $RenamePattern =~ /__FILENAME__/i;
-
-            # Set up patterns for simple filename real rules files
-            my (
-                $allowpatterns, $denypatterns, $allowexists, $denyexists,
-                @allowpatterns, @denypatterns, $megaallow,   $megadeny
-            );
-
-            # These are the ones for normal attachments
-            my (
-                $Nallowpatterns, $Ndenypatterns,  $Nallowexists,
-                $Ndenyexists,    @Nallowpatterns, @Ndenypatterns,
-                $Nmegaallow,     $Nmegadeny
-            );
-
-            # And these are for archived attachments
-            my (
-                $Aallowpatterns, $Adenypatterns,  $Aallowexists,
-                $Adenyexists,    @Aallowpatterns, @Adenypatterns,
-                $Amegaallow,     $Amegadeny
-            );
-            $Nallowpatterns = Baruwa::Scanner::Config::Value( 'allowfilenames', $message );
-            $Ndenypatterns = Baruwa::Scanner::Config::Value( 'denyfilenames', $message );
-            $Nallowpatterns =~ s/^\s+//;    # Trim leading space
-            $Ndenypatterns =~ s/^\s+//;
-            $Nallowpatterns =~ s/\s+$//;    # Trim trailing space
-            $Ndenypatterns =~ s/\s+$//;
-            @Nallowpatterns = split( " ", $Nallowpatterns );
-            @Ndenypatterns  = split( " ", $Ndenypatterns );
-
-            # JKF Addenbrookes - Catch leading "*" on regexps and replace with ".*"
-            @Nallowpatterns = map { s/^\*/.\*/; $_; } @Nallowpatterns;
-            @Ndenypatterns  = map { s/^\*/.\*/; $_; } @Ndenypatterns;
-            $Nallowexists = @Nallowpatterns; # Don't use them if they are empty!
-            $Ndenyexists  = @Ndenypatterns;
-            $Nmegaallow = '(' . join( ')|(', @Nallowpatterns ) . ')';
-            $Nmegadeny = '(' . join( ')|(', @Ndenypatterns ) . ')';
-
-            # And now the same for the archived attachments
-            $Aallowpatterns = Baruwa::Scanner::Config::Value( 'aallowfilenames', $message );
-            $Adenypatterns = Baruwa::Scanner::Config::Value( 'adenyfilenames', $message );
-            $Aallowpatterns =~ s/^\s+//;     # Trim leading space
-            $Adenypatterns =~ s/^\s+//;
-            $Aallowpatterns =~ s/\s+$//;     # Trim trailing space
-            $Adenypatterns =~ s/\s+$//;
-            @Aallowpatterns = split( " ", $Aallowpatterns );
-            @Adenypatterns  = split( " ", $Adenypatterns );
-
-            # JKF Addenbrookes - Catch leading "*" on regexps and replace with ".*"
-            @Aallowpatterns = map { s/^\*/.\*/; $_; } @Aallowpatterns;
-            @Adenypatterns  = map { s/^\*/.\*/; $_; } @Adenypatterns;
-            $Aallowexists = @Aallowpatterns; # Don't use them if they are empty!
-            $Adenyexists  = @Adenypatterns;
-            $Amegaallow = '(' . join( ')|(', @Aallowpatterns ) . ')';
-            $Amegadeny = '(' . join( ')|(', @Adenypatterns ) . ')';
-
-            #print STDERR "allowpatterns = $allowpatterns\n";
-            #print STDERR "deny          = $denypatterns\n";
-            #print STDERR "megaallow     = $megaallow\n";
-            #print STDERR "deny          = $megadeny\n";
-
             # Insert new filename rules checking code here
             #print STDERR "Searching for dodgy filenames in $id\n";
             #print STDERR "SafeFile2File = " . %{$message->{safefile2file}} . "\n";
@@ -249,61 +189,11 @@ sub ScanBatch {
                 # $attach does not contain the type indicator, it's the attachment fn.
                 $attach =~ s/\$$/(\\\?=)\?\$/;
 
-                # Implement simple all-matches rulesets for allowing and denying files
-
                 my $MatchFound = 0;
-                my ( $logtext, $usertext );
-
-                if (defined($ArchivesAre) && ($TypeIndicator =~ /$ArchivesAre/) ) {
-                    $allowexists = $Aallowexists;
-                    $megaallow   = $Amegaallow;
-                } else {
-                    $allowexists = $Nallowexists;
-                    $megaallow   = $Nmegaallow;
-                }
-
-                # Ignore if there aren't any patterns
-                if ($allowexists) {
-                    #print STDERR "Allow exists\n";
-                    if (   $attach =~ /$megaallow/is || $notypesafename =~ /$megaallow/is ) {
-                        $MatchFound = 1;
-                        #print STDERR "Allowing filename $id\t$notypesafename\n";
-                        Baruwa::Scanner::Log::InfoLog("Filename Checks: Allowing %s %s", $id, $notypesafename ) if $LogNames;
-                    }
-                }
-
-                if (defined($ArchivesAre) && ($TypeIndicator =~ /$ArchivesAre/) ) {
-                    $denyexists = $Adenyexists;
-                    $megadeny   = $Amegadeny;
-                } else {
-                    $denyexists = $Ndenyexists;
-                    $megadeny   = $Nmegadeny;
-                }
-
-                # Ignore if there aren't any patterns
-                if ($denyexists) {
-
-                    #print STDERR "Deny exists\n";
-                    if (!$MatchFound && (   $attach =~ /$megadeny/is || $notypesafename =~ /$megadeny/is )) {
-                        $MatchFound = 1;
-
-                        # It's a rejection rule, so log the error.
-                        $logtext = Baruwa::Scanner::Config::LanguageValue( $message, 'foundblockedfilename' );
-                        $usertext = $logtext;
-
-                        #print STDERR "Denying filetype $id\t$notypesafename\n";
-                        Baruwa::Scanner::Log::InfoLog("Filename Checks: %s (%s %s)", $logtext, $id, $attach );
-                        $message->{namereports}{$safename} .= "$usertext ($notypesafename)\n";
-                        $message->{nametypes}{$safename} .= "f";
-                        $counter++;
-                        $message->{nameinfected}++;
-                        $message->DeleteFile($safename);
-                    }
-                }
-
+                my ($logtext, $usertext);
                 # Work through the attachment filename rules,
                 # using the first rule that matches.
-                my ( $i, $FilenameRules );
+                my ($i, $FilenameRules);
                 if (defined($ArchivesAre) && ($TypeIndicator =~ /$ArchivesAre/) ) {
                     $FilenameRules = Baruwa::Scanner::Config::AFilenameRulesValue($message);
                 } else {
@@ -404,17 +294,8 @@ sub ScanBatch {
     return $counter
       if Baruwa::Scanner::Config::IsSimpleValue('afiletyperules')
       && !Baruwa::Scanner::Config::Value('afiletyperules')
-      && Baruwa::Scanner::Config::IsSimpleValue('aallowfiletypes')
-      && !Baruwa::Scanner::Config::Value('aallowfiletypes')
-      && Baruwa::Scanner::Config::IsSimpleValue('adenyfiletypes')
-      && !Baruwa::Scanner::Config::Value('adenyfiletypes')
       && Baruwa::Scanner::Config::IsSimpleValue('filetyperules')
-      && !Baruwa::Scanner::Config::Value('filetyperules')
-      && Baruwa::Scanner::Config::IsSimpleValue('allowfiletypes')
-      && !Baruwa::Scanner::Config::Value('allowfiletypes')
-      && Baruwa::Scanner::Config::IsSimpleValue('denyfiletypes')
-      && !Baruwa::Scanner::Config::Value('denyfiletypes');
-
+      && !Baruwa::Scanner::Config::Value('filetyperules');
     $counter += CheckFileContentTypes($batch);
 
     return $counter;
@@ -595,25 +476,13 @@ sub CheckFileContentTypes {
 }
 
 sub CheckFileTypesRules {
-    my ( $batch, $FileOutput, $FileiOutput ) = @_;
+    my ($batch, $FileOutput, $FileiOutput) = @_;
 
-    my ( $id, $attachtypes, $message, $tnefname, $safename, $type, $attach );
+    my ($id, $attachtypes, $message, $tnefname, $safename, $type, $attach);
     my ($notypesafename);
-    my ( $ArchivesAre, @ArchivesAre, $TypeIndicator );
-    my ( $i, $FiletypeRules, $AFiletypeRules, $NFiletypeRules );
-    my (
-        $allowpatterns, $denypatterns, $allowexists, $denyexists,
-        @allowpatterns, @denypatterns, $megaallow,   $megadeny
-    );
-    my (
-        $Aallowpatterns, $Adenypatterns, $Aallowexists, $Adenyexists,
-        @Aallowpatterns, @Adenypatterns, $Amegaallow,   $Amegadeny
-    );
-    my (
-        $Nallowpatterns, $Ndenypatterns, $Nallowexists, $Ndenyexists,
-        @Nallowpatterns, @Ndenypatterns, $Nmegaallow,   $Nmegadeny
-    );
-    my ( $LogTypes, $RenamePattern );
+    my ($ArchivesAre, $TypeIndicator);
+    my ($i, $FiletypeRules, $AFiletypeRules, $NFiletypeRules);
+    my ($LogTypes, $RenamePattern);
     my $counter = 0;
 
     # winmail.dat will always be a normal attachment
@@ -645,41 +514,6 @@ sub CheckFileTypesRules {
             $RenamePattern = Baruwa::Scanner::Config::Value( 'defaultrenamepattern', $message );
             $RenamePattern = '__FILENAME__' . $RenamePattern
               unless $RenamePattern =~ /__FILENAME__/i;
-
-            # Set up patterns for simple filename real rules files
-            $Aallowpatterns = Baruwa::Scanner::Config::Value( 'aallowfiletypes', $message );
-            $Adenypatterns = Baruwa::Scanner::Config::Value( 'adenyfiletypes', $message );
-            $Aallowpatterns =~ s/^\s+//;    # Trim leading space
-            $Adenypatterns =~ s/^\s+//;
-            $Aallowpatterns =~ s/\s+$//;    # Trim trailing space
-            $Adenypatterns =~ s/\s+$//;
-            @Aallowpatterns = split( " ", $Aallowpatterns );
-            @Adenypatterns  = split( " ", $Adenypatterns );
-
-            # JKF Addenbrookes - Catch leading "*" on regexps and replace with ".*"
-            @Aallowpatterns = map { s/^\*/.\*/; $_; } @Aallowpatterns;
-            @Adenypatterns  = map { s/^\*/.\*/; $_; } @Adenypatterns;
-            $Aallowexists = @Aallowpatterns; # Don't use them if they are empty!
-            $Adenyexists  = @Adenypatterns;
-            $Amegaallow = '(' . join( ')|(', @Aallowpatterns ) . ')';
-            $Amegadeny = '(' . join( ')|(', @Adenypatterns ) . ')';
-            $Nallowpatterns = Baruwa::Scanner::Config::Value( 'allowfiletypes', $message );
-            $Ndenypatterns = Baruwa::Scanner::Config::Value( 'denyfiletypes', $message );
-            $Nallowpatterns =~ s/^\s+//;     # Trim leading space
-            $Ndenypatterns =~ s/^\s+//;
-            $Nallowpatterns =~ s/\s+$//;     # Trim trailing space
-            $Ndenypatterns =~ s/\s+$//;
-            @Nallowpatterns = split( " ", $Nallowpatterns );
-            @Ndenypatterns  = split( " ", $Ndenypatterns );
-
-            # JKF Addenbrookes - Catch leading "*" on regexps and replace with ".*"
-            @Nallowpatterns = map { s/^\*/.\*/; $_; } @Nallowpatterns;
-            @Ndenypatterns  = map { s/^\*/.\*/; $_; } @Ndenypatterns;
-            $Nallowexists = @Nallowpatterns; # Don't use them if they are empty!
-            $Ndenyexists  = @Ndenypatterns;
-            $Nmegaallow = '(' . join( ')|(', @Nallowpatterns ) . ')';
-            $Nmegadeny = '(' . join( ')|(', @Ndenypatterns ) . ')';
-
             $AFiletypeRules = Baruwa::Scanner::Config::AFiletypeRulesValue($message);
             $NFiletypeRules = Baruwa::Scanner::Config::NFiletypeRulesValue($message);
         }
@@ -696,52 +530,11 @@ sub CheckFileTypesRules {
 
             my $MatchFound = 0;
             my ( $logtext, $usertext );
-
             if ( defined($ArchivesAre) && ($TypeIndicator =~ /$ArchivesAre/) ) {
-                $allowexists   = $Aallowexists;
-                $megaallow     = $Amegaallow;
-                $denyexists    = $Adenyexists;
-                $megadeny      = $Amegadeny;
                 $FiletypeRules = $AFiletypeRules;
-            }
-            else {
-                $allowexists   = $Nallowexists;
-                $megaallow     = $Nmegaallow;
-                $denyexists    = $Ndenyexists;
-                $megadeny      = $Nmegadeny;
+            } else {
                 $FiletypeRules = $NFiletypeRules;
             }
-
-            # Ignore if there aren't any patterns
-            if ($allowexists) {
-                if ( $type =~ /$megaallow/is ) {
-                    $MatchFound = 1;
-                    Baruwa::Scanner::Log::InfoLog(
-                        "Filetype Checks: Allowing %s %s",
-                        $id, $notypesafename )
-                      if $LogTypes;
-                }
-            }
-
-            # Ignore if there aren't any patterns
-            if ($denyexists) {
-                if ( !$MatchFound && $type =~ /$megadeny/is ) {
-                    $MatchFound = 1;
-
-                    # It's a rejection rule, so log the error.
-                    $logtext = Baruwa::Scanner::Config::LanguageValue( $message,
-                        'foundblockedfiletype' );
-                    $usertext = $logtext;
-                    Baruwa::Scanner::Log::InfoLog( "Filetype Checks: %s (%s %s)",
-                        $logtext, $id, $attach );
-                    $message->{namereports}{$safename} .= "$usertext ($notypesafename)\n";
-                    $message->{nametypes}{$safename} .= "f";
-                    $counter++;
-                    $message->{nameinfected}++;
-                    $message->DeleteFile($safename);
-                }
-            }
-
             # Work through the attachment filetype rules,
             # using the first rule that matches.
             next unless $FiletypeRules;
@@ -841,18 +634,6 @@ sub CheckFileTypesRules {
         next unless $id;
         $message = $batch->{messages}{$id};
         # Optimisation, don't do any of this if we're on the same message.
-        my (
-            $allowpatterns, $denypatterns, $allowexists, $denyexists,
-            @allowpatterns, @denypatterns, $megaallow,   $megadeny
-        );
-        my (
-            $Aallowpatterns, $Adenypatterns, $Aallowexists, $Adenyexists,
-            @Aallowpatterns, @Adenypatterns, $Amegaallow,   $Amegadeny
-        );
-        my (
-            $Nallowpatterns, $Ndenypatterns, $Nallowexists, $Ndenyexists,
-            @Nallowpatterns, @Ndenypatterns, $Nmegaallow,   $Nmegadeny
-        );
         my ($LogTypes);
         my ( $i, $FiletypeRules );
 
@@ -866,41 +647,6 @@ sub CheckFileTypesRules {
 
             $LogTypes = Baruwa::Scanner::Config::Value( 'logpermittedfilemimetypes',
                 $message );
-
-            # Set up patterns for simple filename real rules files
-            $Aallowpatterns = Baruwa::Scanner::Config::Value( 'aallowfilemimetypes', $message );
-            $Adenypatterns = Baruwa::Scanner::Config::Value( 'adenyfilemimetypes', $message );
-            $Aallowpatterns =~ s/^\s+//;    # Trim leading space
-            $Adenypatterns =~ s/^\s+//;
-            $Aallowpatterns =~ s/\s+$//;    # Trim trailing space
-            $Adenypatterns =~ s/\s+$//;
-            @Aallowpatterns = split( " ", $Aallowpatterns );
-            @Adenypatterns  = split( " ", $Adenypatterns );
-
-            # JKF Addenbrookes - Catch leading "*" on regexps and replace with ".*"
-            @Aallowpatterns = map { s/^\*/.\*/; $_; } @Aallowpatterns;
-            @Adenypatterns  = map { s/^\*/.\*/; $_; } @Adenypatterns;
-            $Aallowexists = @Aallowpatterns; # Don't use them if they are empty!
-            $Adenyexists  = @Adenypatterns;
-            $Amegaallow = '(' . join( ')|(', @Aallowpatterns ) . ')';
-            $Amegadeny = '(' . join( ')|(', @Adenypatterns ) . ')';
-            $Nallowpatterns = Baruwa::Scanner::Config::Value( 'allowfilemimetypes', $message );
-            $Ndenypatterns = Baruwa::Scanner::Config::Value( 'denyfilemimetypes', $message );
-            $Nallowpatterns =~ s/^\s+//;     # Trim leading space
-            $Ndenypatterns =~ s/^\s+//;
-            $Nallowpatterns =~ s/\s+$//;     # Trim trailing space
-            $Ndenypatterns =~ s/\s+$//;
-            @Nallowpatterns = split( " ", $Nallowpatterns );
-            @Ndenypatterns  = split( " ", $Ndenypatterns );
-
-            # JKF Addenbrookes - Catch leading "*" on regexps and replace with ".*"
-            @Nallowpatterns = map { s/^\*/.\*/; $_; } @Nallowpatterns;
-            @Ndenypatterns  = map { s/^\*/.\*/; $_; } @Ndenypatterns;
-            $Nallowexists = @Nallowpatterns; # Don't use them if they are empty!
-            $Ndenyexists  = @Ndenypatterns;
-            $Nmegaallow = '(' . join( ')|(', @Nallowpatterns ) . ')';
-            $Nmegadeny = '(' . join( ')|(', @Ndenypatterns ) . ')';
-
             $AFiletypeRules = Baruwa::Scanner::Config::AFiletypeRulesValue($message);
             $NFiletypeRules = Baruwa::Scanner::Config::NFiletypeRulesValue($message);
         }
@@ -912,55 +658,12 @@ sub CheckFileTypesRules {
             $notypesafename = substr( $safename, 1 );
             $TypeIndicator = substr( $safename, 0, 1 );
             if ( $TypeIndicator =~ /$ArchivesAre/ ) {
-                $allowexists   = $Aallowexists;
-                $megaallow     = $Amegaallow;
-                $denyexists    = $Adenyexists;
-                $megadeny      = $Amegadeny;
                 $FiletypeRules = $AFiletypeRules;
-            }
-            else {
-                $allowexists   = $Nallowexists;
-                $megaallow     = $Nmegaallow;
-                $denyexists    = $Ndenyexists;
-                $megadeny      = $Nmegadeny;
+            } else {
                 $FiletypeRules = $NFiletypeRules;
             }
-
-            # Implement simple all-matches rulesets for allowing and denying files
-
             my $MatchFound = 0;
             my ( $logtext, $usertext );
-
-            # Ignore if there aren't any patterns
-            if ($allowexists) {
-                if ( $type =~ /$megaallow/is ) {
-                    $MatchFound = 1;
-                    Baruwa::Scanner::Log::InfoLog(
-                        "Filetype Checks: Allowing %s %s",
-                        $id, $notypesafename )
-                      if $LogTypes;
-                }
-            }
-
-            # Ignore if there aren't any patterns
-            if ($denyexists) {
-                if ( !$MatchFound && $type =~ /$megadeny/is ) {
-                    $MatchFound = 1;
-
-                    # It's a rejection rule, so log the error.
-                    $logtext = Baruwa::Scanner::Config::LanguageValue( $message,
-                        'foundblockedfiletype' );
-                    $usertext = $logtext;
-                    Baruwa::Scanner::Log::InfoLog( "Filetype Checks: %s (%s %s)",
-                        $logtext, $id, $attach );
-                    $message->{namereports}{$safename} .= "$usertext ($notypesafename)\n";
-                    $message->{nametypes}{$safename} .= "f";
-                    $counter++;
-                    $message->{nameinfected}++;
-                    $message->DeleteFile($safename);
-                }
-            }
-
             # Work through the attachment filetype rules,
             # using the first rule that matches.
             next unless $FiletypeRules;
