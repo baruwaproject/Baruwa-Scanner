@@ -1136,6 +1136,7 @@ sub ReadCountryDomainList {
         $Baruwa::Scanner::Config::SecondLevelDomainExists{"$_"} = 1;
     }
     $fh->close;
+    return 1;
 }
 
 # Return a ref to a list of all the filename-rules for a message

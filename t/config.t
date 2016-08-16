@@ -80,6 +80,7 @@ is( Baruwa::Scanner::Config::ScannerCmds('sophos'),
 
 can_ok('Baruwa::Scanner::Config', 'LanguageValue');
 is(Baruwa::Scanner::Config::LanguageValue(undef, 'baruwa'), 'BaruwaTest');
+is(Baruwa::Scanner::Config::LanguageValue(undef, 'xxxxx'), 'xxxxx');
 
 can_ok('Baruwa::Scanner::Config', 'PrintFixedWidth');
 is(Baruwa::Scanner::Config::PrintFixedWidth('TEST', 6), 'TEST  ');
@@ -96,7 +97,9 @@ my @rules = Baruwa::Scanner::Config::SpamAssassinPostConfig();
 is($rules[0], 'score           BASE_BARUWAHASHDB                       15.0');
 
 my $langfile = "$Bin/data/etc/mail/baruwa/reports/en/languages.conf";
+my $langfilem = "$Bin/data/etc/mail/baruwa/reports/en/languagesm.conf";
 can_ok('Baruwa::Scanner::Config', 'ReadOneLanguageStringsFile');
+is(Baruwa::Scanner::Config::ReadOneLanguageStringsFile($langfilem), undef);
 my $langs = Baruwa::Scanner::Config::ReadOneLanguageStringsFile($langfile);
 is($langs->{'theentiremessage'}, 'the entire message');
 
@@ -117,9 +120,13 @@ TODO: {
 }
 
 my $countryfile = "$Bin/data/etc/mail/baruwa/country.domains.conf";
+my $countryfilem = "$Bin/data/etc/mail/baruwa/country.domains.missing.conf";
 can_ok('Baruwa::Scanner::Config', 'ReadCountryDomainList');
-Baruwa::Scanner::Config::ReadCountryDomainList($countryfile);
+isnt(Baruwa::Scanner::Config::ReadCountryDomainList($countryfilem), 1);
 my %countries = %Baruwa::Scanner::Config::SecondLevelDomainExists;
+isnt(exists $countries{'com.ac'}, 1);
+is(Baruwa::Scanner::Config::ReadCountryDomainList($countryfile), 1);
+%countries = %Baruwa::Scanner::Config::SecondLevelDomainExists;
 is($countries{'com.ac'}, 1);
 
 can_ok('Baruwa::Scanner::Config', 'SetValue');
