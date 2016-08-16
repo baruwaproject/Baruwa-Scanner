@@ -246,7 +246,7 @@ can_ok('Baruwa::Scanner::SweepViruses', 'ScanBatch');
     make_path("$workarea->{dir}/$msgid", {mode => 0700});
     is(Baruwa::Scanner::SweepViruses::ScanBatch($batch), 0);
     is($batch->called('DropBatch'),                      1);
-    is($called,                                          3);
+    is($called,                                          2);
     is(exists $reportref->{$msgid},                      1);
 
     # can_ok('Baruwa::Scanner::SweepViruses', 'Fpscand');
