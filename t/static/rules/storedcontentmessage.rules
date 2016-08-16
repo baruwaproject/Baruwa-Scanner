@@ -1,0 +1,2 @@
+# Default rule
+FromOrTo:  default  %report-dir%/stored.content.message.txt

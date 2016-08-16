@@ -1,0 +1,2 @@
+# Default rule
+FromOrTo:  default  %report-dir%/disinfected.report.txt

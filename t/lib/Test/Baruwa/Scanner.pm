@@ -90,6 +90,11 @@ sub make_test_dirs {
         dircopy("$Bin/../etc/mail/baruwa/*", "$Bin/data/etc/mail/baruwa/")
           or die $!;
     }
+    unless (-f "$Bin/data/etc/mail/baruwa/dynamic/rules/filename.rules") {
+        dircopy("$Bin/static/rules/*",
+            "$Bin/data/etc/mail/baruwa/dynamic/rules/")
+          or die $!;
+    }
     foreach (@msgs) {
         foreach my $suffix (qw/H D/) {
             $from = "$Bin/static/spool/$_-$suffix";

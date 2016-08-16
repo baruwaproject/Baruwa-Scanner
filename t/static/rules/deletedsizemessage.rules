@@ -1,0 +1,2 @@
+# Default rule
+FromOrTo:  default  %report-dir%/deleted.size.message.txt

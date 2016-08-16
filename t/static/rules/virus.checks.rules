@@ -1,0 +1,4 @@
+# AV scanner(s) configured none
+FromOrTo:	*@home.topdog-software.com	yes
+# Default rule: Post SMTP Virus scanning on
+FromOrTo:	default	yes

@@ -1,0 +1,4 @@
+From:	10.0.0.0/8	deliver
+From:	192.168.3.0/24	deliver
+# Default rule
+FromOrTo:	default	store

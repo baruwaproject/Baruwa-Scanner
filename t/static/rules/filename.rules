@@ -1,0 +1,2 @@
+From:		127.0.0.1		%etc-dir%/filetype.rules.allowall.conf
+FromOrTo:		default		%etc-dir%/filename.rules.conf

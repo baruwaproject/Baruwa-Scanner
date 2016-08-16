@@ -1,0 +1,2 @@
+# Default rule
+FromOrTo:  default  %report-dir%/sender.spam.sa.report.txt

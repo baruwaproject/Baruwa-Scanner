@@ -1,0 +1,2 @@
+# Default rule
+FromOrTo:  default  %report-dir%/languages.conf
