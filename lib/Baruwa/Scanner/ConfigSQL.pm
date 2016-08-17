@@ -137,14 +137,15 @@ sub db_connect {
 
 sub QuickPeek {
     my ($file, $option) = @_;
-    return undef if not($file && $option);
-    return undef if $disabled;
+    return undef unless (-e $file && $option);
+    # return undef if $disabled;
 
     # Prevent loops
     return undef if $option =~ /^(db|sql|localdb)/;
 
     $sql_qp = Baruwa::Scanner::Config::QuickPeek($file, 'SQLQuickPeek')
       if not(defined($sql_qp));
+
     if (!$sql_qp) {
         $disabled = 1;
         return undef;
@@ -182,7 +183,7 @@ sub ReadConfBasic {
     my ($conf, $File, $CustomVars) = @_;
     return undef if not defined($conf);
     return undef if not ref($File);
-    return undef if $disabled;
+    # return undef if $disabled;
 
     $sql_cf = Baruwa::Scanner::Config::QuickPeek($conf, 'SQLConfig')
       if not defined($sql_cf);
