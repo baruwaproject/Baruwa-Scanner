@@ -136,7 +136,6 @@ namesubjecttext			= filenamesubjecttext
 newheadersattop			= placenewheadersattopofmessage
 noisyviruses			= nonforgingviruses
 normalrbls                      = spamliststobespam
-nosenderprecedence		= nevernotifysendersofprecedence
 noticefullheaders		= noticesincludefullheaders
 noticerecipient			= noticesto
 phishingblacklist		= phishingbadsitesfile
@@ -163,9 +162,6 @@ sacache				= spamassassincachedatabasefile
 scanmail			= scanmessages
 scoreformat			= spamscorenumberformat
 secondlevellist                 = countrysubdomainslist
-sendercontentreport		= senderbadcontentreport
-senderfilenamereport		= senderbadfilenamereport
-sendersizereport		= sendersizereport
 showscanner			= includescannernameinreports
 signalreadyscanned		= signmessagesalreadyprocessed
 signunscannedmessages		= markunscannedmessages
@@ -196,12 +192,6 @@ usedefaultswithmanyrecips       = usedefaultruleswithmultiplerecipients
 tagphishingsubject		= phishingmodifysubject
 virusmodifysubject		= virusmodifysubject
 virusscan			= virusscanning
-warnsenders			= notifysenders
-warnvirussenders		= notifysendersofviruses
-warnnamesenders			= notifysendersofblockedfilenamesorfiletypes
-warnsizesenders                 = notifysendersofblockedsizeattachments
-warnothersenders		= notifysendersofotherblockedcontent
-# JKF 19/12/2007 warnpasswordsenders		= notifysendersofblockedpasswordprotectedarchives
 webbugurl			= webbugreplacement
 webbugblacklist			= knownwebbugservers
 webbugwhitelist			= ignoredwebbugfilenames
@@ -392,11 +382,6 @@ UnpackOle		1	no	0	yes	1
 UseSACache		1	no	0	yes	1
 VirusModifySubject	start	no	0	yes	1	start	start	end	end
 warningisattachment	1	no	0	yes	1
-WarnSenders		1	no	0	yes	1
-WarnVirusSenders	0	no	0	yes	1
-WarnNameSenders		1	no	0	yes	1
-WarnSizeSenders		0	no	0	yes	1
-WarnOtherSenders	1	no	0	yes	1
 
 [First,File]
 DeletedContentMessage	/etc/mail/baruwa/reports/en/deleted.content.message.txt
@@ -410,12 +395,6 @@ inlinespamwarning	/etc/mail/baruwa/reports/en/inline.spam.warning.txt
 inlinetextsig		/etc/mail/baruwa/reports/en/inline.sig.txt
 inlinetextwarning	/etc/mail/baruwa/reports/en/inline.warning.txt
 languagestrings
-recipientspamreport	/etc/mail/baruwa/reports/en/recipient.spam.report.txt
-sendercontentreport 	/etc/mail/baruwa/reports/en/sender.content.report.txt
-sendererrorreport 	/etc/mail/baruwa/reports/en/sender.error.report.txt
-senderfilenamereport	/etc/mail/baruwa/reports/en/sender.filename.report.txt
-SenderSizeReport	/etc/mail/baruwa/reports/en/sender.size.report.txt
-sendervirusreport 	/etc/mail/baruwa/reports/en/sender.virus.report.txt
 StoredContentMessage	/etc/mail/baruwa/reports/en/stored.content.message.txt
 StoredFilenameMessage	/etc/mail/baruwa/reports/en/stored.filename.message.txt
 StoredSizeMessage	/etc/mail/baruwa/reports/en/stored.size.message.txt
@@ -548,7 +527,6 @@ FiletypeRules
 isareply
 mshmacnull			spam
 NoisyViruses			Joke/ OF97/ WM97/ W97M/ eicar
-NoSenderPrecedence		list bulk
 NoticeRecipient			postmaster
 RemoveHeaders			X-Mozilla-Status: X-Mozilla-Status2:
 SilentViruses			HTML-IFrame All-Viruses

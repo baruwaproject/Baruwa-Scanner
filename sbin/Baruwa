@@ -1087,10 +1087,6 @@ sub WorkForHours {
         $batch->DeliverCleaned();
         $batch->RemoveDeletedMessages();
 
-        # Warn all the senders of messages with any non-silent infections
-        $0 = 'Baruwa: sending warnings';
-        $batch->WarnSenders();
-
         # Warn all the notice recipents about all the viruses
         $batch->WarnLocalPostmaster();
         $batch->StopTiming('virus_processing', 'Virus Processing');

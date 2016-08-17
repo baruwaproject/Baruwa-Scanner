@@ -778,59 +778,6 @@ sub DeliverCleaned {
       if @messages;
 }
 
-# Warn the senders of the infected/troublesome messages that we
-# didn't like them. Only do this if we've been told to!
-sub WarnSenders {
-    my $this = shift;
-    my ($id, $message, $counter, $reasons, $warnviruses);
-
-    $counter = 0;
-    while (($id, $message) = each %{$this->{messages}}) {
-        next if $message->{deleted} && !$message->{stillwarn};
-        next if $message->{silent}  && !$message->{noisy};
-
-        # print STDERR "Looking to warn sender of $id\n";
-        next unless $message->{infected};
-
-        # print STDERR "Warning sender of $id who is " .  $message->{from} . "\n";
-        next
-          unless Baruwa::Scanner::Config::Value('warnsenders', $message) =~ /1/;
-
-        # print STDERR "2Warning sender of $id who is " .  $message->{from} . "\n";
-
-        # Count up the number of reasons why we want to warn the sender.
-        # If it's 0 then don't warn them.
-        # However, let the "warnvirussenders" take priority over the other 2.
-        # So if there is a virus and they don't want to warn virus senders
-        # then don't send a warning regardless of the other traps.
-        $warnviruses =
-          Baruwa::Scanner::Config::Value('warnvirussenders', $message);
-        next if $message->{virusinfected} && !$warnviruses;
-
-        $reasons = 0;
-        $reasons++ if $message->{virusinfected} && $warnviruses;
-        $reasons++
-          if $message->{nameinfected}
-          && Baruwa::Scanner::Config::Value('warnnamesenders', $message);
-        $reasons++
-          if $message->{sizeinfected}
-          && Baruwa::Scanner::Config::Value('warnsizesenders', $message);
-        $reasons++
-          if $message->{otherinfected}
-          && Baruwa::Scanner::Config::Value('warnothersenders', $message);
-
-        next if $reasons == 0;
-
-        $message->WarnSender();
-        $counter++;
-    }
-
-    Baruwa::Scanner::Log::NoticeLog(
-        "Sender Warnings: Delivered %d warnings to " . "virus senders",
-        $counter)
-      if $counter;
-}
-
 # Warn the local postmaster (or whoever is receiving the notices)
 # a summary of the infections found.
 # Save the notices into different emails, one per different postmaster,
