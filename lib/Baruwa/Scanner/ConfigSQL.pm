@@ -21,11 +21,12 @@
 
 package Baruwa::Scanner::ConfigSQL;
 
-use strict;
-use Baruwa::Scanner::Config;
 use DBI;
+use strict;
 use Sys::Hostname;
 use Sys::SigAction qw( set_sig_handler );
+use Baruwa::Scanner::Log();
+use Baruwa::Scanner::Config();
 
 our $VERSION = '4.086000';
 
@@ -63,10 +64,12 @@ my ($serial_min) = 60 * 15;    # 15 minutes
 sub db_connect {
     my ($file) = shift;
     return undef unless (-e $file);
+
     # return undef if $disabled;
 
     # Set the $ConfFile package global
     $ConfFile = $file unless (defined($ConfFile) and $ConfFile eq $file);
+
     # print STDERR "1:===>$dsn,$db_user,$db_pass,$disabled,$file,$ConfFile\n";
     $dsn = Baruwa::Scanner::Config::QuickPeek($file, 'LocalDBDSN')
       unless (defined($dsn) and !$disabled);
@@ -78,9 +81,11 @@ sub db_connect {
         $debug = Baruwa::Scanner::Config::QuickPeek($file, 'SQLDebug');
         $debug = (lc($debug) eq 'yes') ? 1 : 0;
     }
+
     # print STDERR "2:===>$dsn,$db_user,$db_pass,$disabled,$file,$ConfFile\n";
     # Disable database functions if required data not present
     if (!$dsn || !$db_user || !$db_pass) {
+
         # print STDERR "Database functions disabled:$disabled\n";
         $disabled = 1;
         print STDERR "Database functions disabled\n" if $debug;
@@ -120,15 +125,8 @@ sub db_connect {
     };
     alarm(0);
     if ($@) {
-
-        # Error; abort and cause child to exit
         my ($err) = $@;
-        eval {
-            Baruwa::Scanner::Log::DieLog('Database connection error: %s', $err);
-        };
-        if ($@) {
-            die "Database connection error: $err\n";
-        }
+        Baruwa::Scanner::Log::DieLog('Database connection error: %s', $err);
     }
 
     # Otherwise return handle
@@ -138,6 +136,7 @@ sub db_connect {
 sub QuickPeek {
     my ($file, $option) = @_;
     return undef unless (-e $file && $option);
+
     # return undef if $disabled;
 
     # Prevent loops
@@ -155,11 +154,8 @@ sub QuickPeek {
     my ($sth) = $dbh->prepare_cached($sql_qp);
     $sth->execute($option, $hostname);
     if ($sth->err) {
-        eval {
-            Baruwa::Scanner::Log::WarnLog("ConfigSQL QuickPeek error: %s",
-                $sth->errstr);
-        };
-        printf STDERR ("ConfigSQL QuickPeek error: %s\n", $sth->errstr) if ($@);
+        Baruwa::Scanner::Log::WarnLog("ConfigSQL QuickPeek error: %s",
+            $sth->errstr);
     } else {
         my (@row) = $sth->fetchrow_array;
         if (@row) {
@@ -183,6 +179,7 @@ sub ReadConfBasic {
     my ($conf, $File, $CustomVars) = @_;
     return undef if not defined($conf);
     return undef if not ref($File);
+
     # return undef if $disabled;
 
     $sql_cf = Baruwa::Scanner::Config::QuickPeek($conf, 'SQLConfig')
@@ -207,18 +204,11 @@ sub ReadConfBasic {
             if ($opt eq 'confserialnumber') {
                 $serial      = $val;
                 $serial_next = time() + $serial_min;
-                eval {
-                    Baruwa::Scanner::Log::InfoLog(
-                        "ConfigSQL configuration loaded with serial %d, next check in %d seconds",
-                        $serial,
-                        ($serial_next - time())
-                    );
-                };
-                if ($@) {
-                    printf STDERR
-                      "ConfigSQL configuration loaded with serial %d, next check in %d seconds\n",
-                      $serial, ($serial_next - time());
-                }
+                Baruwa::Scanner::Log::InfoLog(
+                    "ConfigSQL configuration loaded with serial %d, next check in %d seconds",
+                    $serial,
+                    ($serial_next - time())
+                );
                 next;
             }
 
@@ -283,7 +273,8 @@ sub ReadConfBasic {
 sub ReadRuleset {
     my ($keyword) = @_;
     return undef if not $keyword;
-    return undef if $disabled;
+
+    # return undef if $disabled;
 
     $sql_rs = Baruwa::Scanner::Config::QuickPeek($ConfFile, 'SQLRuleset')
       if not(defined($sql_rs));
@@ -305,28 +296,23 @@ sub ReadRuleset {
 }
 
 sub ReturnSpamAssassinConfig {
-    return undef if $disabled;
+
+    # return undef if $disabled;
     my (@text) = ();
 
-    return undef if not(defined($ConfFile));
+    return undef unless (defined($ConfFile));
     $sql_sa =
       Baruwa::Scanner::Config::QuickPeek($ConfFile, 'SQLSpamAssassinConfig')
-      if not(defined($sql_sa));
-    return undef if (!$sql_sa);
+      unless (defined($sql_sa));
+    return undef unless ($sql_sa);
 
     my ($dbh) = db_connect($ConfFile) || return undef;
     my ($sth) = $dbh->prepare_cached($sql_sa);
     $sth->execute();
     if ($sth->err) {
-        eval {
-            Baruwa::Scanner::Log::WarnLog(
-                "ConfigSQL SpamAssassin statement error %s",
-                $sth->errstr);
-        };
-        if ($@) {
-            printf STDERR ("ConfigSQL SpamAssassin statement error %s\n",
-                $sth->errstr);
-        }
+        Baruwa::Scanner::Log::WarnLog(
+            "ConfigSQL SpamAssassin statement error %s",
+            $sth->errstr);
     } else {
         while ((my @row = $sth->fetchrow_array)) {
             chomp($row[0]);
@@ -339,10 +325,11 @@ sub ReturnSpamAssassinConfig {
 }
 
 sub CheckForUpdate {
-    return undef if $disabled;
+
+    # return undef if $disabled;
 
     $sql_sn = Baruwa::Scanner::Config::QuickPeek($ConfFile, 'SQLSerialNumber')
-      if not(defined($sql_sn));
+      unless (defined($sql_sn));
     if (!$sql_sn) {
         $disabled = 1;
         return undef;
