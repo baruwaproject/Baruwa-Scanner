@@ -1610,11 +1610,4 @@ sub OriginalMsgHeaders {
     return @result;
 }
 
-sub CheckQueueIsFlat {
-    my ($dir) = @_;
-
-    # FIXME: What is the purpose of this?
-    return 1;
-}
-
 1;

@@ -1432,8 +1432,7 @@ sub CheckQueuesAreTogether {
 
     #print STDERR "Queues are \"" . join('","',@inqdirs) . "\"\n";
 
-   #Baruwa::Scanner::Log::WarnLog("Queuedir is %s", $outqdir);
-   #Outq cannot be split: Baruwa::Scanner::Mta::CheckQueueIsFlat($outqdir);
+    # Baruwa::Scanner::Log::WarnLog("Queuedir is %s", $outqdir);
     chdir($outqdir);    # This should be the default
     @outstat = stat('.');
     ($outdevice, $outuid, $outgrp) = @outstat[0, 4, 5];
@@ -1446,9 +1445,6 @@ sub CheckQueuesAreTogether {
         # FIXME: $inqdir is somehow tained: work out why!
         $inqdir =~ /(.*)/;
         $inqdir = $1;
-
-        #Baruwa::Scanner::Log::WarnLog("Inq %s", $inqdir);
-        Baruwa::Scanner::Mta::CheckQueueIsFlat($inqdir);
         chdir($inqdir);
         @instat = stat('.');
         ($indevice, $inuid, $ingrp) = @instat[0, 4, 5];
