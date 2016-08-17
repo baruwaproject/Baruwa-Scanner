@@ -80,8 +80,7 @@ can_ok('Baruwa::Scanner::ConfigSQL', 'QuickPeek');
         'yes'
     );
     is(Baruwa::Scanner::ConfigSQL::QuickPeek($conf_sql, 'mailheader'), undef);
-
-    # Baruwa::Scanner::ConfigSQL::QuickPeek($conf_sql_fail_qp, 'mailheader');
+    is(Baruwa::Scanner::ConfigSQL::QuickPeek($conf_sql, '%org-name%'), 'Asante');
 }
 
 can_ok('Baruwa::Scanner::ConfigSQL', 'ReadConfBasic');
