@@ -108,5 +108,5 @@ can_ok('Baruwa::Scanner::ConfigSQL', 'ReturnSpamAssassinConfig');
 
 can_ok('Baruwa::Scanner::ConfigSQL', 'CheckForUpdate');
 {
-    is(Baruwa::Scanner::ConfigSQL::CheckForUpdate(), undef);
+    is(Baruwa::Scanner::ConfigSQL::CheckForUpdate(), 0);
 }
