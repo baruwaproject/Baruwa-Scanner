@@ -16,6 +16,7 @@ our @EXPORT = qw/create_config make_test_dirs create_file update_config/;
 
 my @paths = (
     "$Bin/data/var/lib/baruwa/archive",
+    "$Bin/data/var/lib/baruwa/data/db",
     "$Bin/data/var/run/baruwa/scanner",
     "$Bin/data/var/spool/baruwa/incoming",
     "$Bin/data/var/spool/baruwa/quarantine",
@@ -28,6 +29,7 @@ my @paths = (
 my @clean_paths = (
     "$Bin/data/var/spool/exim/input",
     "$Bin/data/var/lib/baruwa/archive",
+    "$Bin/data/var/lib/baruwa/data/db",
     "$Bin/data/var/spool/exim.in/input",
     "$Bin/data/var/spool/baruwa/incoming",
 );
@@ -94,6 +96,9 @@ sub make_test_dirs {
         dircopy("$Bin/static/rules/*",
             "$Bin/data/etc/mail/baruwa/dynamic/rules/")
           or die $!;
+    }
+    unless (-f "$Bin/data/var/lib/baruwa/data/db/baruwa2.db") {
+        copy("$Bin/static/db/baruwa2.db", "$Bin/data/var/lib/baruwa/data/db/baruwa2.db");
     }
     foreach (@msgs) {
         foreach my $suffix (qw/H D/) {

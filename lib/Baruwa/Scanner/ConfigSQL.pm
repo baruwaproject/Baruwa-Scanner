@@ -62,25 +62,26 @@ my ($serial_min) = 60 * 15;    # 15 minutes
 
 sub db_connect {
     my ($file) = shift;
-    return undef if not -e $file;
-    return undef if $disabled;
+    return undef unless (-e $file);
+    # return undef if $disabled;
 
     # Set the $ConfFile package global
-    $ConfFile = $file if not(defined($ConfFile));
-
+    $ConfFile = $file unless (defined($ConfFile) and $ConfFile eq $file);
+    # print STDERR "1:===>$dsn,$db_user,$db_pass,$disabled,$file,$ConfFile\n";
     $dsn = Baruwa::Scanner::Config::QuickPeek($file, 'LocalDBDSN')
-      if (!defined($dsn));
+      unless (defined($dsn) and !$disabled);
     $db_user = Baruwa::Scanner::Config::QuickPeek($file, 'DBUsername')
-      if (!defined($db_user));
+      unless (defined($db_user) and !$disabled);
     $db_pass = Baruwa::Scanner::Config::QuickPeek($file, 'DBPassword')
-      if (!defined($db_pass));
-    if (!defined($debug)) {
+      unless (defined($db_pass) and !$disabled);
+    unless (defined($debug) and !$disabled) {
         $debug = Baruwa::Scanner::Config::QuickPeek($file, 'SQLDebug');
         $debug = (lc($debug) eq 'yes') ? 1 : 0;
     }
-
+    # print STDERR "2:===>$dsn,$db_user,$db_pass,$disabled,$file,$ConfFile\n";
     # Disable database functions if required data not present
     if (!$dsn || !$db_user || !$db_pass) {
+        # print STDERR "Database functions disabled:$disabled\n";
         $disabled = 1;
         print STDERR "Database functions disabled\n" if $debug;
         return undef;

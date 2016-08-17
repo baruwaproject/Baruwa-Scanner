@@ -3,6 +3,7 @@ use v5.10;
 use strict;
 use warnings;
 use FindBin '$Bin';
+use Test::Exception;
 use Test::More qw(no_plan);
 use lib "$Bin/lib";
 use Test::Baruwa::Scanner;
@@ -19,23 +20,50 @@ diag(
 
 make_test_dirs();
 
-my $from    = "$Bin/configs/template.conf";
-my $conf    = "$Bin/data/etc/mail/baruwa/baruwa.conf";
-my $datadir = "$Bin/data";
+my $from          = "$Bin/configs/template.conf";
+my $conf          = "$Bin/data/etc/mail/baruwa/baruwa.conf";
+my $conf_sql      = "$Bin/data/etc/mail/baruwa/baruwa-sql.conf";
+my $conf_sql_fail = "$Bin/data/etc/mail/baruwa/baruwa-sql-fail.conf";
+my $datadir       = "$Bin/data";
 create_config($from, $conf, $datadir);
+my @configsql_matches = (
+    '^Local DB DSN =$',
+    '^SQL Serial Number =$',
+    '^SQL Quick Peek =$',
+    '^SQL Config =$',
+    '^SQL Ruleset =$',
+    '^SQL Debug = no$',
+);
+my @configsql_reps = (
+    "Local DB DSN = DBI:SQLite:dbname=$Bin/data/var/lib/baruwa/data/db/baruwa2.db",
+    "SQL Serial Number = SELECT MAX(value) AS confserialnumber FROM quickpeek WHERE internal='confserialnumber'",
+    "SQL Quick Peek = SELECT value FROM quickpeek WHERE LOWER(external) = ? AND (hostname = ? OR hostname='default') LIMIT 1",
+    "SQL Config = SELECT internal, value, hostname FROM quickpeek WHERE hostname=? OR hostname='default'",
+    "SQL Ruleset = SELECT row_number, ruleset AS rule FROM msrulesets WHERE name=?",
+    "SQL Debug = yes",
+);
+my @configsql_fail_matches = (
+    "Local DB DSN = DBI:SQLite:dbname=$Bin/data/var/lib/baruwa/data/db/baruwa2.db"
+);
+my @configsql_fail_reps = (
+    "Local DB DSN = DBI:SQLite:dbname=$Bin/data/var/lib/baruwa/datax/db/baruwa2.db"
+);
+update_config($conf, $conf_sql, \@configsql_matches, \@configsql_reps);
+update_config($conf_sql, $conf_sql_fail, \@configsql_fail_matches,
+    \@configsql_fail_reps);
 
 can_ok('Baruwa::Scanner::ConfigSQL', 'db_connect');
 {
-    Baruwa::Scanner::Config::Read($conf, 0);
-    is(Baruwa::Scanner::ConfigSQL::db_connect(), undef);
-    is(Baruwa::Scanner::ConfigSQL::db_connect($conf), undef);
-    # Baruwa::Scanner::Config::SetValue('SQLDebug', 'yes');
-    # is(Baruwa::Scanner::ConfigSQL::db_connect($conf), undef);
+    is(Baruwa::Scanner::ConfigSQL::db_connect(),               undef);
+    is(Baruwa::Scanner::ConfigSQL::db_connect($conf),          undef);
+    throws_ok {Baruwa::Scanner::ConfigSQL::db_connect($conf_sql_fail)}
+    qr/Database connection error/,
+      'Throws error if db connection fails';
+    isnt(Baruwa::Scanner::ConfigSQL::db_connect($conf_sql), undef);
 }
 
 can_ok('Baruwa::Scanner::ConfigSQL', 'QuickPeek');
 {
-    Baruwa::Scanner::Config::Read($conf, 0);
     is(Baruwa::Scanner::ConfigSQL::QuickPeek(), undef);
     is(Baruwa::Scanner::ConfigSQL::QuickPeek(undef, 'sql'), undef);
     is(Baruwa::Scanner::ConfigSQL::QuickPeek($conf, 'sql'), undef);
@@ -43,26 +71,23 @@ can_ok('Baruwa::Scanner::ConfigSQL', 'QuickPeek');
 
 can_ok('Baruwa::Scanner::ConfigSQL', 'ReadConfBasic');
 {
-    Baruwa::Scanner::Config::Read($conf, 0);
     is(Baruwa::Scanner::ConfigSQL::ReadConfBasic(), undef);
     is(Baruwa::Scanner::ConfigSQL::ReadConfBasic(undef, 'sql'), undef);
     is(Baruwa::Scanner::ConfigSQL::ReadConfBasic($conf, 'sql'), undef);
+    is(Baruwa::Scanner::ConfigSQL::ReadConfBasic($conf, 'mailheader'), undef);
 }
 
 can_ok('Baruwa::Scanner::ConfigSQL', 'ReadRuleset');
 {
-    Baruwa::Scanner::Config::Read($conf, 0);
     is(Baruwa::Scanner::ConfigSQL::ReadRuleset(), undef);
 }
 
 can_ok('Baruwa::Scanner::ConfigSQL', 'ReturnSpamAssassinConfig');
 {
-    Baruwa::Scanner::Config::Read($conf, 0);
     is(Baruwa::Scanner::ConfigSQL::ReturnSpamAssassinConfig(), undef);
 }
 
 can_ok('Baruwa::Scanner::ConfigSQL', 'CheckForUpdate');
 {
-    Baruwa::Scanner::Config::Read($conf, 0);
     is(Baruwa::Scanner::ConfigSQL::CheckForUpdate(), undef);
 }
