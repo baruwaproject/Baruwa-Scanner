@@ -167,7 +167,10 @@ can_ok($e, 'ReplaceHeader');
     $last = $#{$m->{metadata}{headers}};
     is($m->{metadata}{headers}[0]{name}, 'X-Baruwa-Virus-Checks:');
     isnt($m->{metadata}{headers}[$last]{flag}, '*');
+}
 
+can_ok($e, 'ReplaceHeader');
+{
     # dkimfriendly off
     $m = new Baruwa::Scanner::Message($msgid, $q->[0], 1);
     is($global::MS->{mta}->ReadQf($m, 0), 1);
