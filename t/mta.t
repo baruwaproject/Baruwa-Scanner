@@ -68,7 +68,6 @@ is($e->TFileName('1bWglk-0003N7-5T'), '1bWglk-0003N7-5T-T');
 can_ok($e, 'LFileName');
 is($e->LFileName('1bWglk-0003N7-5T'), '../msglog/1bWglk-0003N7-5T');
 
-diag('ReadQf');
 can_ok($e, 'ReadQf');
 {
     my $msgid = $Test::Baruwa::Scanner::msgs[1];
@@ -78,7 +77,6 @@ can_ok($e, 'ReadQf');
     is($m->{clientip}, '192.168.1.52');
 }
 
-diag('AddHeadersToQf');
 can_ok($e, 'AddHeadersToQf');
 {
     my $msgid = $Test::Baruwa::Scanner::msgs[1];
@@ -93,7 +91,6 @@ can_ok($e, 'AddHeadersToQf');
     is($m->{metadata}{headers}[0]{name}, 'X-Baruwa-Test:');
 }
 
-diag('RealAddHeadersToQf');
 can_ok($e, 'RealAddHeadersToQf');
 {
     my $msgid = $Test::Baruwa::Scanner::msgs[1];
@@ -110,7 +107,6 @@ can_ok($e, 'RealAddHeadersToQf');
     is($m->{metadata}{headers}[0]{name}, 'X-Baruwa-Test:');
 }
 
-diag('AddHeader');
 can_ok($e, 'AddHeader');
 {
     my ($msgid, $m, $last);
@@ -128,7 +124,6 @@ can_ok($e, 'AddHeader');
     is($m->{metadata}{headers}[$last]{name}, 'X-Baruwa-Last:');
 }
 
-diag('DeleteHeader');
 can_ok($e, 'DeleteHeader');
 {
     my ($msgid, $m);
@@ -140,7 +135,6 @@ can_ok($e, 'DeleteHeader');
     is($m->{metadata}{headers}[0]{flag}, '*');
 }
 
-diag('UniqHeader');
 can_ok($e, 'UniqHeader');
 {
     my ($msgid, $m, $last);
@@ -155,7 +149,6 @@ can_ok($e, 'UniqHeader');
     is($m->{metadata}{headers}[$last]{flag}, '*');
 }
 
-diag('ReplaceHeader');
 can_ok($e, 'ReplaceHeader');
 {
     my ($msgid, $m, $last);
@@ -169,7 +162,6 @@ can_ok($e, 'ReplaceHeader');
     isnt($m->{metadata}{headers}[$last]{flag}, '*');
 }
 
-diag('ReplaceHeader2');
 can_ok($e, 'ReplaceHeader');
 {
     # dkimfriendly off
@@ -185,7 +177,6 @@ can_ok($e, 'ReplaceHeader');
     is($m->{metadata}{headers}[$last]{flag}, '*');
 }
 
-diag('FindHeader');
 can_ok($e, 'FindHeader');
 {
     my ($msgid, $m);
@@ -197,7 +188,6 @@ can_ok($e, 'FindHeader');
         'X-Baruwa-Virus-Checks:');
 }
 
-diag('AppendHeader');
 can_ok($e, 'AppendHeader');
 {
     my ($msgid, $m, $last, $body);
@@ -216,7 +206,6 @@ can_ok($e, 'AppendHeader');
     is($m->{metadata}{headers}[$last]{body}, $body . ';' . 'notnice' . "\n");
 }
 
-diag('PrependHeader');
 can_ok($e, 'PrependHeader');
 {
     my ($msgid, $m, $last, $body);
@@ -236,7 +225,6 @@ can_ok($e, 'PrependHeader');
     is($m->{metadata}{headers}[$last]{body}, ' notnice' . ';' . $body . "\n");
 }
 
-diag('TextStartsHeader');
 can_ok($e, 'TextStartsHeader');
 {
     my ($msgid, $m);
@@ -247,7 +235,6 @@ can_ok($e, 'TextStartsHeader');
     is($e->TextStartsHeader($m, 'X-Baruwa-Virus-Checks:', 'bypassed'), 1);
 }
 
-diag('TextEndsHeader');
 can_ok($e, 'TextEndsHeader');
 {
     my ($msgid, $m);
@@ -258,7 +245,6 @@ can_ok($e, 'TextEndsHeader');
     is($e->TextEndsHeader($m, 'X-Baruwa-Virus-Checks:', 'checks'),  1);
 }
 
-diag('AddRecipients');
 can_ok($e, 'AddRecipients');
 {
     my ($msgid, $m, @to);
@@ -273,7 +259,6 @@ can_ok($e, 'AddRecipients');
     is($m->{metadata}{rcpts}[2], $to[1]);
 }
 
-diag('DeleteRecipients');
 can_ok($e, 'DeleteRecipients');
 {
     my ($msgid, $m);
@@ -289,7 +274,6 @@ can_ok($e, 'DeleteRecipients');
 
 can_ok($e, 'KickMessage');
 
-diag('CreateQf');
 can_ok('Baruwa::Scanner::Mta', 'CreateQf');
 {
     my ($msgid, $m);
@@ -299,7 +283,6 @@ can_ok('Baruwa::Scanner::Mta', 'CreateQf');
     like(Baruwa::Scanner::Mta::CreateQf($m), qr/352P Received:/);
 }
 
-diag('FindAndFlag');
 can_ok('Baruwa::Scanner::Mta', 'FindAndFlag');
 {
     my @headers = (
@@ -319,7 +302,6 @@ can_ok('Baruwa::Scanner::Mta', 'FindAndFlag');
     }
 }
 
-diag('BTreeString');
 can_ok('Baruwa::Scanner::Mta', 'BTreeString');
 {
     my ($msgid, $m);
@@ -330,7 +312,6 @@ can_ok('Baruwa::Scanner::Mta', 'BTreeString');
         'XX' . "\n");
 }
 
-diag('BTreeHash');
 can_ok('Baruwa::Scanner::Mta', 'BTreeHash');
 {
     my ($msgid, $m);
@@ -340,13 +321,11 @@ can_ok('Baruwa::Scanner::Mta', 'BTreeHash');
     is(%{Baruwa::Scanner::Mta::BTreeHash($m->{metadata}->{nonrcpts})}, 0);
 }
 
-diag('BTreeDescend');
 can_ok('Baruwa::Scanner::Mta', 'BTreeDescend');
 {
     is(Baruwa::Scanner::Mta::BTreeDescend({}), '');
 }
 
-diag('AddMultipleHeaderName');
 can_ok($e, 'AddMultipleHeaderName');
 {
     my ($msgid, $m, $body, $last);
@@ -376,7 +355,6 @@ can_ok($e, 'AddMultipleHeaderName');
     isnt($m->{metadata}{headers}[$last]{flag}, '*');
 }
 
-diag('AddMultipleHeader');
 can_ok($e, 'AddMultipleHeader');
 {
     my ($msgid, $m, $body, $last, $header);
@@ -413,7 +391,6 @@ can_ok($e, 'AddMultipleHeader');
 can_ok('Baruwa::Scanner::Mta', 'SendMessageString');
 can_ok('Baruwa::Scanner::Mta', 'SendMessageEntity');
 
-diag('CreateBatch');
 can_ok($e, 'CreateBatch');
 {
     Baruwa::Scanner::MessageBatch::initialise();
@@ -427,7 +404,6 @@ can_ok($e, 'CreateBatch');
     $batch->EndBatch();
 }
 
-diag('OriginalMsgHeaders');
 can_ok($e, 'OriginalMsgHeaders');
 {
     my ($msgid, $m, @headers, @result);
