@@ -771,15 +771,6 @@ sub RealAddHeadersToQf {
     return 1;
 }
 
-sub AddStringOfHeadersToQf {
-    my ($this, $message, $headers) = @_;
-    my @headers;
-
-    @headers = split(/\n/, $headers);
-
-    return RealAddHeadersToQf($this, $message, \@headers);
-}
-
 sub AddHeader {
     my ($this, $message, $newkey, $newvalue) = @_;
     my ($newheader);
