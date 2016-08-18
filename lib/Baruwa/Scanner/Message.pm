@@ -4599,10 +4599,10 @@ sub DeliverUnmodifiedBody {
     # Link the queue data file from in to out
     $store->LinkData($OutQ);
 
-  # Set up the output envelope with its (possibly modified) headers
-  # Used to do next line but it breaks text-only messages with no MIME
-  # structure as the MIME explosion will have created a MIME structure.
-  #$global::MS->{mta}->AddHeadersToQf($this, $this->{entity}->stringify_header);
+    # Set up the output envelope with its (possibly modified) headers
+    # Used to do next line but it breaks text-only messages with no MIME
+    # structure as the MIME explosion will have created a MIME structure.
+    # $global::MS->{mta}->AddHeadersToQf($this, $this->{entity}->stringify_header);
     $global::MS->{mta}->AddHeadersToQf($this);
 
     # Remove duplicate subject: lines
