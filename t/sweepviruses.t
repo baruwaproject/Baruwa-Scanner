@@ -22,7 +22,7 @@ use Test::Baruwa::Scanner;
 
 BEGIN {
     my ($tcp_socket) = Test::MockObject->new;
-    $tcp_socket->fake_module('IO::Socket::INET');
+    # $tcp_socket->fake_module('IO::Socket::INET');
     $tcp_socket->fake_new('IO::Socket::INET');
     $tcp_socket->set_false('connected');
     use_ok('Baruwa::Scanner::SweepViruses') || print "Bail out!\n";
