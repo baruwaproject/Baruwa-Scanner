@@ -9,6 +9,7 @@ use Test::MockModule;
 use Test::More qw(no_plan);
 use File::Path qw(remove_tree);
 use Baruwa::Scanner();
+use Baruwa::Scanner::SA();
 use Baruwa::Scanner::Mta();
 use Baruwa::Scanner::Queue();
 use Baruwa::Scanner::Config();
@@ -263,6 +264,91 @@ foreach (
   Baruwa::Scanner::Message::CleanLinkURL('javascript:window.show();');
 is($linkurl, 'JavaScript');
 is($alarm,   0);
+
+use Data::Dumper;
+can_ok('Baruwa::Scanner::Message', 'IsSpam');
+{
+    my $log             = Test::MockModule->new('Baruwa::Scanner::Log');
+    my $ret             = 0;
+    my $mshmacskipvalid = 0;
+    my $mshmacnull_none = 0;
+    $log->mock(
+        InfoLog => sub {
+            my ($log_msg) = @_;
+            print STDERR "XXXX:$log_msg\n";
+            $ret++
+              if ($log_msg eq
+                "Valid RET hash found in Message %s, skipping Spam Checks");
+            $mshmacskipvalid++
+              if ($log_msg eq
+                "Valid Watermark HASH found in Message %s Header, skipping Spam Checks"
+              );
+            $mshmacnull_none++
+              if ($log_msg eq
+                "Message %s from %s has no (or invalid) watermark or sender address"
+              );
+        }
+    );
+    ($msg, $entity) = _parse_msg($msgid5);
+    $msg->{ret} = 1;
+    isnt(exists $msg->{isspam}, 1);
+    is($msg->IsSpam(),        0);
+    is($ret,                  1);
+    is(exists $msg->{isspam}, 1);
+    $msg->{ret}             = 0;
+    $msg->{mshmacskipvalid} = 1;
+    is($msg->IsSpam(),   0);
+    is($mshmacskipvalid, 1);
+    $msg->{mshmacskipvalid}   = 0;
+    $msg->{mshmacnullpresent} = 1;
+    $msg->{mshmacnullvalid}   = 0;
+    Baruwa::Scanner::SA::initialise(0);
+    Baruwa::Scanner::Config::SetValue('mshmacnull', 'delete');
+    isnt($msg->{deleted},     1);
+    isnt($msg->{dontdeliver}, 1);
+    is($msg->IsSpam(),      0);
+    is($msg->{deleted},     1);
+    is($msg->{dontdeliver}, 1);
+    $msg->{deleted}     = 0;
+    $msg->{dontdeliver} = 0;
+    $msg->{ishigh}      = 0;
+    my $highscore =
+      Baruwa::Scanner::Config::Value('highspamassassinscore', $msg);
+    Baruwa::Scanner::Config::SetValue('mshmacnull', 'high');
+    isnt($msg->{spamreport}, "spam(no watermark or sender address)");
+    isnt($msg->{sascore},    $highscore);
+    is($msg->IsSpam(),     1);
+    is($msg->{ishigh},     1);
+    is($msg->{spamreport}, "spam(no watermark or sender address)");
+    is($msg->{sascore},    $highscore);
+    my $reqscore = Baruwa::Scanner::Config::Value('reqspamassassinscore', $msg);
+    _reset_msg(\$msg);
+    Baruwa::Scanner::Config::SetValue('mshmacnull', 'spam');
+    is($msg->IsSpam(),     1);
+    is($msg->{isspam},     1);
+    is($msg->{sascore},    $reqscore);
+    is($msg->{spamreport}, "spam(no watermark or sender address)");
+    _reset_msg(\$msg);
+    Baruwa::Scanner::Config::SetValue('mshmacnull', '5.0');
+    is($msg->IsSpam(), 1);
+    is($msg->{isspam}, 1);
+    like($msg->{spamreport}, qr/no watermark or sender address/);
+    _reset_msg(\$msg);
+    Baruwa::Scanner::Config::SetValue('mshmacnull', 'nothing');
+    is($msg->IsSpam(), 0);
+    is($mshmacnull_none, 1);
+
+    # print STDERR "Msgid->$msg->{id}\n";
+    # print STDERR "MSG=>" . Dumper($msg);
+}
+
+sub _reset_msg {
+    my ($msg) = @_;
+    $$msg->{ishigh}     = 0;
+    $$msg->{isspam}     = 0;
+    $$msg->{sascore}    = 0;
+    $$msg->{spamreport} = "";
+}
 
 sub _count_parts {
     my ($msgid, $num) = @_;
