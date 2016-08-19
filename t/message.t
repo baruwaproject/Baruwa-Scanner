@@ -423,6 +423,7 @@ can_ok('Baruwa::Scanner::Message', 'IsSpam');
     is($msg->{spamreport}, 'skippedastoobig');
     is($skippedastoobig,   2);
     _reset_msg(\$msg);
+    $msg->{store}->Unlock();
 }
 
 {
@@ -462,6 +463,7 @@ can_ok('Baruwa::Scanner::Message', 'IsSpam');
     });
     # print STDERR "Msgid->$msg->{id}\n";
     # print STDERR "MSG=>" . Dumper($msg);
+    $msg->{store}->Unlock();
 }
 
 sub _reset_msg {
