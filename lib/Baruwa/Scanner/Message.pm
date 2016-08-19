@@ -690,7 +690,7 @@ sub IsSpam {
         if (Baruwa::Scanner::Config::Value('spamwhitelist', $this)) {
 
             # Whitelisted, so get out unless they want SA header
-            #print STDERR "Message is whitelisted\n";
+            # print STDERR "Message is whitelisted\n";
             Baruwa::Scanner::Log::InfoLog(
                 "Message %s from %s (%s) is whitelisted",
                 $this->{id}, $this->{clientip}, $this->{from})

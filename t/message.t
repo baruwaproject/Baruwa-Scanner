@@ -269,13 +269,20 @@ use Data::Dumper;
 can_ok('Baruwa::Scanner::Message', 'IsSpam');
 {
     my $log             = Test::MockModule->new('Baruwa::Scanner::Log');
+    my $config          = Test::MockModule->new('Baruwa::Scanner::Config');
     my $ret             = 0;
     my $mshmacskipvalid = 0;
     my $mshmacnull_none = 0;
+    my $whitelisted     = 0;
+    my $manyrecips      = 0;
+    my $skippedastoobig = 0;
+
+    # Baruwa::Scanner::Config::SetValue('usespamassassin', 0);
     $log->mock(
         InfoLog => sub {
             my ($log_msg) = @_;
-            print STDERR "XXXX:$log_msg\n";
+
+            # print STDERR "XXXX:$log_msg\n";
             $ret++
               if ($log_msg eq
                 "Valid RET hash found in Message %s, skipping Spam Checks");
@@ -287,8 +294,26 @@ can_ok('Baruwa::Scanner::Message', 'IsSpam');
               if ($log_msg eq
                 "Message %s from %s has no (or invalid) watermark or sender address"
               );
+            $whitelisted++
+              if ($log_msg eq "Message %s from %s (%s) is whitelisted");
+            $manyrecips++
+              if ($log_msg eq
+                "Message %s from %s (%s) ignored whitelist, had %d recipients (>%d)"
+              );
+            $skippedastoobig++
+              if ($log_msg eq
+                "Message %s from %s (%s) to %s is too big for spam checks (%d > %d bytes)"
+              );
         }
     );
+
+    # $config->mock(
+    #     Value => sub {
+    #         my ($opt, $lmsg) = @_;
+    #         print STDERR "Got option: $opt\n";
+    #         return 0 if ($opt eq 'usespamassassin');
+    #     }
+    # );
     ($msg, $entity) = _parse_msg($msgid5);
     $msg->{ret} = 1;
     isnt(exists $msg->{isspam}, 1);
@@ -335,9 +360,106 @@ can_ok('Baruwa::Scanner::Message', 'IsSpam');
     like($msg->{spamreport}, qr/no watermark or sender address/);
     _reset_msg(\$msg);
     Baruwa::Scanner::Config::SetValue('mshmacnull', 'nothing');
-    is($msg->IsSpam(), 0);
+    is($msg->IsSpam(),   0);
     is($mshmacnull_none, 1);
+    _reset_msg(\$msg);
+    $msg->{mshmacnullpresent} = 0;
+    $config->mock(
+        Value => sub {
+            my ($opt, $lmsg) = @_;
 
+            # print STDERR "Got option: $opt\n";
+            return 1 if ($opt eq 'spamwhitelist');
+            return 1 if ($opt eq 'lognonspam');
+        }
+    );
+    Baruwa::Scanner::Config::SetValue('includespamheader', 0);
+    isnt($msg->{spamwhitelisted}, 1);
+    is($msg->IsSpam(),          0);
+    is($whitelisted,            1);
+    is($msg->{spamwhitelisted}, 1);
+    _reset_msg(\$msg);
+    $msg->{spamwhitelisted} = 0;
+    $config->mock(
+        Value => sub {
+            my ($opt, $lmsg) = @_;
+
+            # print STDERR "Got option: $opt\n";
+            return 1  if ($opt eq 'lognonspam');
+            return -1 if ($opt eq 'whitelistmaxrecips');
+        }
+    );
+    is($msg->IsSpam(), 0);
+    is($manyrecips,    1);
+    _reset_msg(\$msg);
+    $msg->{spamwhitelisted} = 0;
+    $config->mock(
+        Value => sub {
+            my ($opt, $lmsg) = @_;
+
+            # print STDERR "Got option: $opt\n";
+            return 1    if ($opt eq 'lognonspam');
+            return 1    if ($opt eq 'spamblacklist');
+            return 4000 if ($opt eq 'maxspamchecksize');
+        }
+    );
+    isnt($msg->{spamblacklisted}, 1);
+    isnt($msg->{isspam},          1);
+    is($msg->IsSpam(),          1);
+    is($msg->{spamblacklisted}, 1);
+    is($msg->{isspam},          1);
+    _reset_msg(\$msg);
+    $msg->{spamblacklisted} = 0;
+    $config->mock(
+        Value => sub {
+            my ($opt, $lmsg) = @_;
+
+            # print STDERR "Got option: $opt\n";
+            return 1 if ($opt eq 'lognonspam');
+            return 5 if ($opt eq 'maxspamchecksize');
+        }
+    );
+    is($msg->IsSpam(),     0);
+    is($msg->{spamreport}, 'skippedastoobig');
+    is($skippedastoobig,   2);
+    _reset_msg(\$msg);
+}
+
+{
+    my $sa  = Test::MockModule->new('Baruwa::Scanner::SA');
+    my $rbl = Test::MockModule->new('Baruwa::Scanner::RBLs');
+    $rbl->mock(
+        Checks => sub {
+            return (1, 'spamhaus-XBL');
+        }
+    );
+    ($msg, $entity) = _parse_msg($msgid5);
+    foreach my $usesa (qw/0 1/) {
+        Baruwa::Scanner::Config::SetValue('usespamassassin', $usesa);
+        isnt($msg->{isrblspam}, 1);
+        is($msg->IsSpam(),    1);
+        is($msg->{isrblspam}, 1);
+        _reset_msg(\$msg);
+        $msg->{isrblspam} = 0;
+    }
+    Baruwa::Scanner::Config::SetValue('usespamassassin',     1);
+    Baruwa::Scanner::Config::SetValue('checksaifonspamlist', 0);
+    is($msg->IsSpam(),    1);
+    is($msg->{isrblspam}, 1);
+    _reset_msg(\$msg);
+    $msg->{isrblspam} = 0;
+    Baruwa::Scanner::Config::SetValue('checksaifonspamlist', 1);
+    Baruwa::Scanner::Config::SetValue('usespamassassin',     0);
+    $rbl->mock(
+        Checks => sub {
+            return (0, '');
+        }
+    );
+    is($msg->IsSpam(),    0);
+    is($msg->{isrblspam}, 0);
+    $sa->mock(Checks => sub {
+        return ();
+    });
     # print STDERR "Msgid->$msg->{id}\n";
     # print STDERR "MSG=>" . Dumper($msg);
 }
