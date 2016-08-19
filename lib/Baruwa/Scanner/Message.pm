@@ -44,7 +44,9 @@ use Fcntl;
 use File::Path;
 use File::Temp;
 use File::Copy qw/move/;
+use Baruwa::Scanner::SA();
 use Baruwa::Scanner::TNEF();
+use Baruwa::Scanner::RBLs();
 use Baruwa::Scanner::FileInto();
 use Baruwa::Scanner::EximDiskStore();
 
@@ -447,7 +449,7 @@ sub checkHMAC {
     my ($expiry, $newhash) = split(/\@/, $hash);
     return 0 if ($expiry < time());
 
-#print STDERR "I am checking $hash using input of: $email, $date, $secret, $msgid\n";
+    # print STDERR "I am checking $hash using input of: $email, $date, $secret, $msgid\n";
 
     $hash = createHMAC($expiry, $email, $date, $secret, $msgid);
     return 0 unless ($hash eq $newhash);
@@ -622,7 +624,7 @@ sub IsSpam {
         my $mshmacnull =
           lc(Baruwa::Scanner::Config::Value('mshmacnull', $this));
 
-        #print STDERR "mshmacnull = $mshmacnull\n";
+        # print STDERR "mshmacnull = $mshmacnull\n";
         # This can be "none", "spam" or "high-scoring spam"
         #$mshmacnull =~ s/[^a-z]//g;
         if ($mshmacnull =~ /delete/) {
